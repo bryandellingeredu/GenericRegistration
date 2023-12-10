@@ -1,4 +1,5 @@
-﻿using Domain;
+﻿using Application.Core;
+using Domain;
 using MediatR;
 using Persistence;
 using System;
@@ -11,21 +12,22 @@ namespace Application.Registrations
 {
     public class Details
     {
-        public class Query : IRequest<Registration>
+        public class Query : IRequest<Result<Registration>>
         {
             public Guid Id { get; set; }
         }
 
-        public class Handler : IRequestHandler<Query, Registration>
+        public class Handler : IRequestHandler<Query, Result<Registration>>
         {
             private readonly DataContext _context;
             public Handler(DataContext context)
             {
                 _context = context;
             }
-            public async Task<Registration> Handle(Query request, CancellationToken cancellationToken)
+            public async Task<Result<Registration>> Handle(Query request, CancellationToken cancellationToken)
             {
-                return await _context.Registrations.FindAsync(request.Id);
+                var registration =  await _context.Registrations.FindAsync(request.Id);
+                return Result<Registration>.Success(registration);
             }
         }
     }

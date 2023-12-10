@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+﻿using Application.Core;
+using AutoMapper;
 using Domain;
 using MediatR;
 using Persistence;
@@ -12,12 +13,12 @@ namespace Application.Registrations
 {
     public class Edit
     {
-        public class Command : IRequest
+        public class Command : IRequest<Result<Unit>>
         {
             public Registration Registration { get; set;}
         }
 
-        public class Handler : IRequestHandler<Command> {
+        public class Handler : IRequestHandler<Command, Result<Unit>> {
             private readonly DataContext _context;
             private readonly IMapper _mapper;
 
@@ -27,11 +28,20 @@ namespace Application.Registrations
                 _mapper = mapper;
             }
 
-            public async Task Handle(Command request, CancellationToken cancellationToken)
+            public async Task<Result<Unit>> Handle(Command request, CancellationToken cancellationToken)
             {
                 var registration = await _context.Registrations.FindAsync(request.Registration.Id);
-                _mapper.Map(request.Registration, registration);    
-                await _context.SaveChangesAsync();
+
+                if (registration == null) return null;
+
+                _mapper.Map(request.Registration, registration);
+
+                var result = await _context.SaveChangesAsync() > 0;
+
+                if (!result) return Result<Unit>.Failure("Failed to update activity");
+
+                return Result<Unit>.Success(Unit.Value);
+
             }
         }
     }
