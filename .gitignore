@@ -17,6 +17,9 @@ appesttings.json
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
 
+# Ignore wwwroot directory
+wwwroot/
+
 # Mono auto generated files
 mono_crash.*
 

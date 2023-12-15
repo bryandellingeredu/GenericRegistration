@@ -1,10 +1,17 @@
+import { Outlet, ScrollRestoration } from "react-router-dom"
+import { Container } from "semantic-ui-react"
 
 
 function App() {
 
 
   return (
-    <h1>Registrations</h1>
+    <>
+    <ScrollRestoration />
+   <Container fluid >
+      <Outlet />
+   </Container>
+   </>
   )
 }
 
