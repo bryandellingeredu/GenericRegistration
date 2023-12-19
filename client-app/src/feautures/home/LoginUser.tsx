@@ -1,27 +1,29 @@
 import { Container, Header, Segment, Icon } from "semantic-ui-react";
 import ArmyLogo from "./ArmyLogo";
 import { Login } from "@microsoft/mgt-react";
-import agent from "../../app/api/agent";
 import { Providers } from "@microsoft/mgt-element";     
-import { User } from "../../app/models/user";
+import { useStore } from "../../app/stores/store";
+import { observer } from "mobx-react-lite";
+import { useState } from "react";
+import LoadingComponent from "../../app/layout/LoadingComponent";
 
-export default function LoginUser() {
-
+export default observer ( function LoginUser() {
+    const {userStore} = useStore();
+    const {login} = userStore;
+    const [isLoggingIn, setIsLoggingIn] = useState(false);
     const loginCompleted = async () => {
-        console.log('login completed');
+        setIsLoggingIn(true);
         try {
             const provider = Providers.globalProvider;
             const accessToken = await provider.getAccessToken();
-            const user : User  =  await agent.Account.login(accessToken);
-            debugger;
-            console.log(user);
+           await login(accessToken);
         } catch (error) {
             console.error('Error getting access token', error);
         }
     };
  
        const loginInitiated = () => {
-         console.log('login initiated')
+        setIsLoggingIn(true);
         };
 
         return (
@@ -38,11 +40,15 @@ export default function LoginUser() {
                                 <Icon name='user' />
                                      Log in with your EDU Account
                             </Header>
+                          
                             <Segment.Inline>
+                            {!isLoggingIn && 
                                 <Login 
                                     loginCompleted={loginCompleted}
                                     loginInitiated={loginInitiated}
                                 />
+                            }
+                            {isLoggingIn && <LoadingComponent content='Logging in...' />}
                             </Segment.Inline>
                         </Segment>
                    
@@ -54,4 +60,4 @@ export default function LoginUser() {
               
             </div>
         )
-}
+})
