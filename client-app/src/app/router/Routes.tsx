@@ -17,5 +17,5 @@ export const routes: RouteObject[] = [
     }
 ];
 
-export const router = createBrowserRouter(routes, {basename: '/registration/'});
+export const router = createBrowserRouter(routes, {basename: '/registration'});
 
