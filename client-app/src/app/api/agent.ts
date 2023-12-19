@@ -1,5 +1,6 @@
 import axios, { AxiosResponse } from 'axios';
 import { Registration } from '../models/registration';
+import { User } from '../models/user';
 
 axios.defaults.baseURL = import.meta.env.VITE_API_URL;
 
@@ -20,8 +21,15 @@ const Registrations = {
     delete: (id: string) => axios.delete<void>(`/registrations/${id}`),
 }
 
+const Account = {
+    login: (token: string) => requests.post<User>('/account/login', {token}),
+    current: () => requests.get<User>('/account')
+
+}
+
 const agent = {
-    Registrations
+    Registrations,
+    Account
 }
 
 export default agent;

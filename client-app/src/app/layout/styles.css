@@ -1,0 +1,50 @@
+.homepage-background {
+    position: relative;
+    background: url('/assets/bldg651.jpg') no-repeat center center;
+    background-size: cover;
+    width: 100%;
+    height: 100vh; /* Adjust the height as needed */
+    display: flex;
+    align-items: center; /* This will center the content vertically */
+    justify-content: center; /* This will center the content horizontally */
+}
+
+/* Create the overlay using a pseudo-element */
+.homepage-background::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.6); /* This adds the dark overlay */
+    z-index: 1; /* Overlay needs to be under the text and buttons */
+}
+
+/* Container for the text and buttons */
+.homepage-background > .container {
+    position: relative;
+    z-index: 2; /* This ensures that text and buttons are above the overlay */
+    display: flex; /* Use flexbox for alignment */
+    flex-direction: column; /* Stack children vertically */
+    align-items: center; /* Center children horizontally */
+    justify-content: center; /* Center children vertically */
+    text-align: center; /* Center text */
+    height: 100%; /* Take full height of parent to allow centering */
+}
+
+/* Button margin-top for spacing */
+.homepage-background .button.m-top {
+    margin-top: 20px; /* Adjust as needed */
+}
+
+
+.army-logo-container {
+  position: absolute; /* Position relative to the nearest positioned ancestor */
+  bottom: 0; /* At the bottom of the container */
+  left: 0; /* At the left of the container */
+  width: auto; /* Auto width to fit content */
+  text-align: left; /* Align text to the left */
+  padding-bottom: 10px; /* Adds space at the bottom */
+}
+

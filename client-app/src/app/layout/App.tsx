@@ -1,7 +1,6 @@
 import { Outlet, ScrollRestoration } from "react-router-dom"
 import { Container } from "semantic-ui-react"
 
-
 function App() {
 
 
