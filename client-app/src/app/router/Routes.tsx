@@ -12,7 +12,7 @@ export const routes: RouteObject[] = [
         children: [
             { path: '', element: <HomePage /> },
             { path: 'login', element: <LoginUser /> },
-            { path: 'createRegistrationForm', element: <CreateRegistration /> }
+            { path: 'createRegistrationForm', element: <CreateRegistration /> },
         ]
     }
 ];

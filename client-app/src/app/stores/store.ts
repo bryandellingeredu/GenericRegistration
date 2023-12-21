@@ -12,7 +12,7 @@ interface Store {
 export const store: Store = {
     registrationStore: new RegistrationStore(),
     userStore: new UserStore(),
-    commonStore: new CommonStore()
+    commonStore: new CommonStore(),
 }
 
 export const StoreContext = createContext(store)
