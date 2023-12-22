@@ -11,13 +11,13 @@ import { NavLink } from "react-router-dom";
 export default observer(function ManageRegistrationNavbar(){
 
     const {userStore} = useStore();
-    const {logout, isLoggedIn, user} = userStore
+    const {logout, user} = userStore
   
 
 
 
     return(
-        <div style={{backgroundColor: ''}}>
+        <div style={{backgroundColor: 'grey'}}>
         <Menu inverted color='grey'>
         <Menu.Item as={NavLink} to={'/'}>
           <ArmyLogo content={'REGISTRATION PORTAL'}  size="1.7em" textColor="#FFF" outerStarColor="yellow" innerStarColor="grey" />
