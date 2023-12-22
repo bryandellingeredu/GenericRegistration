@@ -1,10 +1,17 @@
 import axios, { AxiosResponse } from 'axios';
 import { Registration } from '../models/registration';
 import { User } from '../models/user';
+import { store } from '../stores/store';
 
 axios.defaults.baseURL = import.meta.env.VITE_API_URL;
 
 const responseBody = <T>(response: AxiosResponse<T>) => response.data;
+
+axios.interceptors.request.use(config => {
+    const token = store.commonStore.token;
+    if (token && config.headers) config.headers.Authorization = `Bearer ${token}`;
+    return config;
+})
 
 const requests = {
     get: <T> (url: string) => axios.get<T>(url).then(responseBody),

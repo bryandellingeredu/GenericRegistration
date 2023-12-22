@@ -1,11 +1,13 @@
 import { Container, Header, Button,  ButtonGroup } from "semantic-ui-react";
 import ArmyLogo from "./ArmyLogo";
 import { NavLink } from "react-router-dom";
+import { observer } from "mobx-react-lite";
+import { useStore } from "../../app/stores/store";
 
-export default function HomePage() {
+export default observer ( function HomePage() {
 
-  
-        
+    const {userStore} = useStore();
+    const {isLoggedIn} = userStore
 
     return (
         <div className="homepage-background">
@@ -18,7 +20,7 @@ export default function HomePage() {
               
                     <ButtonGroup size="huge" color="yellow" inverted>
                     <Button>   register for events</Button>
-                    <Button as={NavLink} to='/login'> manage events</Button>
+                    <Button as={NavLink} to={isLoggedIn ? '/createRegistrationForm' : '/login'}> manage events</Button>
                     </ButtonGroup>                                                 
                     <div className="army-logo-container">
                       <ArmyLogo content={'U.S. ARMY'}  size="1.7em" textColor="#FFF" outerStarColor="yellow" innerStarColor="black" />
@@ -26,4 +28,4 @@ export default function HomePage() {
             </Container>      
         </div>
     )
-}   
+} ) 

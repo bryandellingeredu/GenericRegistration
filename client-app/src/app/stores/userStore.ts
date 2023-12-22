@@ -23,30 +23,33 @@ export default class UserStore {
         },   
     };
 
+
+
   loginRequest = {
     scopes: ["User.Read"]
 };
 myMSALObj = new PublicClientApplication(this.armyMsalConfig);
 
 
+
     constructor() {
         makeAutoObservable(this);
         this.initialize();
-
     }
 
     async initialize() {
         await this.myMSALObj.initialize();
-    }
-    get isLoggedIn(){
-        return !!this.user;
+
     }
 
+    get isLoggedIn(){return !!this.user;}
+
     handleGraphRedirect = async () => {
+        debugger;
         if (this.myMSALObj) {
             const response = await this.myMSALObj.handleRedirectPromise();
             if (response) {
-                await store.userStore.login(response.accessToken);
+                this.login(response.accessToken);
             }
         }
     };
@@ -56,7 +59,6 @@ myMSALObj = new PublicClientApplication(this.armyMsalConfig);
         console.log('sign in army');
         try {
             await this.myMSALObj.loginRedirect(this.loginRequest);
-            // The response will be handled after the redirect
         } catch (error) {
             toast.error('Error Logging into Army 365 - please login again', {
                 position: "top-center",
@@ -72,8 +74,9 @@ myMSALObj = new PublicClientApplication(this.armyMsalConfig);
         }
     };
 
+
+
     login = async (token: string) => {
-            debugger;
             const user = await agent.Account.login(token);
             store.commonStore.setToken(user.token);
             runInAction(() => this.user = user);
@@ -81,10 +84,20 @@ myMSALObj = new PublicClientApplication(this.armyMsalConfig);
     }
 
     logout = () => {
+        sessionStorage.clear(); 
+        localStorage.clear();
         store.commonStore.setToken(null);
-        localStorage.removeItem('jwtregistration');
         this.user = null;
         router.navigate('/')
+    }
+
+    getUser = async () => {
+        try{
+      const user =   await agent.Account.current();
+        runInAction(() => this.user = user);
+        } catch (error){
+          console.log(error);
+        }
     }
 
 

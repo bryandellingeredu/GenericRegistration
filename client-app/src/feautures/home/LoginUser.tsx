@@ -11,7 +11,7 @@ import LoadingComponent from "../../app/layout/LoadingComponent";
 
 export default observer ( function LoginUser() {
     const {userStore} = useStore();
-    const {login, signInArmy, handleGraphRedirect} = userStore;
+    const {login, signInArmy,  handleGraphRedirect} = userStore;
     const [isLoggingIn, setIsLoggingIn] = useState(false);
 
     useEffect(() => {
@@ -20,7 +20,6 @@ export default observer ( function LoginUser() {
     }, [handleGraphRedirect]);
     
     const handleLoginCAC = async () => {
-        console.log('clicking button');
         setIsLoggingIn(true);    
         try{
            await signInArmy();
@@ -28,6 +27,8 @@ export default observer ( function LoginUser() {
             console.error('Error getting access token', error);  
         }
     }
+
+
 
     const loginCompleted = async () => {
         setIsLoggingIn(true);
@@ -65,7 +66,7 @@ export default observer ( function LoginUser() {
             Login EDU
           </Header>
 
-          <Login  loginCompleted={loginCompleted} loginInitiated={loginInitiated}/>
+         <Login  loginCompleted={loginCompleted} loginInitiated={loginInitiated}/>
         </Grid.Column>
 
         <Grid.Column>
@@ -73,7 +74,9 @@ export default observer ( function LoginUser() {
             <Icon name='id badge' />
             Login CAC
           </Header>
+
           <Button basic onClick={handleLoginCAC}>Sign In</Button>
+     
         </Grid.Column>
       </Grid.Row>
     </Grid>
