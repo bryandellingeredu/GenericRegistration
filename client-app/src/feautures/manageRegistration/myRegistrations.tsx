@@ -1,11 +1,14 @@
 import { Container } from "semantic-ui-react";
 import ManageRegistrationNavbar from "../../app/layout/ManageRegistrationNavbar";
 
-export default function CreateRegistration() {
+export default function MyRegistrations() {
     return(
-        <Container fluid>
+        <>
         <ManageRegistrationNavbar  />
-            <h1>Create Registration</h1>
+        <Container fluid>
+
+            <h1>My Registrations</h1>
         </Container>
+        </>
     )
 }

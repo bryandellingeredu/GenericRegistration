@@ -1,6 +1,5 @@
 
 import { Outlet, ScrollRestoration } from "react-router-dom"
-import { Container } from "semantic-ui-react"
 import { useStore } from "../stores/store"
 import { useEffect } from "react";
 import LoadingComponent from "./LoadingComponent";
@@ -25,9 +24,9 @@ if (!commonStore.appLoaded) return <LoadingComponent content="Loading app..."/>
     <>
     <ScrollRestoration />
     <ModalContainer />
-   <Container fluid >
+
       <Outlet />
-   </Container>
+
    </>
   )
 }

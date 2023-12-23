@@ -45,10 +45,9 @@ myMSALObj = new PublicClientApplication(this.armyMsalConfig);
     get isLoggedIn(){return !!this.user;}
 
     handleGraphRedirect = async () => {
-        debugger;
         if (this.myMSALObj) {
             const response = await this.myMSALObj.handleRedirectPromise();
-            if (response) {
+            if (response && !store.commonStore.donotautologin) {
                 this.login(response.accessToken);
             }
         }
@@ -70,23 +69,39 @@ myMSALObj = new PublicClientApplication(this.armyMsalConfig);
                 progress: undefined,
                 theme: "colored",
             });
-            console.log(error);
+            sessionStorage.clear(); 
+            localStorage.clear();
+            store.commonStore.setToken(null);
+            this.user = null;
+            router.navigate('/')
+          console.log(error);
         }
     };
 
 
 
     login = async (token: string) => {
+        try{
             const user = await agent.Account.login(token);
             store.commonStore.setToken(user.token);
+            store.commonStore.setDoNotAutoLogin(null);
             runInAction(() => this.user = user);
-            router.navigate('/createRegistrationForm')
+        } catch (error){
+            sessionStorage.clear(); 
+            localStorage.clear();
+            store.commonStore.setToken(null);
+            store.commonStore.setDoNotAutoLogin('true');
+            this.user = null;
+            router.navigate('/')
+          console.log(error);
+     } router.navigate('/myregistrations')  
     }
 
     logout = () => {
         sessionStorage.clear(); 
         localStorage.clear();
         store.commonStore.setToken(null);
+        store.commonStore.setDoNotAutoLogin('true');
         this.user = null;
         router.navigate('/')
     }
@@ -96,6 +111,12 @@ myMSALObj = new PublicClientApplication(this.armyMsalConfig);
       const user =   await agent.Account.current();
         runInAction(() => this.user = user);
         } catch (error){
+            sessionStorage.clear(); 
+            localStorage.clear();
+            store.commonStore.setToken(null);
+            store.commonStore.setDoNotAutoLogin('true');
+            this.user = null;
+            router.navigate('/')
           console.log(error);
         }
     }

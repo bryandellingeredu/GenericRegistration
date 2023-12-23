@@ -10,9 +10,22 @@ import LoadingComponent from "../../app/layout/LoadingComponent";
 
 
 export default observer ( function LoginUser() {
-    const {userStore} = useStore();
+    const {userStore, commonStore} = useStore();
     const {login, signInArmy,  handleGraphRedirect} = userStore;
     const [isLoggingIn, setIsLoggingIn] = useState(false);
+    const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+
+    useEffect(() => {
+      const handleResize = () => {
+          setIsMobile(window.innerWidth <= 768);
+      };
+
+      window.addEventListener('resize', handleResize);
+
+      return () => {
+          window.removeEventListener('resize', handleResize);
+      };
+  }, []);
 
     useEffect(() => {
         // Call the method from the store to handle the redirect
@@ -20,7 +33,8 @@ export default observer ( function LoginUser() {
     }, [handleGraphRedirect]);
     
     const handleLoginCAC = async () => {
-        setIsLoggingIn(true);    
+        setIsLoggingIn(true);
+        commonStore.setDoNotAutoLogin(null);    
         try{
            await signInArmy();
         }catch(error){
@@ -48,13 +62,20 @@ export default observer ( function LoginUser() {
         return (
             <div className="homepage-background">
                 <Container fluid>
-                    {/* Use "inverted" for light text and add inline styles for uppercase and size */}
-                    <Header as='h1'  textAlign='center' style={{ textTransform: 'uppercase', fontSize: '3.5em' }} color='yellow' >
-                        Carlisle Barricks Registration Portal
-                    </Header>
+                {!isMobile && 
+                <Header as='h1'  textAlign='center' style={{ textTransform: 'uppercase', fontSize: '3.5em' }} color='yellow' >
+                    Carlisle Barricks Registration Portal
+                </Header>
+                }
+                  {isMobile && 
+                <Header as='h1'  textAlign='center' style={{ textTransform: 'uppercase', fontSize: '2em' }} color='yellow' >
+                    Registration Portal
+                </Header>
+                }
 
                     {isLoggingIn && <LoadingComponent content='Logging in...' />}
- { !isLoggingIn &&         
+
+ { !isLoggingIn &&  !isMobile &&         
 <Segment color='black'  >
     <Grid columns={2} stackable textAlign='center'>
       <Divider vertical>Or</Divider>
@@ -83,12 +104,32 @@ export default observer ( function LoginUser() {
   </Segment>
 }
 
+{ !isLoggingIn &&  isMobile && 
+ <Segment color='black'  >
+ <Grid columns={1} textAlign='center'>
+
+
+   <Grid.Row verticalAlign='middle'>
+     <Grid.Column>
+       <Header icon>
+         <Icon name='graduation cap' />
+         Login EDU
+       </Header>
+
+      <Login  loginCompleted={loginCompleted} loginInitiated={loginInitiated}/>
+     </Grid.Column>
+   </Grid.Row>
+ </Grid>
+</Segment>
+}
+
                                             
-                        <div className="army-logo-container">
-                          <ArmyLogo content={'U.S. ARMY'}  size="1.7em" textColor="#FFF" outerStarColor="yellow" innerStarColor="black" />
-                      </div>
-                </Container>
+
+  </Container>
+  <div className="army-logo-container">
+                      <ArmyLogo content={'U.S. ARMY'}  size="1.7em" textColor="#FFF" outerStarColor="yellow" innerStarColor="black" />
+                  </div>  
               
-            </div>
+   </div>
         )
 })

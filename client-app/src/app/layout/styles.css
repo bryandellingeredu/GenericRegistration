@@ -40,12 +40,13 @@
 
 
 .army-logo-container {
+    z-index: 2;
   position: absolute; /* Position relative to the nearest positioned ancestor */
   bottom: 0; /* At the bottom of the container */
   left: 0; /* At the left of the container */
   width: auto; /* Auto width to fit content */
   text-align: left; /* Align text to the left */
-  padding-bottom: 10px; /* Adds space at the bottom */
+  padding-bottom: 30px; /* Adds space at the bottom */
 }
 
 .right {

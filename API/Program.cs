@@ -1,13 +1,9 @@
 using API.Extensions;
 using API.Middleware;
-using Application.Core;
-using Application.Registrations;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Persistence;
-using System.Globalization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -39,7 +35,28 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.UseDefaultFiles();
-app.UseStaticFiles();
+app.UseStaticFiles(new StaticFileOptions
+{
+    OnPrepareResponse = ctx =>
+    {
+        // Apply no caching for index.html
+        if (ctx.File.Name == "index.html")
+        {
+            ctx.Context.Response.Headers[Microsoft.Net.Http.Headers.HeaderNames.CacheControl] =
+                "no-cache, no-store, must-revalidate";
+            ctx.Context.Response.Headers[Microsoft.Net.Http.Headers.HeaderNames.Pragma] =
+                "no-cache";
+            ctx.Context.Response.Headers[Microsoft.Net.Http.Headers.HeaderNames.Expires] =
+                "-1";
+        }
+        else
+        {
+            const int durationInSeconds = 60 * 60 * 24 * 30; // 30 days, for example
+            ctx.Context.Response.Headers[Microsoft.Net.Http.Headers.HeaderNames.CacheControl] =
+                "public,max-age=" + durationInSeconds;
+        }
+    }
+}); ;
 
 app.MapControllers();
 app.MapFallbackToController("Index", "Fallback");
