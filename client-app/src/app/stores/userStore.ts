@@ -20,7 +20,7 @@ export default class UserStore {
         client_id: 'react_client', // Client ID
         redirect_uri: 'http://localhost:3000/registration/callback', // Redirect URI after login
         response_type: "code",
-        scope: 'openid profile movieAPI',
+        scope: 'openid profile API',
         post_logout_redirect_uri: 'http://localhost:3000/registration', // Redirect URI after logout
     });
 
