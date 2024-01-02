@@ -1,5 +1,6 @@
 ﻿using Application.Core;
 using Application.Registrations;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Persistence;
 
@@ -16,6 +17,10 @@ namespace API.Extensions
             {
                 opt.UseSqlServer(config.GetConnectionString("DefaultConnection"));
             });
+
+            services.AddIdentity<IdentityUser, IdentityRole>()
+                 .AddEntityFrameworkStores<DataContext>()
+                 .AddDefaultTokenProviders();
 
             services.AddCors(opt => {
                 opt.AddPolicy("CorsPolicy", policy =>

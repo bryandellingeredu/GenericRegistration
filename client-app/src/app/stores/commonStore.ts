@@ -3,8 +3,6 @@ import { makeAutoObservable, reaction } from "mobx";
 export default class CommonStore {
 
     token: string | null = localStorage.getItem('jwtregistration');
-    donotautologin : string | null = localStorage.getItem('donotautologin');
-
     appLoaded = false;
 
     constructor() {
@@ -19,17 +17,6 @@ export default class CommonStore {
                 }
             }
         )
-        
-        reaction(
-            () => this.donotautologin,
-            (newDoNotAutoLogin) => { // Changed from 'donotautologin' to 'newDoNotAutoLogin'
-                if(newDoNotAutoLogin){
-                    localStorage.setItem('donotautologin', newDoNotAutoLogin);
-                } else {
-                    localStorage.removeItem('donotautologin');
-                }
-            }
-        )
   
     }
 
@@ -37,10 +24,6 @@ export default class CommonStore {
         this.token = token;
     }
 
-    
-    setDoNotAutoLogin = (donotautologin: string | null) => {
-        this.donotautologin = donotautologin;
-    }
 
 
     setAppLoaded = () =>{

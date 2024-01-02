@@ -7,7 +7,7 @@ import { NavLink } from 'react-router-dom';
 
 export default observer(function ManageRegistrationNavbar() {
     const { userStore } = useStore();
-    const { logout, user } = userStore;
+    const { signOut, user } = userStore;
     const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
     const [sidebarVisible, setSidebarVisible] = useState(false);
 
@@ -37,7 +37,7 @@ export default observer(function ManageRegistrationNavbar() {
             <Menu.Item style={{ flexShrink: 0 }}>
               <Dropdown trigger={<><Icon name="user" /> {user?.displayName}</>}>
                 <Dropdown.Menu>
-                  <Dropdown.Item icon="power" text="Logout" onClick={logout} />
+                  <Dropdown.Item icon="power" text="Logout" onClick={signOut} />
                 </Dropdown.Menu>
               </Dropdown>
             </Menu.Item>
@@ -67,7 +67,7 @@ export default observer(function ManageRegistrationNavbar() {
             <Menu.Item position="right">
               <Dropdown trigger={<><Icon name="user" /> {user?.displayName}</>}>
                 <Dropdown.Menu>
-                  <Dropdown.Item icon="power" text="Logout" onClick={logout} />
+                  <Dropdown.Item icon="power" text="Logout" onClick={signOut} />
                 </Dropdown.Menu>
               </Dropdown>
             </Menu.Item>

@@ -8,7 +8,10 @@ axios.defaults.baseURL = import.meta.env.VITE_API_URL;
 const responseBody = <T>(response: AxiosResponse<T>) => response.data;
 
 axios.interceptors.request.use(config => {
+    debugger;
     const token = store.commonStore.token;
+    console.log('token');
+    console.log(token);
     if (token && config.headers) config.headers.Authorization = `Bearer ${token}`;
     return config;
 })
@@ -29,7 +32,7 @@ const Registrations = {
 }
 
 const Account = {
-    login: (token: string) => requests.post<User>('/account/login', {token}),
+    login: () => requests.post<void>('/account/login', {}),
     current: () => requests.get<User>('/account')
 
 }

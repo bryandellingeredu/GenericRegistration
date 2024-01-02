@@ -7,13 +7,12 @@ import { useEffect, useState } from "react";
 
 export default observer ( function HomePage() {
 
-    const {userStore, commonStore} = useStore();
+    const {userStore} = useStore();
     const {isLoggedIn} = userStore
     const navigate = useNavigate()
     const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
    const  navigateBasedOnLoginStatus = () => {
-        commonStore.setDoNotAutoLogin('true')
         if (isLoggedIn) {
             navigate('/myregistrations');
         } else {

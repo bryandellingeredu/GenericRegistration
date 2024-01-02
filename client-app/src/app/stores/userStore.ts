@@ -1,125 +1,104 @@
-import { makeAutoObservable, runInAction } from "mobx";
-import { User } from "../models/user";
-import agent from "../api/agent";
-import { store } from "./store";
-import { router } from "../router/Routes";
-import { PublicClientApplication } from "@azure/msal-browser";
-import { toast } from "react-toastify";
+import { UserManager } from 'oidc-client';
+import { makeAutoObservable, runInAction} from 'mobx';
+import { store } from './store';
+import { router } from '../router/Routes';
+import { User } from '../models/user';
+import { JwtPayload, jwtDecode } from 'jwt-decode';
 
+
+interface MyTokenPayload extends JwtPayload {
+    email?: string;
+    preferred_username?: string;
+    name?: string;
+}
 
 export default class UserStore {
-    user : User | null = null;
+    user: User | null = null;
 
-    armyMsalConfig = {
-        auth: {
-           clientId: import.meta.env.VITE_CAC_CLIENT_ID,
-           authority: `https://login.microsoftonline.com/${import.meta.env.VITE_CAC_TENANT_ID}`,
-            redirectUri: import.meta.env.VITE_REDIRECT_ARMY_URI,
-            navigateToLoginRequestUrl: true
-        },
-        cache: {
-            cacheLocation: "sessionStorage", // This configures where your cache will be stored
-            storeAuthStateInCookie: false, // Set this to "true" if you are having issues on IE11 or Edge
-        },   
-    };
-
-
-
-  loginRequest = {
-    scopes: ["User.Read"]
-};
-myMSALObj = new PublicClientApplication(this.armyMsalConfig);
-
-
+    userManager = new UserManager({
+        authority: 'https://localhost:7014', // IdentityServer URL
+        client_id: 'react_client', // Client ID
+        redirect_uri: 'http://localhost:3000/registration/callback', // Redirect URI after login
+        response_type: "code",
+        scope: 'openid profile movieAPI',
+        post_logout_redirect_uri: 'http://localhost:3000/registration', // Redirect URI after logout
+    });
 
     constructor() {
         makeAutoObservable(this);
-        this.initialize();
+        this.userManager.events.addUserLoaded(this.onUserLoaded);
+        this.userManager.events.addUserUnloaded(this.onUserUnloaded);
     }
 
-    async initialize() {
-        await this.myMSALObj.initialize();
-
-    }
-
-    get isLoggedIn(){return !!this.user;}
-
-    handleGraphRedirect = async () => {
-        if (this.myMSALObj) {
-            const response = await this.myMSALObj.handleRedirectPromise();
-            if (response && !store.commonStore.donotautologin) {
-                this.login(response.accessToken);
-            }
-        }
+    onUserLoaded = (oidcUser : any) => {
+        debugger;
+        store.commonStore.setToken(oidcUser.access_token);
+        this.user = {
+            mail: oidcUser.profile.email || '',
+            userName: oidcUser.profile.preferred_username || '',
+            displayName: oidcUser.profile.name || '',
+            token: oidcUser.access_token
+        };
+        store.commonStore.setToken(oidcUser.access_token);
     };
 
-    
-    signInArmy = async() => {
-        console.log('sign in army');
-        try {
-            await this.myMSALObj.loginRedirect(this.loginRequest);
-        } catch (error) {
-            toast.error('Error Logging into Army 365 - please login again', {
-                position: "top-center",
-                autoClose: 25000,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-                progress: undefined,
-                theme: "colored",
-            });
-            sessionStorage.clear(); 
-            localStorage.clear();
-            store.commonStore.setToken(null);
-            this.user = null;
-            router.navigate('/')
-          console.log(error);
-        }
-    };
-
-
-
-    login = async (token: string) => {
-        try{
-            const user = await agent.Account.login(token);
-            store.commonStore.setToken(user.token);
-            store.commonStore.setDoNotAutoLogin(null);
-            runInAction(() => this.user = user);
-        } catch (error){
-            sessionStorage.clear(); 
-            localStorage.clear();
-            store.commonStore.setToken(null);
-            store.commonStore.setDoNotAutoLogin('true');
-            this.user = null;
-            router.navigate('/')
-          console.log(error);
-     } router.navigate('/myregistrations')  
-    }
-
-    logout = () => {
-        sessionStorage.clear(); 
-        localStorage.clear();
-        store.commonStore.setToken(null);
-        store.commonStore.setDoNotAutoLogin('true');
+    onUserUnloaded = () => {
+        debugger;
         this.user = null;
-        router.navigate('/')
-    }
+        store.commonStore.setToken(null);
+    };
 
     getUser = async () => {
-        try{
-      const user =   await agent.Account.current();
-        runInAction(() => this.user = user);
-        } catch (error){
-            sessionStorage.clear(); 
-            localStorage.clear();
-            store.commonStore.setToken(null);
-            store.commonStore.setDoNotAutoLogin('true');
-            this.user = null;
-            router.navigate('/')
-          console.log(error);
+        debugger;
+        const token = store.commonStore.token;
+        if (token) {
+            try {
+                const decodedToken = jwtDecode<MyTokenPayload>(token);
+                this.user = {
+                    mail: decodedToken.email || '',
+                    userName: decodedToken.preferred_username || '',
+                    displayName: decodedToken.name || '',
+                    token: token
+                };
+            } catch (error) {
+                console.error("Error decoding token", error);
+                runInAction(() => {
+                    this.user = null;
+                    store.commonStore.setToken(null);
+                });
+            }
+        } else {
+            runInAction(() => {
+                this.user = null;
+            });
         }
+    };
+
+    get isLoggedIn() {
+        return !!this.user;
     }
 
+    signIn = () => {
+        debugger;
+        this.userManager.signinRedirect();
+    };
 
+    signOut = () => {
+        debugger;
+        store.commonStore.setToken(null);
+        this.userManager.signoutRedirect();
+    };
+
+
+    handleCallback = async () => {
+        try{
+            await this.userManager.signinRedirectCallback();
+            if (this.user && store.commonStore.token){
+                router.navigate('/myregistrations');
+            }
+        }catch(error){
+            this.userManager.signinRedirect();
+        }
+        
+    };
 }

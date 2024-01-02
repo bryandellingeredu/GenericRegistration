@@ -12,7 +12,7 @@ const {} = useStore();
 const {commonStore, userStore} = useStore();
 
 useEffect(() => {
-  if (commonStore.token){
+  if (commonStore.token && !userStore.user){
     userStore.getUser().finally(() => commonStore.setAppLoaded())
   } else {
     commonStore.setAppLoaded()

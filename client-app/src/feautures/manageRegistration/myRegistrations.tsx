@@ -1,6 +1,7 @@
 import { Container, Divider, Header, Icon, Button } from "semantic-ui-react";
 import ManageRegistrationNavbar from "../../app/layout/ManageRegistrationNavbar";
 import { useEffect, useState } from "react";
+import agent from "../../app/api/agent";
 
 export default function MyRegistrations() {
     const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
@@ -17,6 +18,17 @@ export default function MyRegistrations() {
         };
     }, []);
 
+    const handleLogin = async () =>{
+        try{
+            await agent.Account.login();
+            console.log('success');
+        }catch(error){
+            debugger
+            console.log('error');
+            console.log(error);
+        }
+      
+    }
 
     return(
         <>
@@ -45,6 +57,7 @@ export default function MyRegistrations() {
                     </Button.Content>
                 </Button>
             </Divider>
+            <Button  onClick={handleLogin}>Login</Button>
         </Container>
         </>
     )
