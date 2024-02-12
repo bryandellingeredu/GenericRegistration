@@ -3,6 +3,7 @@ import App from "../layout/App";
 import HomePage from "../../feautures/home/HomePage";
 import LoginUser from "../../feautures/home/LoginUser";
 import MyRegistrations from "../../feautures/manageRegistration/myRegistrations";
+import LoginError from "../../feautures/home/LoginError";
 
 
 export const routes: RouteObject[] = [
@@ -13,6 +14,7 @@ export const routes: RouteObject[] = [
             { path: '', element: <HomePage /> },
             { path: 'login', element: <LoginUser /> },
             { path: 'myregistrations', element: <MyRegistrations /> },
+            { path: 'loginerror', element: <LoginError /> },
         ]
     }
 ];

@@ -3,14 +3,14 @@ import ArmyLogo from "./ArmyLogo";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../app/stores/store";
 import { useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
 
 export default observer ( function HomePage() {
 
-    const {userStore, commonStore} = useStore();
+    const {userStore, commonStore, responsiveStore} = useStore();
     const {isLoggedIn} = userStore
     const navigate = useNavigate()
-    const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+    const {isMobile} = responsiveStore
+
 
    const  navigateBasedOnLoginStatus = () => {
         commonStore.setDoNotAutoLogin('true')
@@ -21,17 +21,6 @@ export default observer ( function HomePage() {
         }
     }
 
-    useEffect(() => {
-        const handleResize = () => {
-            setIsMobile(window.innerWidth <= 768);
-        };
-
-        window.addEventListener('resize', handleResize);
-
-        return () => {
-            window.removeEventListener('resize', handleResize);
-        };
-    }, []);
 
     return (
         <div className="homepage-background">

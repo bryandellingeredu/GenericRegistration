@@ -13,19 +13,8 @@ export default observer ( function LoginUser() {
     const {userStore, commonStore} = useStore();
     const {login, signInArmy,  handleGraphRedirect} = userStore;
     const [isLoggingIn, setIsLoggingIn] = useState(false);
-    const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
-
-    useEffect(() => {
-      const handleResize = () => {
-          setIsMobile(window.innerWidth <= 768);
-      };
-
-      window.addEventListener('resize', handleResize);
-
-      return () => {
-          window.removeEventListener('resize', handleResize);
-      };
-  }, []);
+    const {responsiveStore} = useStore();
+    const {isMobile} = responsiveStore
 
     useEffect(() => {
         // Call the method from the store to handle the redirect
@@ -45,6 +34,7 @@ export default observer ( function LoginUser() {
 
 
     const loginCompleted = async () => {
+        debugger;
         setIsLoggingIn(true);
         try {
             const provider = Providers.globalProvider;

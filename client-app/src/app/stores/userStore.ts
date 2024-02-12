@@ -45,6 +45,7 @@ myMSALObj = new PublicClientApplication(this.armyMsalConfig);
     get isLoggedIn(){return !!this.user;}
 
     handleGraphRedirect = async () => {
+        debugger;
         if (this.myMSALObj) {
             const response = await this.myMSALObj.handleRedirectPromise();
             if (response && !store.commonStore.donotautologin) {
@@ -81,20 +82,24 @@ myMSALObj = new PublicClientApplication(this.armyMsalConfig);
 
 
     login = async (token: string) => {
+        debugger;
         try{
+            debugger;
             const user = await agent.Account.login(token);
             store.commonStore.setToken(user.token);
             store.commonStore.setDoNotAutoLogin(null);
             runInAction(() => this.user = user);
+            router.navigate('/myregistrations')  
         } catch (error){
+            debugger;
             sessionStorage.clear(); 
             localStorage.clear();
             store.commonStore.setToken(null);
             store.commonStore.setDoNotAutoLogin('true');
             this.user = null;
-            router.navigate('/')
-          console.log(error);
-     } router.navigate('/myregistrations')  
+            console.log(error);
+            router.navigate('/loginerror')
+     }
     }
 
     logout = () => {
@@ -107,6 +112,7 @@ myMSALObj = new PublicClientApplication(this.armyMsalConfig);
     }
 
     getUser = async () => {
+        debugger;
         try{
       const user =   await agent.Account.current();
         runInAction(() => this.user = user);
