@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Persistence;
 
@@ -11,9 +12,11 @@ using Persistence;
 namespace Persistence.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20240214145536_registrationeventdates")]
+    partial class registrationeventdates
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,50 +24,6 @@ namespace Persistence.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
-
-            modelBuilder.Entity("Domain.CustomQuestion", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("QuestionText")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("QuestionType")
-                        .HasColumnType("int");
-
-                    b.Property<Guid>("RegistrationEventId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<bool>("Required")
-                        .HasColumnType("bit");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("RegistrationEventId");
-
-                    b.ToTable("CustomQuestions");
-                });
-
-            modelBuilder.Entity("Domain.QuestionOption", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("CustomQuestionId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("OptionText")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CustomQuestionId");
-
-                    b.ToTable("QuestionOptions");
-                });
 
             modelBuilder.Entity("Domain.Registration", b =>
                 {
@@ -98,20 +57,8 @@ namespace Persistence.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("CreatedBy")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<DateTime>("EndDate")
                         .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("LastUpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("LastUpdatedBy")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Location")
                         .HasColumnType("nvarchar(max)");
@@ -328,28 +275,6 @@ namespace Persistence.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("Domain.CustomQuestion", b =>
-                {
-                    b.HasOne("Domain.RegistrationEvent", "RegistrationEvent")
-                        .WithMany("CustomQuestions")
-                        .HasForeignKey("RegistrationEventId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("RegistrationEvent");
-                });
-
-            modelBuilder.Entity("Domain.QuestionOption", b =>
-                {
-                    b.HasOne("Domain.CustomQuestion", "CustomQuestion")
-                        .WithMany("Options")
-                        .HasForeignKey("CustomQuestionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("CustomQuestion");
-                });
-
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -399,16 +324,6 @@ namespace Persistence.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("Domain.CustomQuestion", b =>
-                {
-                    b.Navigation("Options");
-                });
-
-            modelBuilder.Entity("Domain.RegistrationEvent", b =>
-                {
-                    b.Navigation("CustomQuestions");
                 });
 #pragma warning restore 612, 618
         }

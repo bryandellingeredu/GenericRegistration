@@ -1,16 +1,22 @@
-import { useState} from 'react';
+import { useEffect, useState} from 'react';
 import { Dropdown, Icon, Menu, Sidebar } from 'semantic-ui-react';
 import ArmyLogo from '../../feautures/home/ArmyLogo';
 import { useStore } from '../../app/stores/store';
 import { observer } from 'mobx-react-lite';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate} from 'react-router-dom';
 
 export default observer(function ManageRegistrationNavbar() {
     const { userStore, responsiveStore } = useStore();
     const {isMobile} = responsiveStore
     const { logout, user } = userStore;
     const [sidebarVisible, setSidebarVisible] = useState(false);
+    const navigate = useNavigate();
 
+    useEffect(() => {
+      if (!user) {
+        navigate('/login');
+      }
+    }, [user, navigate]);
 
     return (
       <>

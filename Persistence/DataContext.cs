@@ -12,5 +12,8 @@ namespace Persistence
         }
 
         public DbSet<Registration> Registrations { get; set; }
+        public DbSet<RegistrationEvent> RegistrationEvents { get; set; }
+        public DbSet<CustomQuestion> CustomQuestions { get; set; } 
+        public DbSet<QuestionOption> QuestionOptions { get; set; }
     }
 }

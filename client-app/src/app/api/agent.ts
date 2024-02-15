@@ -2,6 +2,7 @@ import axios, { AxiosResponse } from 'axios';
 import { Registration } from '../models/registration';
 import { User } from '../models/user';
 import { store } from '../stores/store';
+import { RegistrationEvent } from '../models/registrationEvent';
 
 axios.defaults.baseURL = import.meta.env.VITE_API_URL;
 
@@ -28,6 +29,11 @@ const Registrations = {
     delete: (id: string) => axios.delete<void>(`/registrations/${id}`),
 }
 
+const RegistrationEvents ={
+    details: (id: string) => requests.get<RegistrationEvent>(`/registrationEvents/${id}`),
+    createUpdate : (registrationEvent: RegistrationEvent) => requests.post<void>('/registrationEvents', registrationEvent)
+}
+
 const Account = {
     login: (token: string) => requests.post<User>('/account/login', {token}),
     current: () => requests.get<User>('/account')
@@ -36,7 +42,8 @@ const Account = {
 
 const agent = {
     Registrations,
-    Account
+    Account,
+    RegistrationEvents
 }
 
 export default agent;
