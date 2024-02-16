@@ -2,17 +2,45 @@ import { Container, Header, Icon, Button, StepGroup, Step, StepContent, StepTitl
 import ManageRegistrationNavbar from "../../app/layout/ManageRegistrationNavbar";
 import { useStore } from "../../app/stores/store";
 import { observer } from "mobx-react-lite";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import DetailsForm from "./detailsForm";
 import QuestionsForm from "./questionsForm";
+import { useParams } from 'react-router-dom';
+import Confirmation from "../../app/common/modals/Confirmation";
 
 export default observer ( function NewRegistration() {
-    const {responsiveStore} = useStore();
+    const { id } = useParams();
+    const [formisDirty, setFormisDirty] = useState(false);
+    const handleSetFormDirty = () => setFormisDirty(true);
+    const handleSetFormClean = () => setFormisDirty(false);
+    const [siteTitle, setSiteTitle] = useState('Create a New Event');
+    const {responsiveStore, modalStore} = useStore();
     const {isMobile} = responsiveStore
+    const {openModal, closeModal} = modalStore;
     const [activeStep, setActiveStep] = useState('Details');
     const [registrationEventId, setNewRegistrationEventId] = useState('');
     const handleSetRegistrationEventId = (id: string): void  => setNewRegistrationEventId(id)
     const setActiveSteptoQuestions = () : void => setActiveStep('Questions');
+    useEffect(() => {
+      if(id){
+        setNewRegistrationEventId(id);
+        setSiteTitle('Edit Event')
+      }
+    }, []);
+
+    const  handleQuestionsClick = () => {
+      if(formisDirty){
+        const handleYesClick = () => { handleSetFormClean(); setActiveSteptoQuestions(); closeModal();}
+        openModal(<Confirmation
+            title={'You have pending changes.'}
+            header={'Are You sure want to leave this page?'} 
+            subHeader={'If you leave this page you will lose all of your changes.'}
+            onYesClick={handleYesClick }/>)
+      }else{
+        setActiveStep('Questions');
+      }    
+    }
+
     return (
         <>
             <ManageRegistrationNavbar />
@@ -21,8 +49,8 @@ export default observer ( function NewRegistration() {
                     {/* Wrapper div for the Header to center it horizontally */}
                     <div style={{ textAlign: 'center', width: '100%' }}>
                         <Header as='h1' icon style={{ display: 'inline-block', margin: '0 auto', color: '#0d47a1' }}> {/* Dark blue text */}
-                            <Icon name='calendar plus outline' color='teal' /> {/* Icon color changed to teal */}
-                            Create a New Event
+                            <Icon name={id ? 'pencil' : 'calendar plus outline' } color='teal' /> {/* Icon color changed to teal */}
+                            {siteTitle}
                             <Header.Subheader style={{ color: '#666' }}> {/* Lighter text for the subheader */}
                             {!isMobile && 
                                 <h3>Plan your event by filling out the form. Provide details about your class, symposium, or event to help participants register and prepare.</h3>
@@ -49,7 +77,7 @@ export default observer ( function NewRegistration() {
       </StepContent>
     </Step>
 
-    <Step disabled={!registrationEventId}  active={activeStep === 'Questions'}>
+    <Step disabled={!registrationEventId}  active={activeStep === 'Questions'} onClick={handleQuestionsClick}>
       <Icon name='question' />
       <StepContent>
         <StepTitle>Questions</StepTitle>
@@ -70,7 +98,10 @@ export default observer ( function NewRegistration() {
      <DetailsForm
       registrationEventId={registrationEventId}
       setRegistrationEventId={handleSetRegistrationEventId}
-      setActiveStep={setActiveSteptoQuestions} />}
+      setActiveStep={setActiveSteptoQuestions}
+      formIsDirty={formisDirty}
+      setFormDirty={handleSetFormDirty}
+      setFormClean={handleSetFormClean} />}
 
       {activeStep === 'Questions' && 
         <QuestionsForm />

@@ -24,12 +24,13 @@ const requests = {
 const Registrations = {
     list: () => requests.get<Registration[]>('/registrations'),
     details: (id: string) => requests.get<Registration>(`/registrations/${id}`),
-    create: (registration: Registration) => axios.post<void>('/registrations', registration),
-    update: (registration: Registration) => axios.put<void>(`/registrations/${registration.id}`, registration),
+    create: (registration: Registration) => requests.post<void>('/registrations', registration),
+    update: (registration: Registration) => requests.put<void>(`/registrations/${registration.id}`, registration),
     delete: (id: string) => axios.delete<void>(`/registrations/${id}`),
 }
 
 const RegistrationEvents ={
+    list: () => requests.get<RegistrationEvent[]>('/registrationEvents'),
     details: (id: string) => requests.get<RegistrationEvent>(`/registrationEvents/${id}`),
     createUpdate : (registrationEvent: RegistrationEvent) => requests.post<void>('/registrationEvents', registrationEvent)
 }

@@ -58,7 +58,7 @@ export default observer(function ManageRegistrationNavbar() {
             <Menu.Item as={NavLink} to='/'>
               <ArmyLogo content='REGISTRATION PORTAL' size="1.7em" textColor="#FFF" outerStarColor="yellow" innerStarColor="grey" />
             </Menu.Item>
-            <Menu.Item name='My Registrations' active />
+            <Menu.Item as={NavLink} to='/myregistrations'>My Registrations</Menu.Item>
             <Menu.Item position="right">
               <Dropdown trigger={<><Icon name="user" /> {user?.displayName}</>}>
                 <Dropdown.Menu>

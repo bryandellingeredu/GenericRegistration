@@ -9,12 +9,16 @@ import { v4 as uuidv4 } from 'uuid';
 import agent from "../../app/api/agent";
 import { toast } from 'react-toastify';
 import LoadingComponent from "../../app/layout/LoadingComponent";
+import { useNavigate } from "react-router-dom";
 
 
 interface Props {
   registrationEventId : string
   setRegistrationEventId: (id: string) => void
   setActiveStep: () => void
+  formIsDirty: boolean
+  setFormDirty: () => void
+  setFormClean: () => void
 }
 
 interface CustomInputProps {
@@ -23,7 +27,7 @@ interface CustomInputProps {
 }
 
 const DetailsForm: React.FC<Props> = observer((
-  {registrationEventId, setRegistrationEventId, setActiveStep} : Props) => {
+  {registrationEventId, setRegistrationEventId, setActiveStep, formIsDirty, setFormClean, setFormDirty} : Props) => {
   const [eventTitle, setEventTitle] = useState<string>("");
   const [overview, setOverview] = useState<string>("");
   const [location, setLocation] = useState<string>("");
@@ -36,34 +40,40 @@ const DetailsForm: React.FC<Props> = observer((
   const [endDate, setEndDate] = useState<Date | null>(null);
   const [updating, setUpdating] = useState(false);
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     getRegistrationEvent();
-  }, []);
+  }, [registrationEventId]);
 
   const handleTitleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     setEventTitle(e.target.value);
     setTitleError(false);
+    setFormDirty();
   };
 
   const handleLocationInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     setLocation(e.target.value);
+    setFormDirty();
   };
 
   const handleOverviewChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
     setOverview(e.target.value);
     setOverviewError(false);
+    setFormDirty();
   };
 
   // Separate handlers for start and end dates
   const handleStartDateChange = (date: Date | null) => {
     setStartDate(date);
     setStartError(false);
+    setFormDirty();
   };
 
   const handleEndDateChange = (date: Date | null) => {
     setEndDate(date);
     setEndError(false);
+    setFormDirty();
   };
 
   const getRegistrationEvent = async () => {
@@ -91,6 +101,7 @@ const DetailsForm: React.FC<Props> = observer((
 
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    if(formIsDirty || !registrationEventId){
     setUpdating(true);
     e.preventDefault();
     setFormError(false);
@@ -133,6 +144,7 @@ const DetailsForm: React.FC<Props> = observer((
             await agent.RegistrationEvents.createUpdate(registrationEvent);
             toast.success("Save was successful!"); 
             setRegistrationEventId(id);
+            setFormClean();
             setActiveStep();
         } catch (error: any) {
           console.log(error);
@@ -147,6 +159,7 @@ const DetailsForm: React.FC<Props> = observer((
     } else {
         setUpdating(false);
     }
+  }
 };
 
 
@@ -234,9 +247,19 @@ const DetailsForm: React.FC<Props> = observer((
     </div>
   </div>
     </FormField>
+    <Button type='button' size="huge" color='grey' floated="left" onClick={() => navigate('/myRegistrations')}>
+      Cancel
+    </Button>
+    {(formIsDirty || !registrationEventId) && 
     <Button type="submit" size="huge" color="teal" loading={updating} floated="right">
       Save and Continue
     </Button>
+   }
+   {!formIsDirty && registrationEventId &&
+    <Button type="button" size="huge" color="teal" floated="right" onClick={() => setActiveStep()}>
+    Go To Questions
+   </Button>
+   }
   </Form>
   </div>
   );
