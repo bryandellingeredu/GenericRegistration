@@ -43,6 +43,7 @@ namespace Application.RegistrationEventWebsites
                     RegistrationEventWebsite newRegistrationEventWebsite = new RegistrationEventWebsite();
                     newRegistrationEventWebsite.RegistrationEventId = request.RegistrationEventWebsite.RegistrationEventId;
                     newRegistrationEventWebsite.Content = request.RegistrationEventWebsite.Content;
+                    await _context.RegistrationEventsWebsites.AddAsync(newRegistrationEventWebsite);
                     var result = await _context.SaveChangesAsync() > 0;
                     if (!result) return Result<Unit>.Failure("Failed to create registration event website");
                     return Result<Unit>.Success(Unit.Value);

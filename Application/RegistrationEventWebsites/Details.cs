@@ -29,6 +29,9 @@ namespace Application.RegistrationEventWebsites
             public async Task<Result<RegistrationEventWebsite>> Handle(Query request, CancellationToken cancellationToken)
             {
                 var registrationEventWebsite = await _context.RegistrationEventsWebsites.FirstOrDefaultAsync(x => x.RegistrationEventId == request.RegistrationEventId);
+                if (registrationEventWebsite == null) {
+                    return Result<RegistrationEventWebsite>.Success(new RegistrationEventWebsite());
+                }
                 return Result<RegistrationEventWebsite>.Success(registrationEventWebsite);
             }
         }

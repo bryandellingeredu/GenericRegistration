@@ -37,8 +37,8 @@ const RegistrationEvents ={
 }
 
 const RegistrationEventWebsites = {
-    details: (registrationEventId: string) => requests.get<RegistrationEventWebsite>(`/registrationEventWebsites/${registrationEventId}`),
-    createUpdate : (registrationEventWebsite: RegistrationEventWebsite) => requests.post<void>('/registrationEventWebsites', registrationEventWebsite)
+    details: (registrationEventId: string) => requests.get<RegistrationEventWebsite>(`/RegistrationEventWebsites/${registrationEventId}`),
+    createUpdate : (registrationEventWebsite: RegistrationEventWebsite) => requests.post<void>('/RegistrationEventWebsites', registrationEventWebsite)
 }
 
 const Registrants = {
