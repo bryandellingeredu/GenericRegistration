@@ -4,7 +4,7 @@ body {
   
 .homepage-background {
     position: relative;
-    background: url('/assets/bldg651.jpg') no-repeat center center;
+    background: url('/assets/bldg651.jpg') no-repeat center center; 
     background-size: cover;
     width: 100%;
     height: 100vh; /* Adjust the height as needed */
@@ -66,6 +66,17 @@ body {
   .react-datepicker-wrapper {
     width: 100%;
   }
+
+
+
+.editor-class-preview {
+    border: none; /* Remove borders */
+    background-color: transparent; /* Adjust as needed */
+}
+
+.toolbar-class-hidden {
+    display: none; /* Ensures the toolbar is not displayed */
+}
 
 
 

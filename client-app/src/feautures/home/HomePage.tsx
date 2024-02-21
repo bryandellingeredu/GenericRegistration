@@ -39,7 +39,7 @@ export default observer ( function HomePage() {
             
               
                     <ButtonGroup size="huge" color="yellow" inverted>
-                    <Button>   register for events</Button>
+                    <Button onClick={() => navigate('/viewallevents')}>   register for events</Button>
                     <Button onClick={navigateBasedOnLoginStatus}> manage events</Button>
                     </ButtonGroup>                                                 
                  

@@ -7,6 +7,8 @@ import DetailsForm from "./detailsForm";
 import QuestionsForm from "./questionsForm";
 import { useParams } from 'react-router-dom';
 import Confirmation from "../../app/common/modals/Confirmation";
+import DesignPage from "./designPage";
+import ReviewAndPublish from "./reviewAndPublish";
 
 export default observer ( function NewRegistration() {
     const { id } = useParams();
@@ -20,7 +22,11 @@ export default observer ( function NewRegistration() {
     const [activeStep, setActiveStep] = useState('Details');
     const [registrationEventId, setNewRegistrationEventId] = useState('');
     const handleSetRegistrationEventId = (id: string): void  => setNewRegistrationEventId(id)
+    const setActiveSteptoDetails = () : void => setActiveStep('Details');
     const setActiveSteptoQuestions = () : void => setActiveStep('Questions');
+    const setActiveSteptoDesign = () : void => setActiveStep('Design');
+    const setActiveSteptoPublish = () : void => setActiveStep('Publish');
+
     useEffect(() => {
       if(id){
         setNewRegistrationEventId(id);
@@ -39,6 +45,32 @@ export default observer ( function NewRegistration() {
       }else{
         setActiveStep('Questions');
       }    
+    }
+
+    const handleDesignClick = () =>{
+      if(formisDirty){
+        const handleYesClick = () => { handleSetFormClean(); setActiveSteptoDesign(); closeModal();}
+        openModal(<Confirmation
+            title={'You have pending changes.'}
+            header={'Are You sure want to leave this page?'} 
+            subHeader={'If you leave this page you will lose all of your changes.'}
+            onYesClick={handleYesClick }/>)
+      }else{
+        setActiveStep('Design');
+      }  
+    }
+
+    const handlePublishClick = () =>{
+      if(formisDirty){
+        const handleYesClick = () => { handleSetFormClean(); setActiveSteptoPublish(); closeModal();}
+        openModal(<Confirmation
+            title={'You have pending changes.'}
+            header={'Are You sure want to leave this page?'} 
+            subHeader={'If you leave this page you will lose all of your changes.'}
+            onYesClick={handleYesClick }/>)
+      }else{
+        setActiveStep('Publish');
+      }  
     }
 
     return (
@@ -68,7 +100,7 @@ export default observer ( function NewRegistration() {
     paddingLeft: isMobile ? '0px' : '40px', 
     paddingRight: isMobile ? '0px' : '40px'
 }}>  
-     <StepGroup size= {isMobile ? 'mini' : 'large'}  widths={3} unstackable>
+     <StepGroup size= {isMobile ? 'mini' : 'large'}  widths={4} unstackable>
     <Step active={activeStep === 'Details'} onClick={() => setActiveStep('Details')}>
       <Icon name='info' />
       <StepContent>
@@ -85,11 +117,18 @@ export default observer ( function NewRegistration() {
       </StepContent>
     </Step>
 
-    <Step disabled={!registrationEventId}>
+    <Step disabled={!registrationEventId} active={activeStep === 'Design'} onClick={handleDesignClick}>
       <Icon name='paint brush' />
       <StepContent>
         <StepTitle>Design</StepTitle>
         <StepDescription>Design your registration webpage</StepDescription>
+      </StepContent>
+    </Step>
+    <Step disabled={!registrationEventId} active={activeStep === 'Publish'} onClick={handlePublishClick}>
+      <Icon name='check' />
+      <StepContent>
+        <StepTitle>Publish</StepTitle>
+        <StepDescription>Review your website and publish</StepDescription>
       </StepContent>
     </Step>
   </StepGroup>
@@ -104,7 +143,25 @@ export default observer ( function NewRegistration() {
       setFormClean={handleSetFormClean} />}
 
       {activeStep === 'Questions' && 
-        <QuestionsForm />
+        <QuestionsForm
+        registrationEventId={registrationEventId}
+        setNextActiveStep={setActiveSteptoDesign}
+        setPreviousActiveStep={setActiveSteptoDetails}
+        formIsDirty={formisDirty}
+        setFormDirty={handleSetFormDirty}
+        setFormClean={handleSetFormClean}
+         />
+      }
+      {activeStep === 'Design' && 
+        <DesignPage registrationEventId={registrationEventId}
+        setNextActiveStep={setActiveSteptoPublish}
+        setPreviousActiveStep={setActiveSteptoQuestions}
+        formIsDirty={formisDirty}
+        setFormDirty={handleSetFormDirty}
+        setFormClean={handleSetFormClean} />
+      }
+      {activeStep === 'Publish' &&
+       <ReviewAndPublish />
       }
   </Container>
         </>

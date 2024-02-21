@@ -1,5 +1,6 @@
 import { observer } from "mobx-react-lite";
-import { Form, FormField, Input, Button, FormGroup, Icon, Divider, Header } from "semantic-ui-react";
+import { Form, FormField, Input, Button, FormGroup,
+   Icon, Divider, Header } from "semantic-ui-react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { ChangeEvent, FormEvent, useEffect, useState } from "react";
@@ -251,14 +252,21 @@ const DetailsForm: React.FC<Props> = observer((
       Cancel
     </Button>
     {(formIsDirty || !registrationEventId) && 
-    <Button type="submit" size="huge" color="teal" loading={updating} floated="right">
+    <Button type="submit" size="huge" color="teal" loading={updating} floated="right"
+    icon labelPosition='right'>
       Save and Continue
+      <Icon name='arrow right' />
     </Button>
    }
    {!formIsDirty && registrationEventId &&
-    <Button type="button" size="huge" color="teal" floated="right" onClick={() => setActiveStep()}>
+    <Button type="button"
+     size="huge" color="teal" floated="right"
+     icon labelPosition='right'
+      onClick={() => setActiveStep()}>
     Go To Questions
+    <Icon name='arrow right' />
    </Button>
+   
    }
   </Form>
   </div>
