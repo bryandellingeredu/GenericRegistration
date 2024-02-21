@@ -11,6 +11,7 @@ import { Editor } from "react-draft-wysiwyg";
 import { convertToRaw, EditorState, convertFromRaw  } from "draft-js";
 import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
 import { RegistrationEventWebsite } from "../../app/models/registrationEventWebsite";
+import RegistrationPagePreview from "./registrationPagePreview";
 
          interface Props {
             registrationEventId : string
@@ -118,30 +119,10 @@ export default observer ( function DesignPage(
                     visible={sidebarVisible}
                     className="customWideSidebar" // Apply custom class here
                 >
-                    <Menu inverted color='black' widths={3}>
-      <Menu.Item>
-    
-      </Menu.Item>
-      <Menu.Item>
-      <ArmyLogo content={registrationEvent.title} size="2em" textColor="#FFF" outerStarColor="yellow" innerStarColor="black" />
-      </Menu.Item>
-      <Menu.Item>
-        {/* Placeholder for right-aligned items if needed */}
-      </Menu.Item>
-    </Menu>
-
-    {sidebarVisible && (
-        <div style={{ padding : '40px' }}>
-        <Editor
-            editorState={editorState}
-            readOnly={true}
-            toolbarHidden={true}
-            wrapperClassName="wrapper-class-preview"
-            editorClassName="editor-class-preview"
-            toolbarClassName="toolbar-class-hidden"
-        />
-        </div>
-    )}
+                  {sidebarVisible && 
+                   <RegistrationPagePreview registrationEvent={registrationEvent} editorState={editorState}/>
+                  }
+                    
 
  
                 </Sidebar>

@@ -29,7 +29,7 @@ namespace Application.RegistrationEventWebsites
             public async Task<Result<Unit>> Handle(Command request, CancellationToken cancellationToken)
             {
                 RegistrationEventWebsite existingRegistrationEventWebsite = await _context.RegistrationEventsWebsites.FirstOrDefaultAsync(
-                    x => x.Id == request.RegistrationEventWebsite.RegistrationEventId);
+                    x => x.RegistrationEventId == request.RegistrationEventWebsite.RegistrationEventId);
 
                 if (existingRegistrationEventWebsite != null)
                 {

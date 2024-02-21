@@ -34,6 +34,7 @@ const DetailsForm: React.FC<Props> = observer((
   const [location, setLocation] = useState<string>("");
   const [formError, setFormError] = useState<boolean>(false);
   const [titleError, setTitleError] = useState<boolean>(false);
+  const [locationError, setLocationError] = useState<boolean>(false);
   const [startError, setStartError] = useState<boolean>(false);
   const [endError, setEndError] = useState<boolean>(false);
   const [overviewError, setOverviewError] = useState<boolean>(false);
@@ -55,6 +56,7 @@ const DetailsForm: React.FC<Props> = observer((
 
   const handleLocationInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     setLocation(e.target.value);
+    setLocationError(false);
     setFormDirty();
   };
 
@@ -110,12 +112,17 @@ const DetailsForm: React.FC<Props> = observer((
     setStartError(false);
     setEndError(false);
     setOverviewError(false);
+    setLocationError(false);
     let localFormError = false;
     
     if (!eventTitle) {
         setTitleError(true);
         localFormError = true;
     }
+    if (!location) {
+      setLocationError(true);
+      localFormError = true;
+  }
     if (!startDate) {
         setStartError(true);
         localFormError= true;
@@ -201,9 +208,11 @@ const DetailsForm: React.FC<Props> = observer((
         onChange={handleTitleInputChange}
       />
     </FormField>
-    <FormField>
+    <FormField error={locationError}>
       <label>Location</label>
       <Input
+        label={{ icon: "asterisk" }}
+        labelPosition="right corner"
         placeholder="Where will the event occur"
         icon="map marker"
         iconPosition="left"

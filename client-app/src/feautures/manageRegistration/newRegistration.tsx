@@ -34,6 +34,19 @@ export default observer ( function NewRegistration() {
       }
     }, []);
 
+    const  handleDetailsClick = () => {
+      if(formisDirty){
+        const handleYesClick = () => { handleSetFormClean(); setActiveSteptoDetails(); closeModal();}
+        openModal(<Confirmation
+            title={'You have pending changes.'}
+            header={'Are You sure want to leave this page?'} 
+            subHeader={'If you leave this page you will lose all of your changes.'}
+            onYesClick={handleYesClick }/>)
+      }else{
+        setActiveStep('Questions');
+      }    
+    }
+
     const  handleQuestionsClick = () => {
       if(formisDirty){
         const handleYesClick = () => { handleSetFormClean(); setActiveSteptoQuestions(); closeModal();}
@@ -101,7 +114,7 @@ export default observer ( function NewRegistration() {
     paddingRight: isMobile ? '0px' : '40px'
 }}>  
      <StepGroup size= {isMobile ? 'mini' : 'large'}  widths={4} unstackable>
-    <Step active={activeStep === 'Details'} onClick={() => setActiveStep('Details')}>
+    <Step active={activeStep === 'Details'} onClick={handleDetailsClick}>
       <Icon name='info' />
       <StepContent>
         <StepTitle>Details</StepTitle>
