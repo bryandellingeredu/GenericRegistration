@@ -5,6 +5,9 @@ import { CustomQuestion } from "../../app/models/customQuestion";
 import { QuestionType } from "../../app/models/questionType";
 import QuestionFormCustomQuestion from "./questionFormCustomQuestion";
 import { v4 as uuidv4 } from 'uuid';
+import LoadingComponent from "../../app/layout/LoadingComponent";
+import { toast } from "react-toastify";
+import agent from "../../app/api/agent";
 
 interface Props {
   registrationEventId : string
@@ -24,10 +27,50 @@ export default observer ( function QuestionsForm(
   const handleOpen = () => {setIsOpen(true);}
   const handleClose = () => {setIsOpen(false);}
   const [customQuestions, setCustomQuestions] = useState<CustomQuestion[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
+    getCustomQuestions();
+  }, [registrationEventId]);
 
-  }, []);
+  const getCustomQuestions = async () => {
+    if(registrationEventId){
+      setLoading(true);
+      try{
+        const data : CustomQuestion[] = await agent.CustomQuestions.details(registrationEventId);
+        debugger;
+        if(data && data.length) setCustomQuestions(data);
+      }catch (error: any) {
+            console.log(error);
+            if (error && error.message) {
+              toast.error("An error occurred: " + error.message);
+            } else {
+              toast.error("An error occured loading data");
+            }
+          }finally {
+            setLoading(false);
+        }
+    }
+  }
+
+  const handleSave = async () =>{
+    setSaving(true);
+    try{
+      await agent.CustomQuestions.createUpdate(registrationEventId, customQuestions);
+      setFormClean();
+      setNextActiveStep();
+     }catch (error: any) {
+        console.log(error);
+        if (error && error.message) {
+          toast.error("An error occurred: " + error.message);
+        } else {
+          toast.error("An error occured saving data");
+        }
+      }finally {
+        setSaving(false);
+    }
+  }
 
   const chunkQuestions = (questions: CustomQuestion[], size: number): CustomQuestion[][] =>
   questions.reduce<CustomQuestion[][]>((chunks, item, index) => {
@@ -39,8 +82,20 @@ export default observer ( function QuestionsForm(
     return chunks;
   }, []);
 
+  const handleRequiredChange = (newRequired: boolean, questionId: string) =>{
+    setFormDirty();
+    const updatedQuestions = customQuestions.map(question => {
+      if (question.id === questionId) {
+        return { ...question, required: newRequired };
+      }
+      return question;
+    });
+  
+    setCustomQuestions(updatedQuestions);
+  }
+
   const handleTextChange = (newText : string, questionId : string) => {
-    // Create a new array with the updated question
+    setFormDirty();
     const updatedQuestions = customQuestions.map(question => {
       if (question.id === questionId) {
         return { ...question, questionText: newText };
@@ -48,15 +103,16 @@ export default observer ( function QuestionsForm(
       return question;
     });
   
-    // Update the state with the new questions array
     setCustomQuestions(updatedQuestions);
   };
 
   const deleteQuestion = (id: string) => {
+    setFormDirty();
     setCustomQuestions((prevQuestions) => prevQuestions.filter((question) => question.id !== id));
   }
 
   const addTextQuestion = (index: number) => {
+    setFormDirty();
     setCustomQuestions((prevQuestions) => {
       let newIndex = index + 1;
       // Update indexes of existing questions if necessary
@@ -81,7 +137,7 @@ export default observer ( function QuestionsForm(
       return [...updatedQuestions, customQuestion];
     });
   };
-
+  if (loading) return <LoadingComponent content="Loading Questions..."/>
     return(
       <>
         <Divider horizontal>
@@ -127,6 +183,7 @@ export default observer ( function QuestionsForm(
          key={question.id}
          question={question}
          handleTextChange={handleTextChange}
+         handleRequiredChange={handleRequiredChange}
          addTextQuestion={addTextQuestion}
          deleteQuestion={deleteQuestion}
          isSingle={chunk.length === 1}
@@ -185,6 +242,7 @@ export default observer ( function QuestionsForm(
     Back To Details
     <Icon name='arrow left' />
     </Button>
+  {!formIsDirty && 
   <Button type="button"
      size="huge" color="teal" floated="right"
      icon labelPosition='right'
@@ -192,6 +250,16 @@ export default observer ( function QuestionsForm(
     Go To Design
     <Icon name='arrow right' />
     </Button>
+  }
+   {formIsDirty && 
+  <Button type="button"
+     size="huge" color="teal" floated="right"
+     icon labelPosition='right'
+      onClick={handleSave} loading={saving}>
+    Save and Continue
+    <Icon name='arrow right' />
+    </Button>
+  }
     </div>
 </>
     )

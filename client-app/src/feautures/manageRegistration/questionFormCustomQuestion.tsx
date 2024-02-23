@@ -6,17 +6,19 @@ import { CustomQuestion } from "../../app/models/customQuestion";
 interface Props{
    question: CustomQuestion 
    handleTextChange: (newText: string, questionId: string) => void;
+   handleRequiredChange: (newRequired: boolean, questionId: string) => void;
    addTextQuestion: (index: number) => void;
    deleteQuestion: (id: string) => void;
    isSingle: boolean
 }
 export default observer (function QuestionFormCustomQuestion(
-    {question, handleTextChange, addTextQuestion, isSingle, deleteQuestion} : Props
+    {question, handleTextChange, handleRequiredChange, addTextQuestion, isSingle, deleteQuestion} : Props
 ){
 
   const [isOpen, setIsOpen] = useState(false);
   const handleOpen = () => {setIsOpen(true);}
   const handleClose = () => {setIsOpen(false);}
+
 
     return (
       <>
@@ -38,7 +40,10 @@ export default observer (function QuestionFormCustomQuestion(
             />
             </FormField >
             <FormField  width='2'>
-            <Checkbox label='Required'  />
+            <Checkbox label='Required'
+          checked={question.required}
+          onChange={(e, data) => handleRequiredChange(data.checked === true, question.id)} />
+
             </FormField>
             <FormField width='1'>
             <Button animated='vertical' color='red' basic 

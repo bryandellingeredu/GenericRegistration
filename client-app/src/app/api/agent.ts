@@ -4,6 +4,7 @@ import { User } from '../models/user';
 import { store } from '../stores/store';
 import { RegistrationEvent } from '../models/registrationEvent';
 import { RegistrationEventWebsite } from '../models/registrationEventWebsite';
+import { CustomQuestion } from '../models/customQuestion';
 
 axios.defaults.baseURL = import.meta.env.VITE_API_URL;
 
@@ -41,6 +42,11 @@ const RegistrationEventWebsites = {
     createUpdate : (registrationEventWebsite: RegistrationEventWebsite) => requests.post<void>('/RegistrationEventWebsites', registrationEventWebsite)
 }
 
+const CustomQuestions = {
+    details: (registrationEventId: string) => requests.get<CustomQuestion[]>(`/CustomQuestions/${registrationEventId}`),
+    createUpdate : (registrationEventId: string, customQuestions: CustomQuestion[]) => requests.post<void>(`/CustomQuestions/${registrationEventId}`, customQuestions)
+}
+
 const Registrants = {
     list: () => requests.get<RegistrationEvent[]>('/Registrants'), 
 }
@@ -55,7 +61,8 @@ const agent = {
     Registrants,
     Account,
     RegistrationEvents,
-    RegistrationEventWebsites
+    RegistrationEventWebsites,
+    CustomQuestions
 }
 
 export default agent;

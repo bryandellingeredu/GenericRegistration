@@ -69,7 +69,6 @@ export default observer ( function DesignPage(
           try{
               const data : RegistrationEvent = await agent.RegistrationEvents.details(registrationEventId);
               setRegistrationEvent(data);
-              debugger;
               const data2 : RegistrationEventWebsite | null = await agent.RegistrationEventWebsites.details(registrationEventId);
               if(data2 && data2.content){
                 setEditorState(
