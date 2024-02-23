@@ -7,5 +7,6 @@ export interface CustomQuestion{
     questionText: string,
     questionType: QuestionType
     required: boolean
+    index: number
     options?: QuestionOption[];
 }

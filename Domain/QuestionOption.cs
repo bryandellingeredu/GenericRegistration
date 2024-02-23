@@ -10,7 +10,7 @@ namespace Domain
     {
         public Guid Id { get; set; }
         public string OptionText { get; set; }
-
+        public int Index { get; set; }
         public Guid CustomQuestionId { get; set; }
         public CustomQuestion CustomQuestion { get; set; }
 

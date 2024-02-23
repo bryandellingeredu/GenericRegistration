@@ -1,5 +1,10 @@
 import { observer } from "mobx-react-lite";
-import { Button, Divider, Header, Icon, Message } from "semantic-ui-react";
+import { useEffect, useState } from "react";
+import { Button, ButtonContent, Checkbox, Divider, Form, FormField, FormGroup, Header, Icon, Input, Menu, Message, Popup, Segment, Select } from "semantic-ui-react";
+import { CustomQuestion } from "../../app/models/customQuestion";
+import { QuestionType } from "../../app/models/questionType";
+import QuestionFormCustomQuestion from "./questionFormCustomQuestion";
+import { v4 as uuidv4 } from 'uuid';
 
 interface Props {
   registrationEventId : string
@@ -15,6 +20,68 @@ export default observer ( function QuestionsForm(
     formIsDirty, setFormDirty, setFormClean } : Props
 ) {
 
+  const [isOpen, setIsOpen] = useState(false);
+  const handleOpen = () => {setIsOpen(true);}
+  const handleClose = () => {setIsOpen(false);}
+  const [customQuestions, setCustomQuestions] = useState<CustomQuestion[]>([]);
+
+  useEffect(() => {
+
+  }, []);
+
+  const chunkQuestions = (questions: CustomQuestion[], size: number): CustomQuestion[][] =>
+  questions.reduce<CustomQuestion[][]>((chunks, item, index) => {
+    const chunkIndex = Math.floor(index / size);
+    if (!chunks[chunkIndex]) {
+      chunks[chunkIndex] = []; // start a new chunk
+    }
+    chunks[chunkIndex].push(item);
+    return chunks;
+  }, []);
+
+  const handleTextChange = (newText : string, questionId : string) => {
+    // Create a new array with the updated question
+    const updatedQuestions = customQuestions.map(question => {
+      if (question.id === questionId) {
+        return { ...question, questionText: newText };
+      }
+      return question;
+    });
+  
+    // Update the state with the new questions array
+    setCustomQuestions(updatedQuestions);
+  };
+
+  const deleteQuestion = (id: string) => {
+    setCustomQuestions((prevQuestions) => prevQuestions.filter((question) => question.id !== id));
+  }
+
+  const addTextQuestion = (index: number) => {
+    setCustomQuestions((prevQuestions) => {
+      let newIndex = index + 1;
+      // Update indexes of existing questions if necessary
+      const updatedQuestions = prevQuestions.map(question => {
+        if (question.index >= newIndex) {
+          return { ...question, index: question.index + 1 };
+        }
+        return question;
+      });
+  
+      // Create the new custom question
+      const customQuestion = {
+        id: uuidv4(),
+        index: newIndex,
+        registrationEventId: registrationEventId, // Assuming registrationEventId is in scope
+        questionText: 'Type Here To Enter Your Question`s Label',
+        questionType: QuestionType.TextInput,
+        required: false
+      };
+  
+      // Add the new question to the end
+      return [...updatedQuestions, customQuestion];
+    });
+  };
+
     return(
       <>
         <Divider horizontal>
@@ -25,21 +92,92 @@ export default observer ( function QuestionsForm(
   </Divider>
   <div style={{padding: '40px'}}>
   <Message info>
-                <Message.Header>Registration Requirements</Message.Header>
-                <p>All registration forms include 4 standard required questions:</p>
-                <ul>
-                    <li>First Name</li>
-                    <li>Last Name</li>
-                    <li>Email</li>
-                    <li>Phone</li>
-                </ul>
-                <p>In addition to these standard questions, you have the flexibility to add custom questions to your registration form. These can be:</p>
-                <ul>
-                    <li><strong>Text-Type Questions:</strong> For open-ended responses where registrants can type their answers.</li>
-                    <li><strong>Choice-Type Questions:</strong> Where registrants select from provided options.</li>
-                </ul>
-                <p>This feature allows you to tailor the registration process to better suit the needs of your event or activity, ensuring you gather all necessary information from participants.</p>
+                <Header textAlign="center">
+                  Name  Email  and Phone are required questions. Use the button to add your own questions
+                </Header>
   </Message>
+
+
+  <Form size='huge' style={{marginTop: '40px'}}>
+            <FormGroup widths='equal'>
+            <FormField required>
+             <label>First Name</label>
+            <Input value={''}/>
+            </FormField>
+            <FormField required>
+             <label>Last Name</label>
+            <Input value={''}/>
+            </FormField >
+            </FormGroup>
+            <FormGroup widths='equal'>
+            <FormField required>
+             <label> Email</label>
+            <Input value={''}/>
+            </FormField>
+            <FormField required>
+             <label>Phone</label>
+            <Input placeholder='(###) ### - ####' value={''}/>
+            </FormField>
+            </FormGroup>
+
+  {chunkQuestions(customQuestions.sort((a, b) => a.index - b.index), 2).map((chunk, index) => (
+    <FormGroup widths='equal' key={index}>
+      {chunk.map((question) => (
+        <QuestionFormCustomQuestion
+         key={question.id}
+         question={question}
+         handleTextChange={handleTextChange}
+         addTextQuestion={addTextQuestion}
+         deleteQuestion={deleteQuestion}
+         isSingle={chunk.length === 1}
+         />
+      ))}
+    </FormGroup>
+  ))}
+
+        </Form>
+
+      {customQuestions.length < 1  && 
+        <Segment>
+        <Popup
+      trigger={
+        <Button animated='vertical' color='green' basic
+        onClick={handleOpen}>
+                <ButtonContent hidden>Add New</ButtonContent>
+            <ButtonContent visible>
+              <Icon name='plus' />
+           </ButtonContent>
+         </Button>
+      }
+      on='click'
+      open={isOpen}
+      onClose={handleClose}
+      position='right center'
+    >
+      <Menu vertical>
+        <Menu.Item
+          name='input'
+          onClick={() => {
+            addTextQuestion(0);
+            handleClose();
+          }}
+        >
+          Input
+        </Menu.Item>
+        <Menu.Item
+          name='choice'
+          onClick={() => {
+            console.log('Choice Selected');
+            handleClose();
+          }}
+        >
+          Choice
+        </Menu.Item>
+      </Menu>
+    </Popup>
+         </Segment>
+}
+
   <Button type="button"
      size="huge" color="teal" floated="left"
      icon labelPosition='left'
