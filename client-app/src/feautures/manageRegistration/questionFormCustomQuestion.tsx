@@ -1,23 +1,39 @@
 import { observer } from "mobx-react-lite";
 import { useEffect, useState } from "react";
-import { Button, ButtonContent, Checkbox, FormField, FormGroup, Icon, Input, Menu, Popup } from "semantic-ui-react";
+import { Button, ButtonContent, Checkbox, FormField, FormGroup, Icon, Input, Menu, Popup, Select } from "semantic-ui-react";
 import { CustomQuestion } from "../../app/models/customQuestion";
+import { QuestionType } from "../../app/models/questionType";
 
 interface Props{
    question: CustomQuestion 
-   handleTextChange: (newText: string, questionId: string) => void;
+   handleTextChange: (newText: string, questionId: string,) => void;
+   handleOptionTextChange: (newText: string, questionId: string, choiceId: string) => void;
    handleRequiredChange: (newRequired: boolean, questionId: string) => void;
    addTextQuestion: (index: number) => void;
+   addChoiceQuestion: (index: number) => void;
    deleteQuestion: (id: string) => void;
+   deleteChoice: (id: string, choiceId: string) => void;
+   addChoice: (questionId: string, choiceIndex: number, choiceText: string) => void;
    isSingle: boolean
 }
 export default observer (function QuestionFormCustomQuestion(
-    {question, handleTextChange, handleRequiredChange, addTextQuestion, isSingle, deleteQuestion} : Props
+    {question, handleTextChange, handleOptionTextChange,  handleRequiredChange, addTextQuestion, addChoiceQuestion, isSingle, deleteQuestion, deleteChoice, addChoice} : Props
 ){
 
   const [isOpen, setIsOpen] = useState(false);
   const handleOpen = () => {setIsOpen(true);}
   const handleClose = () => {setIsOpen(false);}
+
+  const sortedOptions = question.options
+    ? question.options
+        .sort((a, b) => a.index - b.index)
+        .map(option => ({
+          key: option.id, // It's a good practice to include a unique key
+          value: option.optionText, // Use optionText as the value
+          text: option.optionText, // Use optionText for the display text
+        }))
+    : [];
+
 
 
     return (
@@ -61,7 +77,7 @@ export default observer (function QuestionFormCustomQuestion(
       trigger={
         <Button animated='vertical' color='green' basic
         onClick={handleOpen}>
-                <ButtonContent hidden>Add New</ButtonContent>
+                <ButtonContent hidden>New</ButtonContent>
             <ButtonContent visible>
               <Icon name='plus' />
            </ButtonContent>
@@ -85,7 +101,7 @@ export default observer (function QuestionFormCustomQuestion(
         <Menu.Item
           name='choice'
           onClick={() => {
-            console.log('Choice Selected');
+            addChoiceQuestion(question.index)
             handleClose();
           }}
         >
@@ -95,7 +111,56 @@ export default observer (function QuestionFormCustomQuestion(
     </Popup>
   </FormField>
   </FormGroup>
-  <Input value={''} />
+
+  { question.options && question.options.sort((a, b) => a.index - b.index).map((option) => (
+     <FormGroup widths='16'>
+             <FormField width={2} />
+             <FormField width='11'>
+            <input
+              value={option.optionText}
+              onChange={(e) => handleOptionTextChange(e.target.value, question.id, option.id)}
+              style={{
+                border: 'none',
+                borderBottom: '1px solid #ddd',
+                borderRadius: 0,
+                boxShadow: 'none',
+                padding: 0,
+                height: 'auto',
+                backgroundColor: 'transparent',
+              }}
+            />
+            </FormField>
+            <FormField width='1'>
+            <Button animated='vertical' color='red' basic 
+            onClick={() => deleteChoice(question.id, option.id)}>
+                <ButtonContent hidden>Delete</ButtonContent>
+            <ButtonContent visible>
+              <Icon name='x' />
+           </ButtonContent>
+         </Button>
+            </FormField>
+         <FormField width='1'>
+            <Button animated='vertical' color='green' basic 
+            onClick={() => addChoice(question.id, option.index, 'Choice')}>
+                <ButtonContent hidden>+Choice</ButtonContent>
+            <ButtonContent visible>
+              <Icon name='plus' />
+           </ButtonContent>
+         </Button>
+            </FormField>
+     </FormGroup>
+  ))}
+
+
+  {question.questionType === QuestionType.TextInput && <Input value={''} />}
+  {question.questionType === QuestionType.Choice && (
+       
+        <Select
+          placeholder='Select an option'
+          options={sortedOptions}
+        />
+      )}
+
  </FormField>
 
  {isSingle && <FormField />}

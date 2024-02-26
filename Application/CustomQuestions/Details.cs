@@ -33,6 +33,13 @@ namespace Application.CustomQuestions
                 {
                     return Result<List<CustomQuestion>>.Success(new List<CustomQuestion>());
                 }
+                foreach (var question in customQuestions)
+                {
+                    foreach (var option in question.Options)
+                    {
+                        option.CustomQuestion = null; // Break the circular reference
+                    }
+                }
                 return Result<List<CustomQuestion>>.Success(customQuestions);
             }
         }
