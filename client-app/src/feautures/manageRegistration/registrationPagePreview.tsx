@@ -5,11 +5,14 @@ import { Divider, FormField, FormGroup, Header, HeaderContent, Icon, Input, Menu
 import { RegistrationEvent } from "../../app/models/registrationEvent";
 import ArmyLogo from "../home/ArmyLogo";
 import { EditorState } from "draft-js";
+import { CustomQuestion } from "../../app/models/customQuestion";
+import PagePreviewCustomQuestion from "./pagePreviewCustomQuestion";
 
 
 interface Props{
     registrationEvent: RegistrationEvent
     editorState: EditorState
+    customQuestions: CustomQuestion[]
 }
 
 function formatDate(date : Date) {
@@ -20,7 +23,7 @@ function formatDate(date : Date) {
     });
   }
 
-export default observer (function RegistrationPagePreview({registrationEvent, editorState} : Props) {
+export default observer (function RegistrationPagePreview({registrationEvent, editorState, customQuestions} : Props) {
 
     function displayDateRange(startDate : Date, endDate : Date) {
         const formattedStartDate = formatDate(startDate);
@@ -33,6 +36,16 @@ export default observer (function RegistrationPagePreview({registrationEvent, ed
           return `${formattedStartDate} - ${formattedEndDate}`;
         }
       }
+
+      const chunkQuestions = (questions: CustomQuestion[], size: number): CustomQuestion[][] =>
+      questions.reduce<CustomQuestion[][]>((chunks, item, index) => {
+        const chunkIndex = Math.floor(index / size);
+        if (!chunks[chunkIndex]) {
+          chunks[chunkIndex] = []; // start a new chunk
+        }
+        chunks[chunkIndex].push(item);
+        return chunks;
+      }, []);
 
       
     return(
@@ -72,25 +85,35 @@ export default observer (function RegistrationPagePreview({registrationEvent, ed
 
         <Form size='huge' style={{marginTop: '40px'}}>
             <FormGroup widths='equal'>
-            <FormField>
-             <label><Icon name='asterisk' color='red' /> First Name</label>
+            <FormField required>
+             <label>First Name</label>
             <Input/>
             </FormField>
-            <FormField>
-             <label><Icon name='asterisk' color='red' /> Last Name</label>
+            <FormField required>
+             <label>Last Name</label>
             <Input/>
             </FormField>
             </FormGroup>
             <FormGroup widths='equal'>
-            <FormField>
-             <label><Icon name='asterisk' color='red' /> Email</label>
+            <FormField required>
+             <label>Email</label>
             <Input/>
             </FormField>
-            <FormField>
-             <label><Icon name='asterisk' color='red' /> Phone</label>
+            <FormField required>
+             <label>Phone</label>
             <Input placeholder='(###) ### - ####'/>
             </FormField>
             </FormGroup>
+            {chunkQuestions(customQuestions.sort((a, b) => a.index - b.index), 2).map((chunk, index) => (
+                <FormGroup widths='equal' key={index}>
+                      {chunk.map((question) => (
+                        <PagePreviewCustomQuestion
+                        key={question.id}
+                        question={question}
+                        isSingle={chunk.length === 1}/>
+                      ))}
+                </FormGroup>
+              ))}
         </Form>
            
         </div>

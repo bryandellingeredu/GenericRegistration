@@ -12,6 +12,7 @@ import { convertToRaw, EditorState, convertFromRaw  } from "draft-js";
 import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
 import { RegistrationEventWebsite } from "../../app/models/registrationEventWebsite";
 import RegistrationPagePreview from "./registrationPagePreview";
+import { CustomQuestion } from "../../app/models/customQuestion";
 
          interface Props {
             registrationEventId : string
@@ -31,7 +32,9 @@ export default observer ( function DesignPage(
     const [saving, setSaving] = useState(false);
     const [registrationEvent, setRegistrationEvent] = useState<RegistrationEvent>({
        id: '', title: '', overview: '', location: '', startDate: new Date(0), endDate: new Date(0) 
-    })
+    });
+
+    const [customQuestions, setCustomQuestions] = useState<CustomQuestion[]>([]);
 
     const handleEditorChange = (newEditorState : EditorState) => {
       setEditorState(newEditorState); 
@@ -79,6 +82,8 @@ export default observer ( function DesignPage(
                   )
                 );
               }
+              const data3 : CustomQuestion[] = await agent.CustomQuestions.details(registrationEventId);
+              if(data3 && data3.length) setCustomQuestions(data3);
              
           }catch (error: any) {
             console.log(error);
@@ -92,10 +97,12 @@ export default observer ( function DesignPage(
         }
         }
       }
+
+
+
       if (loading) return <LoadingComponent content="Loading Data"/>
     return(
         <>
-            {/* Inline style tag for demonstration. In production, move this to your CSS file. */}
             <style>
                 {`
                     .customWideSidebar {
@@ -119,7 +126,7 @@ export default observer ( function DesignPage(
                     className="customWideSidebar" // Apply custom class here
                 >
                   {sidebarVisible && 
-                   <RegistrationPagePreview registrationEvent={registrationEvent} editorState={editorState}/>
+                   <RegistrationPagePreview registrationEvent={registrationEvent} editorState={editorState} customQuestions={customQuestions}/>
                   }
                     
 

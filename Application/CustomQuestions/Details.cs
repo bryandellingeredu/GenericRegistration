@@ -28,7 +28,7 @@ namespace Application.CustomQuestions
 
             public async Task<Result<List<CustomQuestion>>> Handle(Query request, CancellationToken cancellationToken)
             {
-                var customQuestions = await _context.CustomQuestions.Include(x => x.Options).ToListAsync(cancellationToken);
+                var customQuestions = await _context.CustomQuestions.Where(x => x.RegistrationEventId == request.RegistrationEventId).Include(x => x.Options).ToListAsync(cancellationToken);
                 if (customQuestions == null)
                 {
                     return Result<List<CustomQuestion>>.Success(new List<CustomQuestion>());

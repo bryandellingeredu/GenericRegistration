@@ -39,7 +39,6 @@ export default observer ( function QuestionsForm(
       setLoading(true);
       try{
         const data : CustomQuestion[] = await agent.CustomQuestions.details(registrationEventId);
-        debugger;
         if(data && data.length) setCustomQuestions(data);
       }catch (error: any) {
             console.log(error);
