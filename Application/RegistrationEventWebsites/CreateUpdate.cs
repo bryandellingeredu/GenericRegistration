@@ -34,8 +34,17 @@ namespace Application.RegistrationEventWebsites
                 if (existingRegistrationEventWebsite != null)
                 {
                     existingRegistrationEventWebsite.Content = request.RegistrationEventWebsite.Content;
-                    var result = await _context.SaveChangesAsync() > 0;
-                    if (!result) return Result<Unit>.Failure("Failed to update registration event website");
+                    try
+                    {
+                        await _context.SaveChangesAsync();
+                    }
+                    catch (Exception ex)
+                    {
+
+                        return Result<Unit>.Failure($"An error occurred when trying to update the registration website: {ex.Message}");
+                    }
+                   
+
                     return Result<Unit>.Success(Unit.Value);
                 }
                 else
@@ -44,8 +53,15 @@ namespace Application.RegistrationEventWebsites
                     newRegistrationEventWebsite.RegistrationEventId = request.RegistrationEventWebsite.RegistrationEventId;
                     newRegistrationEventWebsite.Content = request.RegistrationEventWebsite.Content;
                     await _context.RegistrationEventsWebsites.AddAsync(newRegistrationEventWebsite);
-                    var result = await _context.SaveChangesAsync() > 0;
-                    if (!result) return Result<Unit>.Failure("Failed to create registration event website");
+                    try
+                    {
+                        await _context.SaveChangesAsync();
+                    }
+                    catch (Exception ex)
+                    {
+
+                        return Result<Unit>.Failure($"An error occurred when trying to insert the registration website: {ex.Message}");
+                    }
                     return Result<Unit>.Success(Unit.Value);
                 }
             }

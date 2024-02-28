@@ -12,6 +12,8 @@ import CreateUpdateReqistrationDetails from './createUpdateReqistrationDetails';
 import CreateUpdateRegistrationInfo from './createUpdateRegistrationInfo';
 import { RegistrationEventWebsite } from '../../app/models/registrationEventWebsite';
 import { useNavigate } from "react-router-dom";
+import CreateUpdateRegistrationQuestions from './createUpdateRegistrationQuestions';
+import { CustomQuestion } from '../../app/models/customQuestion';
 
 export default observer(function CreateUpdateRegistration() {
     const navigate = useNavigate();
@@ -32,6 +34,8 @@ export default observer(function CreateUpdateRegistration() {
           overview: ''
         }  
     );
+    const [registrationEventId, setRegistrationEventId] = useState(uuidv4());
+    const [customQuestions, setCustomQuestions] = useState<CustomQuestion[]>([]);
     const [loading, setLoading] = useState(false);
 
     const handleSetRegistrationEvent = (event: RegistrationEvent) =>{
@@ -41,6 +45,11 @@ export default observer(function CreateUpdateRegistration() {
     const handleSetContent = (newContent : string) =>{
         setContent(newContent);
     }
+
+    const handleSetCustomQuestions = (newCustomQuestions : CustomQuestion[]) => {
+        setCustomQuestions(newCustomQuestions);
+    }
+
     useEffect(() => {
         if(id) getRegistrationEvent();     
       }, [id]);
@@ -51,8 +60,11 @@ export default observer(function CreateUpdateRegistration() {
           try{
               const registrationEvent : RegistrationEvent = await agent.RegistrationEvents.details(id!);
               setRegistrationEvent(registrationEvent);
+              setRegistrationEventId(registrationEvent.id);
               const registrationEventWebsite : RegistrationEventWebsite | null = await agent.RegistrationEventWebsites.details(id!);
               if(registrationEventWebsite && registrationEventWebsite) setContent(registrationEventWebsite.content)
+              const customQuestionData : CustomQuestion[] = await agent.CustomQuestions.details(id!);
+              if(customQuestionData && customQuestionData.length) setCustomQuestions(customQuestionData);
           }catch (error: any) {
             console.log(error);
             if (error && error.message) {
@@ -73,7 +85,6 @@ export default observer(function CreateUpdateRegistration() {
         if(!registrationEvent.startDate  || !registrationEvent.startDate) error = true;
         if(!error){
             setSaving(true);
-            const registrationEventId = id || registrationEvent.id || uuidv4();
             setRegistrationEvent(prevState => ({
                 ...prevState,
                 id: registrationEventId
@@ -82,8 +93,13 @@ export default observer(function CreateUpdateRegistration() {
           const data = {...registrationEvent, id: registrationEventId}
 
           try {
+            debugger;
             await agent.RegistrationEvents.createUpdate(data);
+            debugger;
             await agent.RegistrationEventWebsites.createUpdate({registrationEventId, content});
+            debugger;
+            await agent.CustomQuestions.createUpdate(registrationEventId, customQuestions);
+            debugger;
             toast.success("Save was successful!"); 
             setFormisDirty(false);
             if(!id)  navigate(`/editregistration/${registrationEventId}`)
@@ -122,6 +138,7 @@ export default observer(function CreateUpdateRegistration() {
                           setFormDirty={handleSetFormDirty}
          
                          />
+                          
                           <Header as='h2' textAlign="center">
                         <Icon name='info' />
                             <Header.Content>
@@ -142,6 +159,15 @@ export default observer(function CreateUpdateRegistration() {
                                 <Header.Subheader>Use the add button to design questions for your form</Header.Subheader> {/* Add your subheader text here */}
                              </Header.Content>
                         </Header>
+                        <CreateUpdateRegistrationQuestions 
+                        customQuestions={customQuestions}
+                        setCustomQuestions={handleSetCustomQuestions}
+                        setFormDirty={handleSetFormDirty}
+                        registrationEventId={registrationEventId}
+                        />
+                         {formisDirty && 
+                        <Button floated='right' color='blue' basic size='huge' loading={saving} onClick={saveForm}> Save Pending Changes</Button>
+                        }
                     </Grid.Column>
                 </Grid.Row>
             </Grid>

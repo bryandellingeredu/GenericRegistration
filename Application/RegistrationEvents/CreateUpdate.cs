@@ -40,9 +40,17 @@ namespace Application.RegistrationEvents
                     existingRegistrationEvent.EndDate = request.RegistrationEvent.EndDate;
                     existingRegistrationEvent.LastUpdatedBy = request.Email;
                     request.RegistrationEvent.LastUpdatedAt = DateTime.UtcNow;
-                    var result = await _context.SaveChangesAsync() > 0;
-                    if (!result) return Result<Unit>.Failure("Failed to update registration event");
-                    return Result<Unit>.Success(Unit.Value);
+                    try
+                    {
+                        await _context.SaveChangesAsync();
+                        return Result<Unit>.Success(Unit.Value);
+                    }
+                    catch (Exception ex)
+                    {
+
+                        return Result<Unit>.Failure($"An error occurred when trying to update the registration event: {ex.Message}");
+                    }
+                   
                 }
                 else
                 {
