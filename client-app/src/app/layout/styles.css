@@ -78,6 +78,11 @@ body {
     display: none; /* Ensures the toolbar is not displayed */
 }
 
+.unique-editor-class {
+  border: 1px solid #ccc; /* Change the color and size as needed */
+  padding: 10px; /* Optional: Adds some space inside the border */
+}
+
 
 
 

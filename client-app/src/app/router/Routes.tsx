@@ -7,6 +7,7 @@ import LoginError from "../../feautures/home/LoginError";
 import NewRegistration from "../../feautures/manageRegistration/newRegistration";
 import ViewAllEvents from "../../feautures/registrants/viewAllEvents";
 import RegistrationPageNoForm from "../../feautures/registrants/registrationPageNoForm";
+import CreateUpdateRegistration from "../../feautures/createUpdateRegistration/createUpdateRegistration";
 
 
 export const routes: RouteObject[] = [
@@ -18,8 +19,10 @@ export const routes: RouteObject[] = [
             { path: 'login', element: <LoginUser /> },
             { path: 'myregistrations', element: <MyRegistrations /> },
             { path: 'loginerror', element: <LoginError /> },
-            { path: 'newregistration', element: <NewRegistration /> },
-            { path: 'editregistration/:id', element: <NewRegistration /> },
+            { path: 'newregistration2', element: <NewRegistration /> },
+            { path: 'newregistration', element: <CreateUpdateRegistration /> },
+            { path: 'editregistration2/:id', element: <NewRegistration /> },
+            { path: 'editregistration/:id', element: <CreateUpdateRegistration /> },
             { path: 'viewallevents', element: <ViewAllEvents />},
             { path: 'registrationpagenoform/:id', element: <RegistrationPageNoForm /> },
         ]

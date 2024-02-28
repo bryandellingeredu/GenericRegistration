@@ -34,6 +34,7 @@ export default observer ( function DesignPage(
        id: '', title: '', overview: '', location: '', startDate: new Date(0), endDate: new Date(0) 
     });
 
+
     const [customQuestions, setCustomQuestions] = useState<CustomQuestion[]>([]);
 
     const handleEditorChange = (newEditorState : EditorState) => {
