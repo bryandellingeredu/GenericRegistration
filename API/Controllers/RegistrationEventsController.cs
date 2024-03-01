@@ -21,5 +21,8 @@ namespace API.Controllers
                 new CreateUpdate.Command {
                     RegistrationEvent = registrationEvent,
                     Email = User.FindFirstValue(ClaimTypes.Email) }));
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteRegistration(Guid id) => HandleResult(await Mediator.Send(new Delete.Command { Id = id }));
     }
 }
