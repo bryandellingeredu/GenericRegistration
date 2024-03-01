@@ -2,12 +2,51 @@ import { observer } from "mobx-react-lite";
 import { RegistrationEvent } from "../../app/models/registrationEvent";
 import { Button, Card, CardContent, CardDescription, CardHeader, CardMeta, Header, HeaderContent, Icon } from "semantic-ui-react";
 import { useNavigate } from "react-router-dom";
+import { useStore } from "../../app/stores/store";
+import Confirmation from "../../app/common/modals/Confirmation";
+import { toast } from "react-toastify";
+import { useState } from "react";
+import agent from "../../app/api/agent";
+
 interface Props {
     event: RegistrationEvent
+    removeEvent: (id: string) => void;
   }
 
-export default observer (function EventCard({event} : Props) {
+export default observer (function EventCard({event, removeEvent} : Props) {
   const navigate = useNavigate();
+  const {modalStore} = useStore();
+  const {openModal, closeModal} = modalStore;
+  const [deleting, setDeleting] = useState(false)
+
+
+  const deleteEvent = async() =>{
+    try {
+      setDeleting(true);
+      await agent.RegistrationEvents.delete(event.id)
+      removeEvent(event.id)
+      toast.success("Event was deleted!"); 
+  } catch (error: any) {
+    console.log(error);
+    if (error && error.message) {
+      toast.error("An error occurred: " + error.message);
+    } else {
+      toast.error("Delete failed!");
+    }
+  } finally {
+      closeModal();
+      setDeleting(false);
+  }
+  }
+
+  const  handleDeleteClick = () => {
+      const handleYesClick = () => { deleteEvent()}
+      openModal(<Confirmation
+          title={`Delete ${event.title}`}
+          header={'Are You sure want to delete this event?'} 
+          subHeader={'deleting this event can not be undone.'}
+          onYesClick={handleYesClick }/>) 
+  }
 
     return(
         <Card color='black'>
@@ -46,7 +85,7 @@ export default observer (function EventCard({event} : Props) {
             onClick={() => navigate(`/editregistration/${event.id}`)}>
               Edit
             </Button>
-            <Button basic color='red'>
+            <Button basic color='red' onClick={handleDeleteClick} loading={deleting}>
               Delete
             </Button>
           </div>

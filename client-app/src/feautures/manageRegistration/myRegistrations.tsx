@@ -20,6 +20,10 @@ export default observer (function MyRegistrations() {
         getRegistrationEvents();
       }, []);
 
+    const handleRemoveRegistrationEvent = (id : string) => {
+      setRegistrationEvents(registrationEvents.filter(event => event.id !== id));
+    }
+
     const getRegistrationEvents = async () => {
         setLoading(true);
         try{
@@ -60,7 +64,7 @@ export default observer (function MyRegistrations() {
                 </div>
                 <CardGroup itemsPerRow={3} style={{padding: '40px'}}>
                     {registrationEvents.map((event) => (
-                        <EventCard key={event.id} event={event}/>
+                        <EventCard key={event.id} event={event} removeEvent={handleRemoveRegistrationEvent}/>
                     ))}
                 </CardGroup>
             </Container>

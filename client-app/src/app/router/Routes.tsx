@@ -23,6 +23,7 @@ export const routes: RouteObject[] = [
             { path: 'newregistration', element: <CreateUpdateRegistration /> },
             { path: 'editregistration2/:id', element: <NewRegistration /> },
             { path: 'editregistration/:id', element: <CreateUpdateRegistration /> },
+            { path: 'editregistration/:id/:step', element: <CreateUpdateRegistration /> },
             { path: 'viewallevents', element: <ViewAllEvents />},
             { path: 'registrationpagenoform/:id', element: <RegistrationPageNoForm /> },
         ]

@@ -339,9 +339,11 @@ export default observer(function CreateUpdateRegistrationQuestions({customQuesti
   ))}
 
         <FormField required={question.required}>
-            {question.questionType === QuestionType.TextInput &&  <Input value={''} />}
+            {question.questionType === QuestionType.TextInput &&  <Input value={''} placeholder={question.questionText} />}
             {question.questionType === QuestionType.Choice &&
              <Select
+             search
+             clearable
              placeholder='Select an option'
              options={ question.options
                 ? question.options
