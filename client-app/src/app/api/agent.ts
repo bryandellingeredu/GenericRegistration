@@ -36,6 +36,9 @@ const RegistrationEvents ={
     details: (id: string) => requests.get<RegistrationEvent>(`/registrationEvents/${id}`),
     createUpdate : (registrationEvent: RegistrationEvent) => requests.post<void>('/registrationEvents', registrationEvent),
     delete: (id: string) => axios.delete<void>(`/registrationEvents/${id}`),
+    publish: (id: string) => axios.put<void>(`/registrationEvents/publish/${id}`, {}),
+    unpublish: (id: string) => axios.put<void>(`/registrationEvents/unpublish/${id}`, {}),
+
 }
 
 const RegistrationEventWebsites = {

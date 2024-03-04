@@ -4,7 +4,6 @@ import HomePage from "../../feautures/home/HomePage";
 import LoginUser from "../../feautures/home/LoginUser";
 import MyRegistrations from "../../feautures/manageRegistration/myRegistrations";
 import LoginError from "../../feautures/home/LoginError";
-import NewRegistration from "../../feautures/manageRegistration/newRegistration";
 import ViewAllEvents from "../../feautures/registrants/viewAllEvents";
 import RegistrationPageNoForm from "../../feautures/registrants/registrationPageNoForm";
 import CreateUpdateRegistration from "../../feautures/createUpdateRegistration/createUpdateRegistration";
@@ -19,9 +18,7 @@ export const routes: RouteObject[] = [
             { path: 'login', element: <LoginUser /> },
             { path: 'myregistrations', element: <MyRegistrations /> },
             { path: 'loginerror', element: <LoginError /> },
-            { path: 'newregistration2', element: <NewRegistration /> },
             { path: 'newregistration', element: <CreateUpdateRegistration /> },
-            { path: 'editregistration2/:id', element: <NewRegistration /> },
             { path: 'editregistration/:id', element: <CreateUpdateRegistration /> },
             { path: 'editregistration/:id/:step', element: <CreateUpdateRegistration /> },
             { path: 'viewallevents', element: <ViewAllEvents />},

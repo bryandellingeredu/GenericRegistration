@@ -1,6 +1,7 @@
 ﻿using Application.RegistrationEvents;
 using Domain;
 using Microsoft.AspNetCore.Mvc;
+using Persistence.Migrations;
 using System.Security.Claims;
 
 namespace API.Controllers
@@ -24,5 +25,14 @@ namespace API.Controllers
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteRegistration(Guid id) => HandleResult(await Mediator.Send(new Delete.Command { Id = id }));
+
+        [HttpPut("publish/{id}")]
+        public async Task<IActionResult> PublishRegistration(Guid id) => HandleResult(await Mediator.Send(new Publish.Command { Id = id }));
+
+        [HttpPut("unpublish/{id}")]
+        public async Task<IActionResult> UnPublishRegistration(Guid id) => HandleResult(await Mediator.Send(new UnPublish.Command { Id = id }));
+
+
+
     }
 }

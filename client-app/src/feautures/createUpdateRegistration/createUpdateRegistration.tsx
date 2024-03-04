@@ -22,12 +22,16 @@ export default observer(function CreateUpdateRegistration() {
     const { step } = useParams();
     const [content, setContent] = useState('');
     const [saving, setSaving] = useState(false);
+    const [publishing, setPublishing] = useState(false);
     const [savingFromStepClick, setSavingFromStepClick] = useState(false);
     const [formisDirty, setFormisDirty] = useState(false);
     const handleSetFormDirty = () => setFormisDirty(true);
     const handleSetFormClean = () => setFormisDirty(false);
     const [formSubmitted, setFormSubmitted] = useState(false);
     const [activeStep, setActiveStep] = useState('Design');
+    const handeSetActiveStepToDesign = () => {
+      setActiveStep('Design');
+    }
     const [registrationEvent, setRegistrationEvent] = useState<RegistrationEvent>(
         {
           id: '',
@@ -35,7 +39,8 @@ export default observer(function CreateUpdateRegistration() {
           location: '',
           startDate: new Date(),
           endDate: new Date(),
-          overview: ''
+          overview: '',
+          published: false,
         }  
     );
     const [registrationEventId, setRegistrationEventId] = useState(uuidv4());
@@ -128,6 +133,49 @@ export default observer(function CreateUpdateRegistration() {
           setActiveStep('Review');
         }
   
+      }
+
+      const handlePublish = async() => {
+        try{
+          setPublishing(true);
+          await agent.RegistrationEvents.publish(registrationEventId);
+          setRegistrationEvent(prevState => ({
+            ...prevState,
+            published: true
+          }));
+          toast.success("Publish was successful!"); 
+        }catch (error: any) {
+          console.log(error);
+          if (error && error.message) {
+            toast.error("An error occurred: " + error.message);
+          } else {
+            toast.error("Published failed!");
+          }
+        } finally {
+            setPublishing(false);
+        }
+      }
+
+      const handleUnpublish = async() => {
+        try{
+          debugger;
+          setPublishing(true);
+          await agent.RegistrationEvents.unpublish(registrationEventId);
+          setRegistrationEvent(prevState => ({
+            ...prevState,
+            published: false
+          }));
+          toast.success("Un Publish was successful!"); 
+        }catch (error: any) {
+          console.log(error);
+          if (error && error.message) {
+            toast.error("An error occurred: " + error.message);
+          } else {
+            toast.error("Un Published failed!");
+          }
+        } finally {
+            setPublishing(false);
+        }
       }
 
       const saveForm = async() => {
@@ -238,8 +286,19 @@ export default observer(function CreateUpdateRegistration() {
                         setFormDirty={handleSetFormDirty}
                         registrationEventId={registrationEventId}
                         />
+                         <Button icon labelPosition='right' floated='right' color='blue' basic size='huge'
+                          disabled = {savingFromStepClick || !registrationEvent.title || !registrationEvent.title.trim() || !registrationEvent.location || !registrationEvent.location.trim() || !registrationEvent.startDate || !registrationEvent.endDate  }
+                          loading={savingFromStepClick}
+                          onClick={handleReviewClick}
+                         >
+                            Review and Publish
+                          <Icon name='arrow alternate circle right' />
+                        </Button>
                          {formisDirty && !savingFromStepClick && 
-                        <Button floated='right' color='blue' basic size='huge' loading={saving} onClick={saveForm}> Save Pending Changes</Button>
+                        <Button floated='right'
+                         color='blue'
+                         basic size='huge'
+                         loading={saving} onClick={saveForm}> Save Pending Changes</Button>
                         }
                     </Grid.Column>
                 </Grid.Row>
@@ -249,7 +308,12 @@ export default observer(function CreateUpdateRegistration() {
              <ReviewAndPublishRegistration 
              registrationEvent={registrationEvent}
              content={content}
-             customQuestions={customQuestions}/>}
+             customQuestions={customQuestions}
+             publish={handlePublish}
+             unPublish={handleUnpublish}
+             publishing={publishing}
+             setActiveStep={handeSetActiveStepToDesign}
+             registrationEventId={registrationEventId}/>}
         </>
     );
 });

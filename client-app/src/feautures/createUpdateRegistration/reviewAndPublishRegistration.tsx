@@ -2,18 +2,28 @@ import { useEffect, useState } from 'react';
 import { observer } from "mobx-react-lite";
 import { RegistrationEvent } from '../../app/models/registrationEvent';
 import { CustomQuestion } from '../../app/models/customQuestion';
-import { Form, FormField, Grid, Header, Icon, Input, Menu, Select } from 'semantic-ui-react';
+import { Button, ButtonGroup, Form, FormField, Grid, Header, Icon, Input, Menu, Message, Select } from 'semantic-ui-react';
 import ArmyLogo from '../home/ArmyLogo';
 import { Editor } from "react-draft-wysiwyg";
 import { convertToRaw, EditorState, convertFromRaw  } from "draft-js";
 import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
 import { QuestionType } from '../../app/models/questionType';
+import { toast } from 'react-toastify';
+import { useNavigate } from "react-router-dom";
 
 interface Props{
    registrationEvent: RegistrationEvent
    content: string
    customQuestions: CustomQuestion[]
+   publish: () => void
+   unPublish: () => void
+   publishing: boolean
+   setActiveStep: () => void
+   registrationEventId: string
+
 }
+
+const baseUrl = import.meta.env.VITE_BASE_URL;
 
 function formatDate(date : Date) {
     return new Date(date).toLocaleDateString('en-US', {
@@ -24,9 +34,9 @@ function formatDate(date : Date) {
   }
 
 export default observer(function ReviewAndPublishRegistration(
-    {registrationEvent, content, customQuestions} : Props
+    {registrationEvent, content, customQuestions, publish, unPublish, publishing, setActiveStep, registrationEventId} : Props
 ) {
-
+    const navigate = useNavigate();
     const [editorState, setEditorState] = useState(() => EditorState.createEmpty());
 
     useEffect(() => {
@@ -53,8 +63,44 @@ export default observer(function ReviewAndPublishRegistration(
         }
       }
 
+      const copyLink = () => {
+        const websiteUrl = `${baseUrl}/registerforevent/${registrationEventId}`;
+        navigator.clipboard.writeText(websiteUrl).then(() => {
+          // Optionally, show a notification or message indicating the link was copied
+          toast.success("Link copied to clipboard!");
+        }).catch(err => {
+          toast.error('Could not copy link: ', err);
+        });
+      };
+
     return (
         <>
+        <Message info >
+          <Message.Header>
+              <h3>Review how your website will appear. </h3>
+              <p></p>
+          </Message.Header>
+          {! registrationEvent.published && 
+          <Message.Content>
+
+           <p>  When you are satisfied with your website <Button basic color='blue' size='tiny'  onClick={publish} loading={publishing}>Publish</Button> your website so that user's may register.</p>
+           <p> To make changes to your website go back to the <Button basic color='blue' size='tiny' onClick={setActiveStep}>Design Screen</Button>.</p>
+           
+          </Message.Content>
+          }
+            {registrationEvent.published && 
+          <Message.Content>
+
+           <p> This event has been published. The link for the registration page is
+             <a href={`${baseUrl}/registerforevent/${registrationEventId}`}><strong>{` ${baseUrl}/registerforevent/${registrationEventId}`}</strong></a>
+             <Button basic color='blue' size='tiny' content='copy registration link to clipboard' style={{marginLeft: '5px'}} onClick={copyLink} />
+           </p>
+           <p> To make changes to your website go back to the <Button basic color='blue' size='tiny' onClick={setActiveStep}>Design Screen</Button>.</p>
+           <p><Button basic color='blue' size='tiny' content='Unpublish' onClick={unPublish} loading={publishing}/> your event to stop users from registering</p>
+           
+          </Message.Content>
+          }
+        </Message>
         <Menu inverted color='black' widths={3}>
         <Menu.Item >
         <Header as='h4' inverted>
@@ -106,7 +152,6 @@ export default observer(function ReviewAndPublishRegistration(
          {displayDateRange(registrationEvent.startDate, registrationEvent.endDate)}
          </Header.Content>
         </Header> 
-       
         </Grid.Column>
         <Grid.Column width={8}>
         <Form>
@@ -152,6 +197,18 @@ export default observer(function ReviewAndPublishRegistration(
         </Grid.Column>
       </Grid.Row>
       </Grid>
+      <Button icon labelPosition='left' floated='left' color='blue' basic size='huge' onClick={setActiveStep} style={{marginLeft: '40px'}}>
+                           Design Page
+                          <Icon name='arrow alternate circle left' />
+                        </Button>
+                        {!registrationEvent.published && 
+        <Button size='huge' primary content='Publish Web Page' onClick={publish} loading={publishing} style={{marginRight: '40px'}} floated='right'/> }
+       {registrationEvent.published && 
+       <ButtonGroup size='huge' floated='right' style={{marginRight: '40px'}} >
+        <Button  primary content='copy registration link to clipboard' floated='right' onClick={copyLink} />
+        <Button  secondary primary content='Go to your events'  floated='right' onClick={() => navigate('/myregistrations')} />
+        </ButtonGroup>
+       }
         </>
     )
 })

@@ -20,6 +20,8 @@ namespace Domain
 
         public DateTime EndDate { get; set; }
 
+        public bool Published {get; set;}
+
         public DateTime CreatedAt { get; set; }
         public string CreatedBy { get; set; }
         public DateTime LastUpdatedAt { get; set; }
