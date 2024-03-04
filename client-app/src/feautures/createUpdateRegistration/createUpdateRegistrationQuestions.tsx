@@ -300,7 +300,7 @@ export default observer(function CreateUpdateRegistrationQuestions({customQuesti
     { question.options && question.options.sort((a, b) => a.index - b.index).map((option) => (
      <FormGroup widths='16'>
              <FormField width={2} />
-             <FormField width='10'>
+             <FormField width='8'>
             <input
               value={option.optionText}
               onChange={(e) => handleOptionTextChange(e.target.value, question.id, option.id)}
@@ -315,7 +315,7 @@ export default observer(function CreateUpdateRegistrationQuestions({customQuesti
               }}
             />
             </FormField>
-            <FormField width='2'>
+            <FormField width='1'>
             <Button animated='vertical' color='red' basic size='tiny'
             onClick={() => deleteChoice(question.id, option.id)}
            >
@@ -325,7 +325,7 @@ export default observer(function CreateUpdateRegistrationQuestions({customQuesti
            </ButtonContent>
          </Button>
             </FormField>
-         <FormField width='2'>
+         <FormField width='1'>
             <Button animated='vertical' color='green' basic size='tiny'
             onClick={() => addChoice(question.id, option.index, 'Choice')}
             >
