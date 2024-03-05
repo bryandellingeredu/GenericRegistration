@@ -1,7 +1,7 @@
 import { Fragment, useEffect, useState } from 'react';
 import { observer } from "mobx-react-lite";
 import { CustomQuestion } from '../../app/models/customQuestion';
-import { Button, ButtonContent, Checkbox, Form, FormField, FormGroup, Icon, Input, Menu, Popup, Segment, Select } from 'semantic-ui-react';
+import { Button, ButtonContent, ButtonGroup, Checkbox, Form, FormField, FormGroup, Icon, Input, Menu, Popup, Segment, Select } from 'semantic-ui-react';
 import { v4 as uuidv4 } from 'uuid';
 import { QuestionType } from '../../app/models/questionType';
 
@@ -204,22 +204,92 @@ export default observer(function CreateUpdateRegistrationQuestions({customQuesti
     return(
         <>
     <Form>
-         <FormField required >
-             <label>First Name</label>
-            <Input value={''}/>
-        </FormField>
-        <FormField required >
-             <label>Last Name</label>
-            <Input value={''}/>
-        </FormField>
-        <FormField required >
-             <label> Email</label>
-            <Input value={''}/>
-       </FormField>
-       <FormField required >
-             <label>Phone</label>
-            <Input placeholder='(###) ### - ####' value={''}/>
-        </FormField>
+    <FormGroup>
+            <FormField width='9'>
+            <input
+              value={'First Name'}
+              style={{
+                border: 'none',
+                borderBottom: '1px solid #ddd',
+                borderRadius: 0,
+                boxShadow: 'none',
+                padding: 0,
+                height: 'auto',
+                backgroundColor: 'transparent',
+              }}
+            />
+            </FormField>
+            <FormField  width='3'>
+            <Checkbox label='Required'
+                checked
+             />
+            </FormField>
+        </FormGroup>
+        <FormGroup>
+            <FormField width='9'>
+            <input
+              value={'Last Name'}
+              style={{
+                border: 'none',
+                borderBottom: '1px solid #ddd',
+                borderRadius: 0,
+                boxShadow: 'none',
+                padding: 0,
+                height: 'auto',
+                backgroundColor: 'transparent',
+              }}
+            />
+            </FormField>
+            <FormField  width='3'>
+            <Checkbox label='Required'
+                checked
+             />
+            </FormField>
+        </FormGroup>
+       
+ 
+        <FormGroup>
+            <FormField width='9'>
+            <input
+              value={'Email'}
+              style={{
+                border: 'none',
+                borderBottom: '1px solid #ddd',
+                borderRadius: 0,
+                boxShadow: 'none',
+                padding: 0,
+                height: 'auto',
+                backgroundColor: 'transparent',
+              }}
+            />
+            </FormField>
+            <FormField  width='3'>
+            <Checkbox label='Required'
+                checked
+             />
+            </FormField>
+        </FormGroup>
+        <FormGroup>
+            <FormField width='9'>
+            <input
+              value={'Phone'}
+              style={{
+                border: 'none',
+                borderBottom: '1px solid #ddd',
+                borderRadius: 0,
+                boxShadow: 'none',
+                padding: 0,
+                height: 'auto',
+                backgroundColor: 'transparent',
+              }}
+            />
+            </FormField>
+            <FormField  width='3'>
+            <Checkbox label='Required'
+                checked
+             />
+            </FormField>
+        </FormGroup>
         {
           customQuestions.sort((a, b) => a.index - b.index).map((question) => (
             <Segment key={question.id} style={{backgroundColor: '#f4f4f4'}}>
@@ -246,7 +316,8 @@ export default observer(function CreateUpdateRegistrationQuestions({customQuesti
              />
 
             </FormField>
-            <FormField width='2'>
+            <FormField width='4'>
+            <ButtonGroup size='tiny'>
             <Button animated='vertical' color='red' basic size='tiny' 
             onClick={() => deleteQuestion(question.id)}
             >
@@ -255,14 +326,13 @@ export default observer(function CreateUpdateRegistrationQuestions({customQuesti
               <Icon name='x' />
            </ButtonContent>
          </Button>
-            </FormField>
-            <FormField width='2'>          
+                     
             <Popup
     key={question.id} // Ensure each Popup has a unique key
     trigger={
       <Button animated='vertical' color='green' basic size='tiny'
       onClick={() => togglePopover(question.id)}> {/* Toggle visibility for this specific question */}
-        <ButtonContent hidden>New</ButtonContent>
+        <ButtonContent hidden>+Question</ButtonContent>
         <ButtonContent visible>
           <Icon name='plus' />
         </ButtonContent>
@@ -294,6 +364,7 @@ export default observer(function CreateUpdateRegistrationQuestions({customQuesti
       </Menu.Item>
     </Menu>
   </Popup>
+  </ButtonGroup>
     </FormField>
     </FormGroup>
 
@@ -315,7 +386,8 @@ export default observer(function CreateUpdateRegistrationQuestions({customQuesti
               }}
             />
             </FormField>
-            <FormField width='1'>
+            <FormField width='2'>
+              <ButtonGroup size='tiny'>
             <Button animated='vertical' color='red' basic size='tiny'
             onClick={() => deleteChoice(question.id, option.id)}
            >
@@ -324,9 +396,8 @@ export default observer(function CreateUpdateRegistrationQuestions({customQuesti
               <Icon name='x' />
            </ButtonContent>
          </Button>
-            </FormField>
-         <FormField width='1'>
-            <Button animated='vertical' color='green' basic size='tiny'
+        
+            <Button animated='vertical' color='teal' basic size='tiny'
             onClick={() => addChoice(question.id, option.index, 'Choice')}
             >
                 <ButtonContent hidden>+Choice</ButtonContent>
@@ -334,11 +405,12 @@ export default observer(function CreateUpdateRegistrationQuestions({customQuesti
               <Icon name='plus' />
            </ButtonContent>
          </Button>
+         </ButtonGroup>
             </FormField>
      </FormGroup>
   ))}
 
-        <FormField required={question.required}>
+       {/* <FormField required={question.required}>
             {question.questionType === QuestionType.TextInput &&  <Input value={''} placeholder={question.questionText} />}
             {question.questionType === QuestionType.Choice &&
              <Select
@@ -356,7 +428,7 @@ export default observer(function CreateUpdateRegistrationQuestions({customQuesti
                 : []}
            />
             }
-        </FormField>
+          </FormField> */}
 
     </Segment>
   ))
@@ -364,17 +436,14 @@ export default observer(function CreateUpdateRegistrationQuestions({customQuesti
 
 
     </Form>
-    {customQuestions.length < 1  && 
+
         <Segment>
         <Popup
       trigger={
-        <Button animated='vertical' color='green' basic
-        onClick={handleOpen}>
-                <ButtonContent hidden>Add New</ButtonContent>
-            <ButtonContent visible>
-              <Icon name='plus' />
-           </ButtonContent>
-         </Button>
+        <Button icon labelPosition='left' basic color='green' onClick={handleOpen}>
+        <Icon name='plus' />
+        Add a Question
+      </Button>
       }
       on='click'
       open={isOpen}
@@ -385,7 +454,7 @@ export default observer(function CreateUpdateRegistrationQuestions({customQuesti
         <Menu.Item
           name='input'
           onClick={() => {
-            addTextQuestion(0);
+            addTextQuestion(customQuestions.length > 0 ? Math.max(...customQuestions.map(x => x.index)) : 0);
             handleClose();
           }}
         >
@@ -394,7 +463,7 @@ export default observer(function CreateUpdateRegistrationQuestions({customQuesti
         <Menu.Item
           name='choice'
           onClick={() => {
-            addChoiceQuestion(0);
+            addChoiceQuestion(customQuestions.length > 0 ? Math.max(...customQuestions.map(x => x.index)) : 0);
             handleClose();
           }}
         >
@@ -403,7 +472,7 @@ export default observer(function CreateUpdateRegistrationQuestions({customQuesti
       </Menu>
     </Popup>
          </Segment>
-}
+
     </>
     )
 })
