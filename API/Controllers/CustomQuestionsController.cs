@@ -1,11 +1,13 @@
 ﻿using Application.CustomQuestions;
 using Domain;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
 {
     public class CustomQuestionsController : BaseApiController
     {
+        [AllowAnonymous]
         [HttpGet("{registrationEventId}")]
         public async Task<ActionResult> GetRegistration(Guid registrationEventId)
         {

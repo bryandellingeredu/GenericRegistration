@@ -29,6 +29,7 @@ namespace Application.Registrant
                     var result = Result<List<RegistrationEvent>>.Success(
                         await _context.RegistrationEvents
                          .Where(x => x.EndDate >= DateTime.Today)
+                         .Where(x => x.Published)
                          .ToListAsync(cancellationToken)
                    );
                     return result;

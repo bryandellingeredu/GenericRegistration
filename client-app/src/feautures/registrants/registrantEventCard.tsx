@@ -43,7 +43,7 @@ export default observer (function RegistrantEventCard({event} : Props) {
         <CardContent extra>
  
             <Button  color='teal' fluid size='huge' icon labelPosition='left'
-            onClick={() => navigate(`/registrationpagenoform/${event.id}`)}>
+            onClick={() => navigate(`/registerforevent/${event.id}`)}>
                   <Icon name='world' size="big" />
               Go To Registration Page
             </Button>

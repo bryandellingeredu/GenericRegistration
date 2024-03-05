@@ -5,7 +5,7 @@ import { CustomQuestion } from '../../app/models/customQuestion';
 import { Button, ButtonGroup, Form, FormField, Grid, Header, Icon, Input, Menu, Message, Select } from 'semantic-ui-react';
 import ArmyLogo from '../home/ArmyLogo';
 import { Editor } from "react-draft-wysiwyg";
-import { convertToRaw, EditorState, convertFromRaw  } from "draft-js";
+import { EditorState, convertFromRaw  } from "draft-js";
 import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
 import { QuestionType } from '../../app/models/questionType';
 import { toast } from 'react-toastify';
@@ -101,7 +101,10 @@ export default observer(function ReviewAndPublishRegistration(
           </Message.Content>
           }
         </Message>
-        <Menu inverted color='black' widths={3}>
+        <Menu inverted color='black' widths={4}>
+        <Menu.Item>
+        <ArmyLogo content={registrationEvent.title} size="2em" textColor="#FFF" outerStarColor="yellow" innerStarColor="black" />
+        </Menu.Item>
         <Menu.Item >
         <Header as='h4' inverted>
         <Icon name='map marker alternate' color='teal' />
@@ -111,15 +114,18 @@ export default observer(function ReviewAndPublishRegistration(
         </Header> 
         </Menu.Item>
         <Menu.Item>
-        <ArmyLogo content={registrationEvent.title} size="2em" textColor="#FFF" outerStarColor="yellow" innerStarColor="black" />
-        </Menu.Item>
-        <Menu.Item>
-        <Header as='h3' inverted>
+        <Header as='h4' inverted>
         <Icon name='calendar' color='teal'/>
          <Header.Content>
          {displayDateRange(registrationEvent.startDate, registrationEvent.endDate)}
          </Header.Content>
         </Header> 
+        <Header as='h4' inverted>
+      <Icon name='user' color='teal'/>
+       <Header.Content>
+       The Registrant's Name
+       </Header.Content>
+      </Header> 
         </Menu.Item>
       </Menu>
 
