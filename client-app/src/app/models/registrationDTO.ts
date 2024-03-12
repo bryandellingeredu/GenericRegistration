@@ -1,6 +1,8 @@
 import { Answer } from "./answer"
+import { Registration } from "./registration"
 
-export interface Registration{
+export interface registrationDTO {
+    decodedKey : string
     id: string,
     registrationEventId: string,
     firstName: string,

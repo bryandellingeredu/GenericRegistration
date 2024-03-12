@@ -26,5 +26,15 @@ namespace API.Controllers
          public async Task<IActionResult> GetRegistrationLink([FromBody] ValidateDTO validateDTO) =>
             HandleResult(await Mediator.Send(new GetRegistrationLink.Command { ValidateDTO = validateDTO }));
 
+        [AllowAnonymous]
+        [HttpPost("getRegistration")]
+        public async Task<IActionResult> GetRegistration([FromBody] ValidateDTO validateDTO) =>
+          HandleResult(await Mediator.Send(new GetRegistration.Command { ValidateDTO = validateDTO }));
+
+        [AllowAnonymous]
+        [HttpPost("createUpdateRegistration")]
+        public async Task<IActionResult> CreateUpdateRegistration([FromBody] RegistrationDTO registrationDTO) =>
+        HandleResult(await Mediator.Send(new CreateUpdateRegistration.Command { RegistrationDTO = registrationDTO }));
+
     }
 }

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Persistence;
 
@@ -11,9 +12,11 @@ using Persistence;
 namespace Persistence.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20240312144408_answers")]
+    partial class answers
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -34,7 +37,10 @@ namespace Persistence.Migrations
                     b.Property<Guid>("CustomQuestionId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("RegistrationId")
+                    b.Property<Guid>("RegistrantId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("RegistrationId")
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
@@ -409,9 +415,7 @@ namespace Persistence.Migrations
                 {
                     b.HasOne("Domain.Registration", null)
                         .WithMany("Answers")
-                        .HasForeignKey("RegistrationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("RegistrationId");
                 });
 
             modelBuilder.Entity("Domain.CustomQuestion", b =>

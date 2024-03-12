@@ -14,6 +14,8 @@ import { RegistrationEvent } from "../../app/models/registrationEvent";
 import { RegistrationLink } from "../../app/models/registrationLink";
 import { RegistrationEventWebsite } from "../../app/models/registrationEventWebsite";
 import { CustomQuestion } from "../../app/models/customQuestion";
+import { Registration } from "../../app/models/registration";
+import { registrationDTO } from "../../app/models/registrationDTO";
 
 const query = new URLSearchParams(location.search);
 function formatDate(date : Date) {
@@ -25,12 +27,14 @@ function formatDate(date : Date) {
   }
 
   export default observer(function RegisterFromLink() {
+    const [formisDirty, setFormisDirty] = useState(false);
     const [editorState, setEditorState] = useState(() => EditorState.createEmpty());
     const encryptedKey = query.get('key');
     const [validating, setValidating] = useState(true);
     const [validated, setValidated] = useState(false);
     const [loading, setLoading] = useState(false);
     const [content, setContent] = useState('');
+    const [saving, setSaving] = useState(false);
     const [registrationEvent, setRegistrationEvent] = useState<RegistrationEvent>(
         {
           id: '',
@@ -42,6 +46,16 @@ function formatDate(date : Date) {
           published: true,
         }  
     );
+    const [registration, setRegistration] = useState<Registration>({
+      id: '',
+      registrationEventId: '',
+      firstName: '',
+      lastName: '',
+      email: '',
+      phone: '',
+      registrationDate: new Date(),
+      }
+    )
     const [customQuestions, setCustomQuestions] = useState<CustomQuestion[]>([]);
     const [email, setEmail] = useState('');
 
@@ -89,6 +103,9 @@ function formatDate(date : Date) {
             if(registrationEventWebsite && registrationEventWebsite) setContent(registrationEventWebsite.content);
             const customQuestionData : CustomQuestion[] = await agent.CustomQuestions.details(registrationEvent.id);
             if(customQuestionData && customQuestionData.length) setCustomQuestions(customQuestionData);
+            const registrationData : Registration = await agent.EmailLinks.getRegistration(decodedKey)
+            setRegistration(registrationData);
+            console.log(registrationData);
           } catch (error: any) {
             console.log(error);
             if (error && error.message) {
@@ -101,6 +118,39 @@ function formatDate(date : Date) {
             setLoading(false);
           }
     }
+
+    const handleSubmit = async () => {
+      if(!saving){
+      setFormisDirty(true);
+      let formHasError =
+       !registration.firstName || !registration.firstName.trim() ||
+       !registration.lastName || !registration.lastName.trim() ||
+       !registration.phone || !registration.phone.trim()
+       if(!formHasError){
+         try{
+           setSaving(true);
+           const decodedKey = decodeURIComponent(encryptedKey!);
+           const registrationDTO : registrationDTO = {decodedKey, ...registration }
+           debugger;
+           await agent.EmailLinks.createUpdateRegistration(registrationDTO)
+          } catch (error: any) {
+            console.log(error);
+            if (error && error.message) {
+              toast.error("An error occurred: " + error.message);
+            } else {
+              toast.error("an error occured during save");
+            }
+          } finally {
+            setSaving(false);
+          }
+       }
+      }
+    }
+
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const { name, value } = e.target;
+      setRegistration({ ...registration, [name]: value });
+  };
 
 
 
@@ -162,22 +212,28 @@ function formatDate(date : Date) {
               />
               </Grid.Column>
               <Grid.Column width={8}>
-                <Form>
-        <FormField required >
+                <Form onSubmit={handleSubmit}>
+        <FormField required error={formisDirty && (!registration.firstName || !registration.firstName.trim()) } >
              <label>First Name</label>
-            <Input value={''}/>
+            <Input value={registration.firstName}
+            name="firstName"
+            onChange={handleInputChange}/>
         </FormField>
-        <FormField required >
+        <FormField required error={formisDirty && (!registration.lastName || !registration.lastName.trim()) } >
              <label>Last Name</label>
-            <Input value={''}/>
+            <Input value={registration.lastName}
+            name="lastName"
+            onChange={handleInputChange}/>
         </FormField>
         <FormField required >
              <label> Email</label>
-            <Input value={email}/>
+            <Input value={registration.email}/>
        </FormField>
-       <FormField required >
+       <FormField required error={formisDirty && (!registration.phone || !registration.phone.trim()) }  >
              <label>Phone</label>
-            <Input placeholder='(###) ### - ####' value={''}/>
+            <Input placeholder='(###) ### - ####' value={registration.phone}
+            name="phone"
+            onChange={handleInputChange} />
         </FormField>
         {customQuestions.sort((a, b) => a.index - b.index).map((question) => (
           <FormField key={question.id} required={question.required}>
@@ -201,7 +257,7 @@ function formatDate(date : Date) {
             }
           </FormField>
             ))}
-            <Button type='submit' size='huge' primary floated="right" content='Register' />
+            <Button type='submit' size='huge' primary floated="right" content='Register' loading={saving} />
         </Form>
               </Grid.Column>
               </Grid.Row>

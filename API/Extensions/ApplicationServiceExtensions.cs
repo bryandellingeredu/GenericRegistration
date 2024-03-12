@@ -1,5 +1,5 @@
 ﻿using Application.Core;
-using Application.Registrations;
+using Application.RegistrationEvents;
 using Microsoft.EntityFrameworkCore;
 using Persistence;
 

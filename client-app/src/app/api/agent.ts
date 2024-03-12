@@ -7,6 +7,7 @@ import { RegistrationEventWebsite } from '../models/registrationEventWebsite';
 import { CustomQuestion } from '../models/customQuestion';
 import { EmailLinkDTO } from '../models/emailLinkDTO';
 import { RegistrationLink } from '../models/registrationLink';
+import { registrationDTO } from '../models/registrationDTO';
 
 axios.defaults.baseURL = import.meta.env.VITE_API_URL;
 
@@ -25,13 +26,6 @@ const requests = {
     del: <T> (url: string) => axios.delete<T>(url).then(responseBody),
 }
 
-const Registrations = {
-    list: () => requests.get<Registration[]>('/registrations'),
-    details: (id: string) => requests.get<Registration>(`/registrations/${id}`),
-    create: (registration: Registration) => requests.post<void>('/registrations', registration),
-    update: (registration: Registration) => requests.put<void>(`/registrations/${registration.id}`, registration),
-    delete: (id: string) => axios.delete<void>(`/registrations/${id}`),
-}
 
 const RegistrationEvents ={
     list: () => requests.get<RegistrationEvent[]>('/registrationEvents'),
@@ -65,11 +59,12 @@ const EmailLinks = {
     sendLink: (emailLink: EmailLinkDTO) => requests.post<void>('/EmailLink', emailLink),
     validate: (encryptedKey: string) => requests.post<void>('/EmailLink/validate', {encryptedKey}),
     getRegistrationEvent: (encryptedKey: string) => requests.post<RegistrationEvent>('/EmailLink/getRegistrationEvent', {encryptedKey}),
-    getRegistrationLink: (encryptedKey: string) => requests.post<RegistrationLink>('/EmailLink/getRegistrationLink', {encryptedKey})
+    getRegistrationLink: (encryptedKey: string) => requests.post<RegistrationLink>('/EmailLink/getRegistrationLink', {encryptedKey}),
+    getRegistration: (encryptedKey: string) => requests.post<Registration>('/EmailLink/getRegistration', {encryptedKey}),
+    createUpdateRegistration: (data: registrationDTO) => requests.post<void>('/EmailLink/createUpdateRegistration', data)
 }
 
 const agent = {
-    Registrations,
     Registrants,
     Account,
     RegistrationEvents,

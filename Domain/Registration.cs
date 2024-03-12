@@ -11,5 +11,9 @@ namespace Domain
         public string Phone {get; set;}
         public DateTime RegistrationDate {get; set;}
 
+        public Guid RegistrationEventId { get; set;}
+
+        public List<Answer> Answers { get; set;}
+
     }
 }

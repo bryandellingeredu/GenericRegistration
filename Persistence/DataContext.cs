@@ -16,6 +16,7 @@ namespace Persistence
         public DbSet<QuestionOption> QuestionOptions { get; set; }
         public DbSet<RegistrationEventWebsite> RegistrationEventsWebsites { get; set; } 
         public DbSet<RegistrationLink> RegistrationLinks { get; set; }
+        public DbSet<Answer> Answers { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
