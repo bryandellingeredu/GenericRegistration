@@ -3,6 +3,7 @@ import ArmyLogo from "./ArmyLogo";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../app/stores/store";
 import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 
 export default observer ( function HomePage() {
 
@@ -10,12 +11,31 @@ export default observer ( function HomePage() {
     const {isLoggedIn} = userStore
     const navigate = useNavigate()
     const {isMobile} = responsiveStore
+    const {redirectToPage, setDoNotAutoLogin, setRedirectToPage} = commonStore;
 
+    useEffect(() => {
+        // Call the method from the store to handle the redirect
+        if (redirectToPage){
+            if (isLoggedIn) {
+                const redirect = redirectToPage;
+                setRedirectToPage(null);
+                navigate(`/${redirect}`)
+            }else{
+                navigate('/login');
+            }
+        }
+    }, []);
 
    const  navigateBasedOnLoginStatus = () => {
-        commonStore.setDoNotAutoLogin('true')
+        setDoNotAutoLogin('true')
         if (isLoggedIn) {
-            navigate('/myregistrations');
+            if(redirectToPage){
+                const redirect = redirectToPage;
+                setRedirectToPage(null);
+                navigate(`/${redirect}`)
+            }else{
+                navigate('/myregistrations');
+            }
         } else {
             navigate('/login');
         }

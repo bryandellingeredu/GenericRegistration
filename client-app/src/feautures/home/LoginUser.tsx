@@ -6,6 +6,7 @@ import { useStore } from "../../app/stores/store";
 import { observer } from "mobx-react-lite";
 import {  useEffect, useState} from "react";
 import LoadingComponent from "../../app/layout/LoadingComponent";
+import { useNavigate } from "react-router-dom";
 
 
 
@@ -15,6 +16,10 @@ export default observer ( function LoginUser() {
     const [isLoggingIn, setIsLoggingIn] = useState(false);
     const {responsiveStore} = useStore();
     const {isMobile} = responsiveStore
+    const {redirectToPage} = commonStore;
+    const navigate = useNavigate();
+
+
 
     useEffect(() => {
         // Call the method from the store to handle the redirect
@@ -48,6 +53,13 @@ export default observer ( function LoginUser() {
        const loginInitiated = () => {
         setIsLoggingIn(true);
         };
+      
+        const handleSendLink = () => {
+          if(redirectToPage && redirectToPage.toLocaleLowerCase().includes('registerforevent')){
+            const guid = redirectToPage.split('/').pop();
+            if (guid) navigate(`/sendemaillink/${guid}`);
+          }
+        }
 
         return (
             <div className="homepage-background">
@@ -67,8 +79,8 @@ export default observer ( function LoginUser() {
 
  { !isLoggingIn &&  !isMobile &&         
 <Segment color='black'  >
-    <Grid columns={2} stackable textAlign='center'>
-      <Divider vertical>Or</Divider>
+    <Grid columns={(redirectToPage && redirectToPage.toLocaleLowerCase().includes('registerforevent')) ? 3 : 2 } stackable textAlign='center'>
+      {!redirectToPage && <Divider vertical>Or</Divider>}
 
       <Grid.Row verticalAlign='middle'>
         <Grid.Column>
@@ -89,6 +101,18 @@ export default observer ( function LoginUser() {
           <Button basic onClick={handleLoginCAC}>Sign In</Button>
      
         </Grid.Column>
+       {redirectToPage && redirectToPage.toLocaleLowerCase().includes('registerforevent') &&
+          <Grid.Column>
+          <Header icon>
+            <Icon name='envelope' />
+            Email Link
+          </Header>
+
+          <Button basic onClick={handleSendLink}>Send Link</Button>
+     
+        </Grid.Column>
+        }
+
       </Grid.Row>
     </Grid>
   </Segment>
@@ -96,7 +120,7 @@ export default observer ( function LoginUser() {
 
 { !isLoggingIn &&  isMobile && 
  <Segment color='black'  >
- <Grid columns={1} textAlign='center'>
+    <Grid columns={(redirectToPage && redirectToPage.toLocaleLowerCase().includes('registerforevent')) ? 2 : 1 } stackable textAlign='center'>
 
 
    <Grid.Row verticalAlign='middle'>
@@ -108,6 +132,15 @@ export default observer ( function LoginUser() {
 
       <Login  loginCompleted={loginCompleted} loginInitiated={loginInitiated}/>
      </Grid.Column>
+     {redirectToPage && redirectToPage.toLocaleLowerCase().includes('registerforevent') &&
+          <Grid.Column>
+          <Header icon>
+            <Icon name='envelope' />
+            Email Link
+          </Header>
+          <Button basic onClick={handleSendLink}>Send Link</Button>   
+        </Grid.Column>
+        }
    </Grid.Row>
  </Grid>
 </Segment>

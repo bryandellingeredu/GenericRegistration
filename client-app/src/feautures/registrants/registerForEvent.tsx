@@ -94,31 +94,20 @@ export default observer(function RegisterForEvents() {
       }
     }
 
+    const handleSignIn = () =>{
+      const baseUrl = import.meta.env.VITE_BASE_URL;
+      const url = `${baseUrl}?redirecttopage=registerforevent/${id}`
+      window.location.href = url;
+    }
+
     if (loading) return <LoadingComponent content="Loading Data..."/>
     return (
       <>
-      <Menu inverted color='black'  widths={user ? 4 : 3}>
+      <Menu inverted color='black'  widths='2'>
       <Menu.Item>
       <ArmyLogo content={registrationEvent.title} size="2em" textColor="#FFF" outerStarColor="yellow" innerStarColor="black" />
       </Menu.Item>
-      {!isMobile && 
-      <>
-      <Menu.Item >
-      <Header as='h4' inverted>
-      <Icon name='map marker alternate' color='teal' />
-       <Header.Content>
-       {registrationEvent.location}
-       </Header.Content>
-      </Header> 
-      </Menu.Item>
-      <Menu.Item>
-      <Header as='h4' inverted>
-      <Icon name='calendar' color='teal'/>
-       <Header.Content>
-       {displayDateRange(registrationEvent.startDate, registrationEvent.endDate)}
-       </Header.Content>
-      </Header> 
-      </Menu.Item>
+      
       {user &&
          <Menu.Item>
       <Header as='h4' inverted>
@@ -128,23 +117,13 @@ export default observer(function RegisterForEvents() {
        </Header.Content>
       </Header> 
       </Menu.Item>
-  
       }
-         </>
-    }
+
     </Menu>
     <Grid  stackable style={{padding: '40px' }}>
       <Grid.Row>
         <Grid.Column width={8}>
-        <Editor
-            editorState={editorState}
-            readOnly={true}
-            toolbarHidden={true}
-            wrapperClassName="wrapper-class-preview"
-            editorClassName="editor-class-preview"
-            toolbarClassName="toolbar-class-hidden"
-        />
-                <Header as='h3'>
+        <Header as='h3'>
         <Icon name='pencil' />
          <Header.Content>
          {registrationEvent.title}
@@ -162,6 +141,15 @@ export default observer(function RegisterForEvents() {
          {displayDateRange(registrationEvent.startDate, registrationEvent.endDate)}
          </Header.Content>
         </Header> 
+        <Editor
+            editorState={editorState}
+            readOnly={true}
+            toolbarHidden={true}
+            wrapperClassName="wrapper-class-preview"
+            editorClassName="editor-class-preview"
+            toolbarClassName="toolbar-class-hidden"
+        />
+      
         </Grid.Column>
        {user && <Grid.Column width={8}>
           <Form>
@@ -227,7 +215,7 @@ export default observer(function RegisterForEvents() {
                 <MessageItem>You can sign in by having a confirmation link emailed to you</MessageItem>
             </MessageList>
             <Message.Content>
-              <Button size="huge" primary content='Sign In' style={{marginTop: '40px'}}/>
+              <Button size="huge" primary content='Sign In' style={{marginTop: '40px'}} onClick={handleSignIn}/>
             </Message.Content>
             </Message>
         </Grid.Column>}

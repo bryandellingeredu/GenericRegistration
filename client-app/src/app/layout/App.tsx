@@ -12,6 +12,12 @@ function App() {
 
 const {} = useStore();
 const {commonStore, userStore} = useStore();
+const query = new URLSearchParams(location.search);
+
+useEffect(() => {
+  const redirecttopage = query.get('redirecttopage');
+  if(redirecttopage) commonStore.setRedirectToPage(redirecttopage)
+  }, [commonStore])
 
 useEffect(() => {
   if (commonStore.token){

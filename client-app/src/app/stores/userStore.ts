@@ -82,14 +82,18 @@ myMSALObj = new PublicClientApplication(this.armyMsalConfig);
 
 
     login = async (token: string) => {
-        debugger;
         try{
-            debugger;
             const user = await agent.Account.login(token);
             store.commonStore.setToken(user.token);
             store.commonStore.setDoNotAutoLogin(null);
             runInAction(() => this.user = user);
-            router.navigate('/myregistrations')  
+            if (store.commonStore.redirectToPage){
+                const redirectToPage = store.commonStore.redirectToPage;
+                store.commonStore.setRedirectToPage(null);
+                router.navigate(`/${redirectToPage}`);
+            }else{
+                router.navigate('/myregistrations')  
+            }
         } catch (error){
             debugger;
             sessionStorage.clear(); 

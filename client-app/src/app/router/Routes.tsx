@@ -7,6 +7,8 @@ import LoginError from "../../feautures/home/LoginError";
 import ViewAllEvents from "../../feautures/registrants/viewAllEvents";
 import RegisterForEvent from "../../feautures/registrants/registerForEvent";
 import CreateUpdateRegistration from "../../feautures/createUpdateRegistration/createUpdateRegistration";
+import SendEmailLink from "../../feautures/home/SendEmailLink";
+import RegisterFromLink from "../../feautures/registrants/registerFromLink";
 
 
 export const routes: RouteObject[] = [
@@ -23,6 +25,8 @@ export const routes: RouteObject[] = [
             { path: 'editregistration/:id/:step', element: <CreateUpdateRegistration /> },
             { path: 'viewallevents', element: <ViewAllEvents />},
             { path: 'registerforevent/:id', element: <RegisterForEvent /> },
+            { path: 'sendemaillink/:id', element: <SendEmailLink /> },
+            { path: 'registerfromlink', element: <RegisterFromLink /> },
         ]
     }
 ];

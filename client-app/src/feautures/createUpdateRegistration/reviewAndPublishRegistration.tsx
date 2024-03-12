@@ -101,25 +101,11 @@ export default observer(function ReviewAndPublishRegistration(
           </Message.Content>
           }
         </Message>
-        <Menu inverted color='black' widths={4}>
+        <Menu inverted color='black' widths={2}>
         <Menu.Item>
         <ArmyLogo content={registrationEvent.title} size="2em" textColor="#FFF" outerStarColor="yellow" innerStarColor="black" />
         </Menu.Item>
-        <Menu.Item >
-        <Header as='h4' inverted>
-        <Icon name='map marker alternate' color='teal' />
-         <Header.Content>
-         {registrationEvent.location}
-         </Header.Content>
-        </Header> 
-        </Menu.Item>
         <Menu.Item>
-        <Header as='h4' inverted>
-        <Icon name='calendar' color='teal'/>
-         <Header.Content>
-         {displayDateRange(registrationEvent.startDate, registrationEvent.endDate)}
-         </Header.Content>
-        </Header> 
         <Header as='h4' inverted>
       <Icon name='user' color='teal'/>
        <Header.Content>

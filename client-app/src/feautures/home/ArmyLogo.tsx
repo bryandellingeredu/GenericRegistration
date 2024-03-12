@@ -50,3 +50,4 @@ export default function ArmyLogo ({size,  textColor,  outerStarColor,  innerStar
             </span>
           );
 }
+

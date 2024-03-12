@@ -1,5 +1,6 @@
 using API.Extensions;
 using API.Middleware;
+using Application.EmailLink;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.EntityFrameworkCore;
@@ -14,6 +15,7 @@ builder.Services.AddControllers(opt =>
 });
 builder.Services.AddApplicationServices(builder.Configuration);
 builder.Services.AddIdentityServices(builder.Configuration);
+builder.Services.AddSingleton<EncryptionHelper>();
 
 var app = builder.Build();
 

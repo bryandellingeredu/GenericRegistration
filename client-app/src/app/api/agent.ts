@@ -5,6 +5,8 @@ import { store } from '../stores/store';
 import { RegistrationEvent } from '../models/registrationEvent';
 import { RegistrationEventWebsite } from '../models/registrationEventWebsite';
 import { CustomQuestion } from '../models/customQuestion';
+import { EmailLinkDTO } from '../models/emailLinkDTO';
+import { RegistrationLink } from '../models/registrationLink';
 
 axios.defaults.baseURL = import.meta.env.VITE_API_URL;
 
@@ -57,7 +59,13 @@ const Registrants = {
 const Account = {
     login: (token: string) => requests.post<User>('/account/login', {token}),
     current: () => requests.get<User>('/account')
+}
 
+const EmailLinks = {
+    sendLink: (emailLink: EmailLinkDTO) => requests.post<void>('/EmailLink', emailLink),
+    validate: (encryptedKey: string) => requests.post<void>('/EmailLink/validate', {encryptedKey}),
+    getRegistrationEvent: (encryptedKey: string) => requests.post<RegistrationEvent>('/EmailLink/getRegistrationEvent', {encryptedKey}),
+    getRegistrationLink: (encryptedKey: string) => requests.post<RegistrationLink>('/EmailLink/getRegistrationLink', {encryptedKey})
 }
 
 const agent = {
@@ -66,7 +74,9 @@ const agent = {
     Account,
     RegistrationEvents,
     RegistrationEventWebsites,
-    CustomQuestions
+    CustomQuestions,
+    EmailLinks
+
 }
 
 export default agent;
