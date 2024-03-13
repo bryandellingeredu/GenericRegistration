@@ -64,14 +64,19 @@ const EmailLinks = {
     createUpdateRegistration: (data: registrationDTO) => requests.post<void>('/EmailLink/createUpdateRegistration', data)
 }
 
+const Registrations = {
+    getRegistration: (email: string, registrationEventId: string) => requests.post<Registration>('/Registration/getRegistration',{email, registrationEventId }),
+    createUpdateRegistration: (data: Registration) => requests.post<void>('/Registration/createUpdateRegistration', data)
+}
+
 const agent = {
     Registrants,
     Account,
     RegistrationEvents,
     RegistrationEventWebsites,
     CustomQuestions,
-    EmailLinks
-
+    EmailLinks,
+    Registrations
 }
 
 export default agent;

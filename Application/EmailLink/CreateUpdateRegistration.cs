@@ -32,12 +32,27 @@ namespace Application.EmailLink
                 var registrationLink = await _context.RegistrationLinks.Where(x => x.RandomKey == decryptedKey).FirstOrDefaultAsync();
                 if (registrationLink != null)
                 {
-                    var existingRegistration =await _context.Registrations.Where(x => x.Id == request.RegistrationDTO.Id).FirstOrDefaultAsync();
+                    var existingRegistration =await _context.Registrations
+                        .Include(x => x.Answers)
+                        .Where(x => x.Id == request.RegistrationDTO.Id)
+                        .FirstOrDefaultAsync();
+
                     if (existingRegistration != null) {
                         existingRegistration.FirstName = request.RegistrationDTO.FirstName; 
                         existingRegistration.LastName = request.RegistrationDTO.LastName;
                         existingRegistration.Phone = request.RegistrationDTO.Phone;
                         existingRegistration.Email = request.RegistrationDTO.Email;
+                        if (existingRegistration.Answers.Any())
+                        {
+                            foreach (var answer in existingRegistration.Answers)
+                            {
+                                answer.AnswerText = request.RegistrationDTO.Answers.FirstOrDefault(x => x.Id == answer.Id).AnswerText ?? string.Empty;
+                            }
+                        }
+                        else
+                        {
+                            existingRegistration.Answers = request.RegistrationDTO.Answers;
+                        }
                         try
                         {
                             await _context.SaveChangesAsync();

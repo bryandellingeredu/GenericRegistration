@@ -7,13 +7,14 @@ import { RegistrationEventWebsite } from "../../app/models/registrationEventWebs
 import agent from "../../app/api/agent";
 import { toast } from "react-toastify";
 import LoadingComponent from "../../app/layout/LoadingComponent";
-import { FormField, Grid, Header, Icon, Input, Menu, Form, Select, Button, Message, Divider, MessageList, MessageItem } from "semantic-ui-react";
+import { FormField, Grid, Header, Icon, Input, Menu, Form, Select, Button, Message, Divider, MessageList, MessageItem, Dropdown, DropdownProps } from "semantic-ui-react";
 import ArmyLogo from "../home/ArmyLogo";
 import { Editor } from "react-draft-wysiwyg";
 import { EditorState, convertFromRaw  } from "draft-js";
 import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
 import { QuestionType } from "../../app/models/questionType";
 import { useStore } from '../../app/stores/store';
+import { Registration } from "../../app/models/registration";
 
 function formatDate(date : Date) {
   return new Date(date).toLocaleDateString('en-US', {
@@ -26,7 +27,7 @@ function formatDate(date : Date) {
 export default observer(function RegisterForEvents() {
   const { userStore, responsiveStore } = useStore();
   const {isMobile} = responsiveStore
-  const { user } = userStore;
+  const { user, logout } = userStore;
     const { id } = useParams();
     const [content, setContent] = useState('');
     const [registrationEvent, setRegistrationEvent] = useState<RegistrationEvent>(
@@ -40,8 +41,21 @@ export default observer(function RegisterForEvents() {
           published: true,
         }  
     );
+    const [registration, setRegistration] = useState<Registration>({
+      id: '',
+      registrationEventId: '',
+      firstName: '',
+      lastName: '',
+      email: '',
+      phone: '',
+      registrationDate: new Date(),
+      }
+    )
+    const [formisDirty, setFormisDirty] = useState(false);
+    const [saving, setSaving] = useState(false);
     const [customQuestions, setCustomQuestions] = useState<CustomQuestion[]>([]);
     const [loading, setLoading] = useState(true);
+    const [loading2, setLoading2] = useState(false);
     const [editorState, setEditorState] = useState(() => EditorState.createEmpty());
 
     function displayDateRange(startDate : Date, endDate : Date) {
@@ -61,6 +75,13 @@ export default observer(function RegisterForEvents() {
       }, [id]);
 
       useEffect(() => {
+        if(user && user.mail && registrationEvent && registrationEvent.id)
+        {
+          getRegistration();
+        } 
+      }, [user, registrationEvent]);
+
+      useEffect(() => {
         if(content){
           setEditorState(
             EditorState.createWithContent(
@@ -72,8 +93,24 @@ export default observer(function RegisterForEvents() {
         }
       }, [content]);
 
+      const getRegistration = async () => {
+        setLoading2(true)
+        try{
+          const registrationData : Registration = await agent.Registrations.getRegistration(user!.mail, registrationEvent.id);
+          setRegistration(registrationData);
+         }catch (error: any) {
+          console.log(error);
+          if (error && error.message) {
+            toast.error("An error occurred: " + error.message);
+          } else {
+            toast.error("An error occured loading data");
+          }
+        }finally {
+          setLoading2(false);
+          }
+      }
+
       const getRegistrationEvent = async () => {
-       
         setLoading(true);
         try{
             const registrationEvent : RegistrationEvent = await agent.RegistrationEvents.details(id!);
@@ -100,7 +137,72 @@ export default observer(function RegisterForEvents() {
       window.location.href = url;
     }
 
-    if (loading) return <LoadingComponent content="Loading Data..."/>
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const { name, value } = e.target;
+      setRegistration({ ...registration, [name]: value });
+  };
+
+  const handleCustomInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    const updatedRegistration = { ...registration };
+    if (updatedRegistration.answers) {
+      const answerIndex = updatedRegistration.answers.findIndex(answer => answer.customQuestionId === name);
+      if (answerIndex !== -1) {
+        updatedRegistration.answers[answerIndex] = { ...updatedRegistration.answers[answerIndex], answerText: value };
+        setRegistration(updatedRegistration);
+      }
+    }
+  }
+
+  const handleCustomSelectChange = (e: React.SyntheticEvent<HTMLElement>, data: DropdownProps ) =>{
+    const name = data.name as string;
+    const value = data.value ?? '';
+    const updatedRegistration = { ...registration };
+    if (updatedRegistration.answers) {
+      const answerIndex = updatedRegistration.answers.findIndex(answer => answer.customQuestionId === name);
+      if (answerIndex !== -1) {
+        updatedRegistration.answers[answerIndex] = { ...updatedRegistration.answers[answerIndex], answerText: value as string };
+        setRegistration(updatedRegistration);
+      }
+    }
+  }
+
+  const handleSubmit = async () => {
+    if(!saving){
+    setFormisDirty(true);
+    let formHasError =
+     !registration.firstName || !registration.firstName.trim() ||
+     !registration.lastName || !registration.lastName.trim() ||
+     !registration.phone || !registration.phone.trim();
+
+     const customQuestionsErrors = customQuestions.some(question => 
+      question.required &&
+      (!registration.answers?.find(x => x.customQuestionId === question.id)?.answerText ||
+       !registration.answers?.find(x => x.customQuestionId === question.id)?.answerText.trim())
+    );
+
+    formHasError = formHasError || customQuestionsErrors;
+
+
+     if(!formHasError){
+       try{
+         setSaving(true);
+         await agent.Registrations.createUpdateRegistration(registration)
+        } catch (error: any) {
+          console.log(error);
+          if (error && error.message) {
+            toast.error("An error occurred: " + error.message);
+          } else {
+            toast.error("an error occured during save");
+          }
+        } finally {
+          setSaving(false);
+        }
+     }
+    }
+  }
+
+    if (loading || loading2) return <LoadingComponent content="Loading Data..."/>
     return (
       <>
       <Menu inverted color='black'  widths='2'>
@@ -110,12 +212,16 @@ export default observer(function RegisterForEvents() {
       
       {user &&
          <Menu.Item>
-      <Header as='h4' inverted>
-      <Icon name='user' color='teal'/>
-       <Header.Content>
-       {user.displayName}
-       </Header.Content>
-      </Header> 
+      <Dropdown trigger={
+      <>
+        <Icon name="user" />
+         {user?.displayName}
+         </>
+      }>
+                <Dropdown.Menu>
+                  <Dropdown.Item icon="power" text="Logout" onClick={logout} />
+                </Dropdown.Menu>
+              </Dropdown>
       </Menu.Item>
       }
 
@@ -152,32 +258,49 @@ export default observer(function RegisterForEvents() {
       
         </Grid.Column>
        {user && <Grid.Column width={8}>
-          <Form>
-        <FormField required >
+          <Form onSubmit={handleSubmit}>
+          <FormField required error={formisDirty && (!registration.firstName || !registration.firstName.trim()) } >
              <label>First Name</label>
-            <Input value={''}/>
+            <Input value={registration.firstName}
+            name="firstName"
+            onChange={handleInputChange}/>
         </FormField>
-        <FormField required >
+        <FormField required error={formisDirty && (!registration.lastName || !registration.lastName.trim()) } >
              <label>Last Name</label>
-            <Input value={''}/>
+            <Input value={registration.lastName}
+            name="lastName"
+            onChange={handleInputChange}/>
         </FormField>
         <FormField required >
              <label> Email</label>
-            <Input value={''}/>
+            <Input value={registration.email}/>
        </FormField>
-       <FormField required >
+       <FormField required error={formisDirty && (!registration.phone || !registration.phone.trim()) }  >
              <label>Phone</label>
-            <Input placeholder='(###) ### - ####' value={''}/>
+            <Input placeholder='(###) ### - ####' value={registration.phone}
+            name="phone"
+            onChange={handleInputChange} />
         </FormField>
         {customQuestions.sort((a, b) => a.index - b.index).map((question) => (
-          <FormField key={question.id} required={question.required}>
+          <FormField key={question.id} required={question.required}
+          error={formisDirty && question.required &&
+            (!registration.answers?.find(x => x.customQuestionId === question.id)?.answerText ||
+             !registration.answers?.find(x => x.customQuestionId === question.id)?.answerText.trim()) 
+            }
+            >
             <label>{question.questionText}</label>
-            {question.questionType === QuestionType.TextInput && <Input value={''}/>}
+            {question.questionType === QuestionType.TextInput &&
+               <Input value={registration.answers?.find(x => x.customQuestionId === question.id)?.answerText} 
+                name={question.id}
+                onChange={handleCustomInputChange }/>}
             {question.questionType === QuestionType.Choice &&
              <Select
+             name={question.id}
+             value={registration.answers?.find(x => x.customQuestionId === question.id)?.answerText || ''}
              search
              clearable
              placeholder='Select an option'
+             onChange={(e, data) => handleCustomSelectChange(e, data)}
              options={ question.options
                 ? question.options
                     .sort((a, b) => a.index - b.index)
@@ -191,7 +314,7 @@ export default observer(function RegisterForEvents() {
             }
           </FormField>
             ))}
-            <Button type='submit' size='huge' primary floated="right" content='Register' />
+            <Button type='submit' size='huge' primary floated="right" content='Register' loading={saving} />
         </Form>
         </Grid.Column> }
         {!user && <Grid.Column width={8}>

@@ -9,7 +9,7 @@ import { EditorState, convertFromRaw  } from "draft-js";
 import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
 import { QuestionType } from "../../app/models/questionType";
 import { useStore } from '../../app/stores/store';
-import { Button, Form, FormField, Grid, Header, Icon, Input, Menu, Message, Select } from "semantic-ui-react";
+import { Button, DropdownProps, Form, FormField, Grid, Header, Icon, Input, Menu, Message, Select } from "semantic-ui-react";
 import { RegistrationEvent } from "../../app/models/registrationEvent";
 import { RegistrationLink } from "../../app/models/registrationLink";
 import { RegistrationEventWebsite } from "../../app/models/registrationEventWebsite";
@@ -105,7 +105,6 @@ function formatDate(date : Date) {
             if(customQuestionData && customQuestionData.length) setCustomQuestions(customQuestionData);
             const registrationData : Registration = await agent.EmailLinks.getRegistration(decodedKey)
             setRegistration(registrationData);
-            console.log(registrationData);
           } catch (error: any) {
             console.log(error);
             if (error && error.message) {
@@ -125,7 +124,17 @@ function formatDate(date : Date) {
       let formHasError =
        !registration.firstName || !registration.firstName.trim() ||
        !registration.lastName || !registration.lastName.trim() ||
-       !registration.phone || !registration.phone.trim()
+       !registration.phone || !registration.phone.trim();
+
+       const customQuestionsErrors = customQuestions.some(question => 
+        question.required &&
+        (!registration.answers?.find(x => x.customQuestionId === question.id)?.answerText ||
+         !registration.answers?.find(x => x.customQuestionId === question.id)?.answerText.trim())
+      );
+
+      formHasError = formHasError || customQuestionsErrors;
+
+
        if(!formHasError){
          try{
            setSaving(true);
@@ -151,6 +160,31 @@ function formatDate(date : Date) {
       const { name, value } = e.target;
       setRegistration({ ...registration, [name]: value });
   };
+
+    const handleCustomInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const { name, value } = e.target;
+      const updatedRegistration = { ...registration };
+      if (updatedRegistration.answers) {
+        const answerIndex = updatedRegistration.answers.findIndex(answer => answer.customQuestionId === name);
+        if (answerIndex !== -1) {
+          updatedRegistration.answers[answerIndex] = { ...updatedRegistration.answers[answerIndex], answerText: value };
+          setRegistration(updatedRegistration);
+        }
+      }
+    }
+
+    const handleCustomSelectChange = (e: React.SyntheticEvent<HTMLElement>, data: DropdownProps ) =>{
+      const name = data.name as string;
+      const value = data.value ?? '';
+      const updatedRegistration = { ...registration };
+      if (updatedRegistration.answers) {
+        const answerIndex = updatedRegistration.answers.findIndex(answer => answer.customQuestionId === name);
+        if (answerIndex !== -1) {
+          updatedRegistration.answers[answerIndex] = { ...updatedRegistration.answers[answerIndex], answerText: value as string };
+          setRegistration(updatedRegistration);
+        }
+      }
+    }
 
 
 
@@ -236,14 +270,26 @@ function formatDate(date : Date) {
             onChange={handleInputChange} />
         </FormField>
         {customQuestions.sort((a, b) => a.index - b.index).map((question) => (
-          <FormField key={question.id} required={question.required}>
+          <FormField key={question.id} required={question.required}
+          error={formisDirty && question.required &&
+             (!registration.answers?.find(x => x.customQuestionId === question.id)?.answerText ||
+              !registration.answers?.find(x => x.customQuestionId === question.id)?.answerText.trim()) 
+             }
+          >
             <label>{question.questionText}</label>
-            {question.questionType === QuestionType.TextInput && <Input value={''}/>}
+            {question.questionType === QuestionType.TextInput &&
+             <Input value={registration.answers?.find(x => x.customQuestionId === question.id)?.answerText} 
+              name={question.id}
+              onChange={handleCustomInputChange }/>
+             }
             {question.questionType === QuestionType.Choice &&
              <Select
+             name={question.id}
+             value={registration.answers?.find(x => x.customQuestionId === question.id)?.answerText || ''}
              search
              clearable
              placeholder='Select an option'
+             onChange={(e, data) => handleCustomSelectChange(e, data)}
              options={ question.options
                 ? question.options
                     .sort((a, b) => a.index - b.index)
