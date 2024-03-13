@@ -15,6 +15,11 @@ import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
 import { QuestionType } from "../../app/models/questionType";
 import { useStore } from '../../app/stores/store';
 import { Registration } from "../../app/models/registration";
+import { convertToRaw } from 'draft-js';
+import { stateToHTML } from 'draft-js-export-html';
+import { RegistrationWithHTMLContent } from "../../app/models/registrationWithHTMLContent";
+
+
 
 function formatDate(date : Date) {
   return new Date(date).toLocaleDateString('en-US', {
@@ -24,7 +29,7 @@ function formatDate(date : Date) {
   });
 }
 
-export default observer(function RegisterForEvents() {
+export default observer(function RegisterForEvent() {
   const { userStore, responsiveStore } = useStore();
   const {isMobile} = responsiveStore
   const { user, logout } = userStore;
@@ -173,7 +178,8 @@ export default observer(function RegisterForEvents() {
     let formHasError =
      !registration.firstName || !registration.firstName.trim() ||
      !registration.lastName || !registration.lastName.trim() ||
-     !registration.phone || !registration.phone.trim();
+     !registration.phone || !registration.phone.trim() ||
+     !registration.email || !registration.email.trim() || !isValidEmail(registration.email);
 
      const customQuestionsErrors = customQuestions.some(question => 
       question.required &&
@@ -187,7 +193,10 @@ export default observer(function RegisterForEvents() {
      if(!formHasError){
        try{
          setSaving(true);
-         await agent.Registrations.createUpdateRegistration(registration)
+         const contentState = editorState.getCurrentContent();
+        const hcontent = stateToHTML(contentState);
+        const registrationWithHTMLContent : RegistrationWithHTMLContent = {...registration, hcontent}
+         await agent.Registrations.createUpdateRegistration(registrationWithHTMLContent);
         } catch (error: any) {
           console.log(error);
           if (error && error.message) {
@@ -201,6 +210,12 @@ export default observer(function RegisterForEvents() {
      }
     }
   }
+
+  const isValidEmail = (email : string) => {
+    const emailRegex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@(([^<>()[\]\\.,;:\s@"]+\.)+[^<>()[\]\\.,;:\s@"]{2,})$/i;
+    return emailRegex.test(email);
+  };
+  
 
     if (loading || loading2) return <LoadingComponent content="Loading Data..."/>
     return (
@@ -271,10 +286,12 @@ export default observer(function RegisterForEvents() {
             name="lastName"
             onChange={handleInputChange}/>
         </FormField>
-        <FormField required >
-             <label> Email</label>
-            <Input value={registration.email}/>
-       </FormField>
+        <FormField required error={formisDirty && (!registration.email || !registration.email.trim() || !isValidEmail(registration.email) ) } >
+             <label>Email</label>
+            <Input value={registration.email}
+            name="email"
+            onChange={handleInputChange}/>
+        </FormField>
        <FormField required error={formisDirty && (!registration.phone || !registration.phone.trim()) }  >
              <label>Phone</label>
             <Input placeholder='(###) ### - ####' value={registration.phone}

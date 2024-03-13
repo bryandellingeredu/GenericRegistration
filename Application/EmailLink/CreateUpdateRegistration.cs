@@ -1,8 +1,11 @@
 ﻿using Application.Core;
+using Application.Registrations;
 using Domain;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Persistence;
+using System.Text;
 
 
 namespace Application.EmailLink
@@ -18,10 +21,12 @@ namespace Application.EmailLink
         {
             private readonly DataContext _context;
             private readonly EncryptionHelper _encryptionHelper;
-            public Handler(DataContext context, EncryptionHelper encryptionHelper)
+            private readonly IConfiguration _config;
+            public Handler(DataContext context, EncryptionHelper encryptionHelper, IConfiguration config)
             {
                 _context = context;
                 _encryptionHelper = encryptionHelper;
+                _config = config;
             }
 
             public async Task<Result<Unit>> Handle(Command request, CancellationToken cancellationToken)
@@ -56,6 +61,7 @@ namespace Application.EmailLink
                         try
                         {
                             await _context.SaveChangesAsync();
+                            await SendEmail(request.RegistrationDTO);
                             return Result<Unit>.Success(Unit.Value);
                         }
                         catch (Exception ex)
@@ -78,13 +84,74 @@ namespace Application.EmailLink
                         _context.Registrations.Add(newRegistration);
                         var result = await _context.SaveChangesAsync() > 0;
                         if (!result) return Result<Unit>.Failure("Failed to create registration");
+                        await SendEmail(request.RegistrationDTO);
                         return Result<Unit>.Success(Unit.Value);
                     }
 
                 }
                 return Result<Unit>.Failure($"invalid registration link");
 
+               
+            }
+            private async Task SendEmail(RegistrationDTO registration)
+            {
+                Settings s = new Settings();
+                var settings = s.LoadSettings(_config);
+                GraphHelper.InitializeGraph(settings, (info, cancel) => Task.FromResult(0));
+                RegistrationEvent registrationEvent = await _context.RegistrationEvents.FindAsync(registration.RegistrationEventId);
+                string title = $"Thank You for Registering for {registrationEvent.Title}";
+                string body = $"<p>Thank You for Registering for {registrationEvent.Title}</p>";
+                body = body + $"<p>  <strong>Location:</strong> {registrationEvent.Location}</p>";
+                body = body + $"<p><strong>Start:</strong> {registrationEvent.StartDate.ToString("MM/dd/yyyy")}</p>";
+                body = body + $"<p><strong>End:</strong> {registrationEvent.EndDate.ToString("MM/dd/yyyy")}</p><p></p> ";
+                body = body + registration.Hcontent;
+                var icalContent = CreateICalContent(registrationEvent);
+                var icalFileName = "event_invite.ics";
+                try
+                {
+                    await GraphHelper.SendEmail(new[] { registration.Email }, title, body, icalContent, icalFileName);
+                }
+                catch (Exception ex)
+                {
 
+                    throw;
+                }
+            }
+            private string CreateICalContent(RegistrationEvent registrationEvent)
+            {
+                var sb = new StringBuilder();
+
+                sb.AppendLine("BEGIN:VCALENDAR");
+                sb.AppendLine("VERSION:2.0");
+                sb.AppendLine("PRODID:-//hacksw/handcal//NONSGML v1.0//EN");
+                sb.AppendLine("BEGIN:VTIMEZONE");
+                sb.AppendLine("TZID:America/New_York");
+                sb.AppendLine("BEGIN:STANDARD");
+                sb.AppendLine("DTSTART:20201101T020000");
+                sb.AppendLine("RRULE:FREQ=YEARLY;BYMONTH=11;BYDAY=1SU");
+                sb.AppendLine("TZOFFSETFROM:-0400");
+                sb.AppendLine("TZOFFSETTO:-0500");
+                sb.AppendLine("TZNAME:EST");
+                sb.AppendLine("END:STANDARD");
+                sb.AppendLine("BEGIN:DAYLIGHT");
+                sb.AppendLine("DTSTART:20200308T020000");
+                sb.AppendLine("RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=2SU");
+                sb.AppendLine("TZOFFSETFROM:-0500");
+                sb.AppendLine("TZOFFSETTO:-0400");
+                sb.AppendLine("TZNAME:EDT");
+                sb.AppendLine("END:DAYLIGHT");
+                sb.AppendLine("END:VTIMEZONE");
+                sb.AppendLine("BEGIN:VEVENT");
+                sb.AppendLine($"UID:{Guid.NewGuid()}");
+                sb.AppendLine($"DTSTAMP:{DateTime.UtcNow:yyyyMMddTHHmmssZ}");
+                sb.AppendLine($"DTSTART;VALUE=DATE:{registrationEvent.StartDate:yyyyMMdd}");
+                sb.AppendLine($"DTEND;VALUE=DATE:{registrationEvent.EndDate.AddDays(1):yyyyMMdd}");
+                sb.AppendLine($"SUMMARY:{registrationEvent.Title}");
+                sb.AppendLine($"LOCATION:{registrationEvent.Location}");
+                sb.AppendLine("END:VEVENT");
+                sb.AppendLine("END:VCALENDAR");
+
+                return sb.ToString();
             }
         }
     }

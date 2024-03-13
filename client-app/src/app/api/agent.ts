@@ -8,6 +8,7 @@ import { CustomQuestion } from '../models/customQuestion';
 import { EmailLinkDTO } from '../models/emailLinkDTO';
 import { RegistrationLink } from '../models/registrationLink';
 import { registrationDTO } from '../models/registrationDTO';
+import { RegistrationWithHTMLContent } from '../models/registrationWithHTMLContent';
 
 axios.defaults.baseURL = import.meta.env.VITE_API_URL;
 
@@ -66,7 +67,7 @@ const EmailLinks = {
 
 const Registrations = {
     getRegistration: (email: string, registrationEventId: string) => requests.post<Registration>('/Registration/getRegistration',{email, registrationEventId }),
-    createUpdateRegistration: (data: Registration) => requests.post<void>('/Registration/createUpdateRegistration', data)
+    createUpdateRegistration: (data: RegistrationWithHTMLContent) => requests.post<void>('/Registration/createUpdateRegistration', data)
 }
 
 const agent = {

@@ -9,6 +9,7 @@ namespace Application.EmailLink
 {
     public class RegistrationDTO : Registration
     {
-        public string DecodedKey {  get; set; } 
+        public string DecodedKey {  get; set; }
+        public string Hcontent { get; set; }    
     }
 }

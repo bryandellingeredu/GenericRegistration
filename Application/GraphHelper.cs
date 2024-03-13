@@ -43,7 +43,7 @@ namespace Application
             }
         }
 
-        public static async Task SendEmail(string[] emails, string subject, string body)
+        public static async Task SendEmail(string[] emails, string subject, string body, string icalContent = null, string icalFileName = "invite.ics")
         {
             EnsureGraphForAppOnlyAuth();
             _ = _appClient ?? throw new System.NullReferenceException("Graph has not been initialized for app-only auth");
@@ -64,6 +64,27 @@ namespace Application
                 ToRecipients = recipients,
             };
 
+            // Check if iCal content is provided and prepare it as an attachment
+            if (!string.IsNullOrEmpty(icalContent))
+            {
+                byte[] icalBytes = Encoding.UTF8.GetBytes(icalContent);
+                var icalAttachment = new FileAttachment
+                {
+                    // ODataType might not be necessary depending on your Graph SDK version
+                    // ODataType = "#microsoft.graph.fileAttachment",
+                    ContentBytes = icalBytes,
+                    ContentType = "text/calendar",
+                    Name = icalFileName
+                };
+
+                // Initialize the Attachments collection if it's null
+                if (message.Attachments == null)
+                {
+                    message.Attachments = new List<Attachment>();
+                }
+
+                message.Attachments.Add(icalAttachment);
+            }
 
 
             Microsoft.Graph.Users.Item.SendMail.SendMailPostRequestBody mailbody = new()

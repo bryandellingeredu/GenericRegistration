@@ -18,6 +18,7 @@ namespace Application.Registrations
         public class Command : IRequest<Result<Registration>>
         {
             public GetRegistrationDTO GetRegistrationDTO { get; set; }
+            public string Email { get; set; }
         }
 
         public class Handler : IRequestHandler<Command, Result<Registration>>
@@ -31,7 +32,7 @@ namespace Application.Registrations
             public async Task<Result<Registration>> Handle(Command request, CancellationToken cancellationToken)
             {
                 var registration = await _context.Registrations.Include(x => x.Answers)
-                .Where(x => x.Email == request.GetRegistrationDTO.Email)
+                .Where(x => x.UserEmail == request.Email)
                        .Where(x => x.RegistrationEventId == request.GetRegistrationDTO.RegistrationEventId)
                        .FirstOrDefaultAsync();
                 if (registration != null)
@@ -59,7 +60,7 @@ namespace Application.Registrations
                     Registration newRegistration = new Registration();
                     newRegistration.Id = registrationId;
                     newRegistration.RegistrationEventId = request.GetRegistrationDTO.RegistrationEventId;
-                    newRegistration.Email = request.GetRegistrationDTO.Email;
+                    newRegistration.Email = request.Email;
                     newRegistration.Answers = answers;
                     return Result<Registration>.Success(newRegistration);
                 }

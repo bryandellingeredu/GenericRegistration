@@ -16,6 +16,7 @@ import { RegistrationEventWebsite } from "../../app/models/registrationEventWebs
 import { CustomQuestion } from "../../app/models/customQuestion";
 import { Registration } from "../../app/models/registration";
 import { registrationDTO } from "../../app/models/registrationDTO";
+import { stateToHTML } from "draft-js-export-html";
 
 const query = new URLSearchParams(location.search);
 function formatDate(date : Date) {
@@ -139,7 +140,9 @@ function formatDate(date : Date) {
          try{
            setSaving(true);
            const decodedKey = decodeURIComponent(encryptedKey!);
-           const registrationDTO : registrationDTO = {decodedKey, ...registration }
+           const contentState = editorState.getCurrentContent();
+           const hcontent = stateToHTML(contentState);
+           const registrationDTO : registrationDTO = {decodedKey, hcontent, ...registration }
            debugger;
            await agent.EmailLinks.createUpdateRegistration(registrationDTO)
           } catch (error: any) {
