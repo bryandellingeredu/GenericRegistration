@@ -55,6 +55,7 @@ namespace Application.Registrations
                     {
                         await _context.SaveChangesAsync();
                         await SendEmail(request.Registration);
+                        await SendEmailToEventOwner(request.Registration);  
                         return Result<Unit>.Success(Unit.Value);
                     }
                     catch (Exception ex)
@@ -79,7 +80,36 @@ namespace Application.Registrations
                     var result = await _context.SaveChangesAsync() > 0;
                     if (!result) return Result<Unit>.Failure("Failed to create registration");
                     await SendEmail(request.Registration);
+                    await SendEmailToEventOwner(request.Registration);
                     return Result<Unit>.Success(Unit.Value);
+                }
+            }
+
+            private async Task SendEmailToEventOwner(RegistrationWithHTMLContent registration)
+            {
+                Settings s = new Settings();
+                var settings = s.LoadSettings(_config);
+                GraphHelper.InitializeGraph(settings, (info, cancel) => Task.FromResult(0));
+                RegistrationEvent registrationEvent = await _context.RegistrationEvents.FindAsync(registration.RegistrationEventId);
+                List<CustomQuestion> customQuestions = await _context.CustomQuestions.Where(x => x.RegistrationEventId == registration.RegistrationEventId).ToListAsync();
+                string title = $"{registration.FirstName} {registration.LastName} has registered for {registrationEvent.Title}";
+                string body = $"{registration.FirstName} {registration.LastName} has registered for {registrationEvent.Title}";
+                body = body + $"<p><strong>First Name: </strong> {registration.FirstName}</p>";
+                body = body + $"<p><strong>Last Name: </strong> {registration.LastName}</p>";
+                body += $"<p><strong>Email: </strong> <a href='mailto:{registration.Email}'>{registration.Email}</a></p>";
+                body += $"<p><strong>Phone: </strong> <a href='tel:{registration.Phone}'>{registration.Phone}</a></p>";
+                foreach (var question in customQuestions)
+                {
+                    body = body + $"<p><strong>{question.QuestionText}: </strong> {registration.Answers.Where(x => x.CustomQuestionId == question.Id).FirstOrDefault().AnswerText ?? string.Empty}</p>";
+                }
+                try
+                {
+                    await GraphHelper.SendEmail(new[] { registrationEvent.CreatedBy }, title, body);
+                }
+                catch (Exception ex)
+                {
+
+                    throw;
                 }
             }
 
