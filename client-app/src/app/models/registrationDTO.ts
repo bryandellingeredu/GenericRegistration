@@ -12,4 +12,5 @@ export interface registrationDTO {
     phone: string,
     registrationDate: Date
     answers? : Answer[]
+    registered: boolean
 }

@@ -76,6 +76,7 @@ namespace Application.Registrations
                     newRegistration.UserEmail = request.Email;
                     newRegistration.RegistrationDate = DateTime.UtcNow;
                     newRegistration.Answers = request.Registration.Answers;
+                    newRegistration.Registered = true;
                     _context.Registrations.Add(newRegistration);
                     var result = await _context.SaveChangesAsync() > 0;
                     if (!result) return Result<Unit>.Failure("Failed to create registration");

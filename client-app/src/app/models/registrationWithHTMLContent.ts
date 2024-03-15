@@ -10,4 +10,5 @@ export interface RegistrationWithHTMLContent{
     phone: string,
     registrationDate: Date
     answers? : Answer[]
+    registered: boolean
 }

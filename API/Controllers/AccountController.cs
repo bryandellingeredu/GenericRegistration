@@ -2,21 +2,25 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Graph.Models;
+using System.IdentityModel.Tokens.Jwt;
+using System.Net;
 using System.Net.Http.Headers;
 using System.Security.Claims;
 using System.Text.Json;
+using static API.Controllers.AccountController;
+
 
 namespace API.Controllers
 {
-  
     [ApiController]
     [Route("api/[controller]")]
     public class AccountController : ControllerBase
     {
         private readonly UserManager<IdentityUser> _userManager;
         private readonly TokenService _tokenService;
-        public AccountController(
-            UserManager<IdentityUser> userManager, TokenService tokenService)
+
+        public AccountController(UserManager<IdentityUser> userManager, TokenService tokenService)
         {
             _userManager = userManager;
             _tokenService = tokenService;
@@ -24,14 +28,14 @@ namespace API.Controllers
 
         [HttpGet]
         public async Task<ActionResult<UserDTO>> GetCurrentUser()
-            {
-              var user = await _userManager.FindByEmailAsync(User.FindFirstValue(ClaimTypes.Email));
+        {
+            var user = await _userManager.FindByEmailAsync(User.FindFirstValue(ClaimTypes.Email));
 
             UserDTO userDTO = new UserDTO
             {
                 Mail = user.Email,
                 UserName = user.UserName,
-                Token = _tokenService.CreateToken(user, ClaimTypes.GivenName),
+                Token = _tokenService.CreateToken(user, User.FindFirstValue(ClaimTypes.GivenName)),
                 DisplayName = User.FindFirstValue(ClaimTypes.GivenName)
             };
 
@@ -42,55 +46,81 @@ namespace API.Controllers
         [HttpPost("login")]
         public async Task<ActionResult<UserDTO>> Login(GraphTokenDTO graphToken)
         {
-            using (var httpClient = new HttpClient())
+            var handler = new HttpClientHandler()
+            {
+                AllowAutoRedirect = false
+            };
+
+            using (var httpClient = new HttpClient(handler))
             {
                 httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", graphToken.Token);
                 var response = await httpClient.GetAsync("https://graph.microsoft.com/v1.0/me");
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    // Handle error response
-                    return BadRequest("Error fetching user data from Microsoft Graph");
-                }
+                    var h = new JwtSecurityTokenHandler();
+                    var tokenS = h.ReadToken(graphToken.Token) as JwtSecurityToken;
+                    string email = tokenS.Claims.FirstOrDefault(claim => claim.Type == "upn")?.Value;
+                    string displayName = tokenS.Claims.FirstOrDefault(claim => claim.Type == "name")?.Value;
 
-                var content = await response.Content.ReadAsStringAsync();
-                var graphUser = JsonSerializer.Deserialize<GraphUser>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-
-                if (graphUser == null)
-                {
-                    // Handle deserialization failure
-                    return BadRequest("Error parsing user data");
-                }
-
-                var user = await _userManager.FindByEmailAsync(graphUser.Mail);
-
-                if (user == null)
-                {
-                    // User not found, create a new one
-                    user = new IdentityUser
+                    IdentityUser user = await _userManager.FindByEmailAsync(email);
+                    if (user == null)
                     {
-                        UserName = graphUser.Mail, // Or another unique identifier
-                        Email = graphUser.Mail,
-                        
-                    };
-                    var result = await _userManager.CreateAsync(user);
-
-                    if (!result.Succeeded)
-                    {
-                        // Handle the case where user creation failed
-                        return BadRequest("User creation failed");
+                        user = new IdentityUser
+                        {
+                            UserName = email,
+                            Email = email,
+                        };
+                        var result = await _userManager.CreateAsync(user);
+                        if (!result.Succeeded)
+                        {
+                            return BadRequest("User creation failed");
+                        }
                     }
 
+                    UserDTO userDTO = new UserDTO
+                    {
+                        Mail = user.Email,
+                        UserName = user.UserName,
+                        Token = _tokenService.CreateToken(user, displayName),
+                        DisplayName = displayName
+                    };
+                    return Ok(userDTO);
                 }
+                else
+                {
+                    var content = await response.Content.ReadAsStringAsync();
+                    var graphUser = JsonSerializer.Deserialize<GraphUser>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
-                // If this point is reached, user is either found or created successfully
-                UserDTO userDTO = new UserDTO {
-                    Mail = user.Email,
-                    UserName = user.UserName,
-                    Token = _tokenService.CreateToken(user, graphUser.DisplayName),
-                    DisplayName = graphUser.DisplayName
-                };
-                return Ok(userDTO);
+                    if (graphUser == null)
+                    {
+                        return BadRequest("Error parsing user data");
+                    }
+
+                    IdentityUser user = await _userManager.FindByEmailAsync(graphUser.Mail);
+                    if (user == null)
+                    {
+                        user = new IdentityUser
+                        {
+                            UserName = graphUser.Mail,
+                            Email = graphUser.Mail,
+                        };
+                        var result = await _userManager.CreateAsync(user);
+                        if (!result.Succeeded)
+                        {
+                            return BadRequest("User creation failed");
+                        }
+                    }
+
+                    UserDTO userDTO = new UserDTO
+                    {
+                        Mail = user.Email,
+                        UserName = user.UserName,
+                        Token = _tokenService.CreateToken(user, graphUser.DisplayName),
+                        DisplayName = graphUser.DisplayName
+                    };
+                    return Ok(userDTO);
+                }
             }
         }
     }
@@ -105,24 +135,14 @@ namespace API.Controllers
         public string Mail { get; set; }
         public string UserName { get; set; }
         public string Token { get; set; }
-        public string DisplayName { get; set; } 
+        public string DisplayName { get; set; }
     }
 
     public class GraphUser
     {
-        // The primary email address of the user.
-        // The exact name of the property might vary based on the Graph API response.
-        // Commonly, it can be "mail" or "userPrincipalName" depending on the user type and settings.
         public string Mail { get; set; }
-
-        // The user's display name.
         public string DisplayName { get; set; }
-
-        // The unique identifier for the user.
         public string Id { get; set; }
-
-        // Additional properties as needed...
     }
 }
-    
 

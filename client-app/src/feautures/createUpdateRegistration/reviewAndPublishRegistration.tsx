@@ -10,6 +10,7 @@ import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
 import { QuestionType } from '../../app/models/questionType';
 import { toast } from 'react-toastify';
 import { useNavigate } from "react-router-dom";
+import QRCode from 'qrcode';
 
 interface Props{
    registrationEvent: RegistrationEvent
@@ -73,6 +74,26 @@ export default observer(function ReviewAndPublishRegistration(
         });
       };
 
+      const downloadQRCode = (): void => {
+        const websiteUrl = `${baseUrl}/registerforevent/${registrationEventId}`;
+      
+        QRCode.toDataURL(websiteUrl, { width: 300, margin: 2 }, (err: Error | null | undefined, url: string) => {
+          if (err) {
+            toast.error(`Could not generate QR code: ${err.message}`);
+            return;
+          }
+      
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = `${registrationEvent.title.replace(/\s+/g, '_')}_QRCode.png`;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+      
+          toast.success("QR code downloaded!");
+        });
+      };
+
     return (
         <>
         <Message info >
@@ -95,6 +116,7 @@ export default observer(function ReviewAndPublishRegistration(
              <a href={`${baseUrl}/registerforevent/${registrationEventId}`}><strong>{` ${baseUrl}/registerforevent/${registrationEventId}`}</strong></a>
              <Button basic color='blue' size='tiny' content='copy registration link to clipboard' style={{marginLeft: '5px'}} onClick={copyLink} />
            </p>
+           <p>To create and download a QR Code   <Button basic color='blue' size='tiny' content='create QR Code' style={{marginLeft: '5px'}} onClick={downloadQRCode} /></p>
            <p> To make changes to your website go back to the <Button basic color='blue' size='tiny' onClick={setActiveStep}>Design Screen</Button>.</p>
            <p><Button basic color='blue' size='tiny' content='Unpublish' onClick={unPublish} loading={publishing}/> your event to stop users from registering</p>
            
@@ -197,8 +219,9 @@ export default observer(function ReviewAndPublishRegistration(
         <Button size='huge' primary content='Publish Web Page' onClick={publish} loading={publishing} style={{marginRight: '40px'}} floated='right'/> }
        {registrationEvent.published && 
        <ButtonGroup size='huge' floated='right' style={{marginRight: '40px'}} >
-        <Button  primary content='copy registration link to clipboard' floated='right' onClick={copyLink} />
-        <Button  secondary primary content='Go to your events'  floated='right' onClick={() => navigate('/myregistrations')} />
+        <Button  primary content='Copy Registration Link to Clipboard' floated='right' onClick={copyLink} />
+        <Button  color='teal' content='Create QR Code' floated='right' onClick={downloadQRCode} />
+        <Button  secondary primary content='Go to Your Events'  floated='right' onClick={() => navigate('/myregistrations')} />
         </ButtonGroup>
        }
         </>

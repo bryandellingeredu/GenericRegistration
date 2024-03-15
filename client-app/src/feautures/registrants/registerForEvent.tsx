@@ -18,6 +18,7 @@ import { Registration } from "../../app/models/registration";
 import { convertToRaw } from 'draft-js';
 import { stateToHTML } from 'draft-js-export-html';
 import { RegistrationWithHTMLContent } from "../../app/models/registrationWithHTMLContent";
+import { useNavigate } from "react-router-dom";
 
 
 
@@ -30,6 +31,7 @@ function formatDate(date : Date) {
 }
 
 export default observer(function RegisterForEvent() {
+  const navigate = useNavigate();
   const { userStore, responsiveStore } = useStore();
   const {isMobile} = responsiveStore
   const { user, logout } = userStore;
@@ -54,6 +56,7 @@ export default observer(function RegisterForEvent() {
       email: '',
       phone: '',
       registrationDate: new Date(),
+      registered: false,
       }
     )
     const [formisDirty, setFormisDirty] = useState(false);
@@ -197,6 +200,7 @@ export default observer(function RegisterForEvent() {
         const hcontent = stateToHTML(contentState);
         const registrationWithHTMLContent : RegistrationWithHTMLContent = {...registration, hcontent}
          await agent.Registrations.createUpdateRegistration(registrationWithHTMLContent);
+         navigate(`/thankyouforregistering/${id}`);
         } catch (error: any) {
           console.log(error);
           if (error && error.message) {
@@ -331,7 +335,10 @@ export default observer(function RegisterForEvent() {
             }
           </FormField>
             ))}
-            <Button type='submit' size='huge' primary floated="right" content='Register' loading={saving} />
+          {registration.registered && 
+            <Button type='button' size='huge' color='red' floated="right" content='Cancel Registration'  />
+            }
+            <Button type='submit' size='huge' primary floated="right" content={registration.registered ? 'Update Registration': 'Register'} loading={saving} />
         </Form>
         </Grid.Column> }
         {!user && <Grid.Column width={8}>

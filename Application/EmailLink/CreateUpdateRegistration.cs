@@ -81,6 +81,7 @@ namespace Application.EmailLink
                         newRegistration.Phone = request.RegistrationDTO.Phone;
                         newRegistration.Email = request.RegistrationDTO.Email;
                         newRegistration.RegistrationDate = DateTime.UtcNow;
+                        newRegistration.Registered = true;
                         newRegistration.Answers = request.RegistrationDTO.Answers;
                         _context.Registrations.Add(newRegistration);
                         var result = await _context.SaveChangesAsync() > 0;

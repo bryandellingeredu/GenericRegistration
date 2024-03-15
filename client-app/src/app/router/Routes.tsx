@@ -9,6 +9,8 @@ import RegisterForEvent from "../../feautures/registrants/registerForEvent";
 import CreateUpdateRegistration from "../../feautures/createUpdateRegistration/createUpdateRegistration";
 import SendEmailLink from "../../feautures/home/SendEmailLink";
 import RegisterFromLink from "../../feautures/registrants/registerFromLink";
+import ThankYouForRegistering from "../../feautures/registrants/thankYouForRegistering";
+import ThankYouForRegisteringFromLink from "../../feautures/registrants/thankYouForRegisteringFromLink";
 
 
 export const routes: RouteObject[] = [
@@ -27,6 +29,8 @@ export const routes: RouteObject[] = [
             { path: 'registerforevent/:id', element: <RegisterForEvent /> },
             { path: 'sendemaillink/:id', element: <SendEmailLink /> },
             { path: 'registerfromlink', element: <RegisterFromLink /> },
+            { path: 'thankyouforregistering/:id', element: <ThankYouForRegistering /> },
+            { path: 'thankyouforregisteringfromlink/:encryptedKey', element: <ThankYouForRegisteringFromLink /> },
         ]
     }
 ];

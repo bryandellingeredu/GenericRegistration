@@ -17,6 +17,7 @@ import { CustomQuestion } from "../../app/models/customQuestion";
 import { Registration } from "../../app/models/registration";
 import { registrationDTO } from "../../app/models/registrationDTO";
 import { stateToHTML } from "draft-js-export-html";
+import { useNavigate } from "react-router-dom";
 
 const query = new URLSearchParams(location.search);
 function formatDate(date : Date) {
@@ -28,6 +29,7 @@ function formatDate(date : Date) {
   }
 
   export default observer(function RegisterFromLink() {
+    const navigate = useNavigate();
     const [formisDirty, setFormisDirty] = useState(false);
     const [editorState, setEditorState] = useState(() => EditorState.createEmpty());
     const encryptedKey = query.get('key');
@@ -55,6 +57,7 @@ function formatDate(date : Date) {
       email: '',
       phone: '',
       registrationDate: new Date(),
+      registered: false
       }
     )
     const [customQuestions, setCustomQuestions] = useState<CustomQuestion[]>([]);
@@ -143,8 +146,8 @@ function formatDate(date : Date) {
            const contentState = editorState.getCurrentContent();
            const hcontent = stateToHTML(contentState);
            const registrationDTO : registrationDTO = {decodedKey, hcontent, ...registration }
-           debugger;
-           await agent.EmailLinks.createUpdateRegistration(registrationDTO)
+           await agent.EmailLinks.createUpdateRegistration(registrationDTO);
+           navigate(`/thankyouforregistering/${registration.id}/encryptedKey!`);
           } catch (error: any) {
             console.log(error);
             if (error && error.message) {
@@ -306,7 +309,10 @@ function formatDate(date : Date) {
             }
           </FormField>
             ))}
-            <Button type='submit' size='huge' primary floated="right" content='Register' loading={saving} />
+            {registration.registered && 
+            <Button type='button' size='huge' color='red' floated="right" content='Cancel Registration'  />
+            }
+            <Button type='submit' size='huge' primary floated="right" content={registration.registered ? 'Update Registration': 'Register'} loading={saving} />
         </Form>
               </Grid.Column>
               </Grid.Row>

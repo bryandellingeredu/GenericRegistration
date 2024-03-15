@@ -7,6 +7,7 @@ import Confirmation from "../../app/common/modals/Confirmation";
 import { toast } from "react-toastify";
 import { useState } from "react";
 import agent from "../../app/api/agent";
+import QRCode from 'qrcode';
 
 interface Props {
     event: RegistrationEvent
@@ -28,6 +29,26 @@ export default observer (function EventCard({event, removeEvent} : Props) {
       toast.success("Link copied to clipboard!");
     }).catch(err => {
       toast.error('Could not copy link: ', err);
+    });
+  };
+
+  const downloadQRCode = (): void => {
+    const websiteUrl = `${baseUrl}/registerforevent/${event.id}`;
+  
+    QRCode.toDataURL(websiteUrl, { width: 300, margin: 2 }, (err: Error | null | undefined, url: string) => {
+      if (err) {
+        toast.error(`Could not generate QR code: ${err.message}`);
+        return;
+      }
+  
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${event.title.replace(/\s+/g, '_')}_QRCode.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+  
+      toast.success("QR code downloaded!");
     });
   };
 
@@ -109,7 +130,7 @@ export default observer (function EventCard({event, removeEvent} : Props) {
         </CardContent>
         <CardContent extra>
         {event.published && 
-          <div className='ui three buttons'>
+          <div className='ui four buttons'>
             <Button basic color='green'
             onClick={() => navigate(`/editregistration/${event.id}`)}>
               Edit
@@ -117,6 +138,10 @@ export default observer (function EventCard({event, removeEvent} : Props) {
             <Button basic color='teal'
             onClick={copyLink}>
               Copy Link To Clipboard
+            </Button>
+            <Button basic color='orange'
+            onClick={downloadQRCode}>
+              Create QR Code
             </Button>
             <Button basic color='red' onClick={handleDeleteClick} loading={deleting}>
               Delete

@@ -62,7 +62,7 @@ export default observer (function MyRegistrations() {
                         <Icon name='add' /> Create New Event
                     </Button>
                 </div>
-                <CardGroup itemsPerRow={3} style={{padding: '40px'}}>
+                <CardGroup itemsPerRow={2} style={{padding: '40px'}}>
                     {registrationEvents.map((event) => (
                         <EventCard key={event.id} event={event} removeEvent={handleRemoveRegistrationEvent}/>
                     ))}

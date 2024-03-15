@@ -9,4 +9,5 @@ export interface Registration{
     phone: string,
     registrationDate: Date
     answers? : Answer[]
+    registered: boolean
 }

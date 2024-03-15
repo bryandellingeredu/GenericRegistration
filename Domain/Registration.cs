@@ -10,6 +10,7 @@ namespace Domain
         public string Email {get; set;}
         public string UserEmail {get; set;}
         public string Phone {get; set;}
+        public bool Registered {get; set;}
         public DateTime RegistrationDate {get; set;}
 
         public Guid RegistrationEventId { get; set;}
