@@ -97,6 +97,7 @@ function formatDate(date : Date) {
         try{
             setValidating(true);
             await agent.EmailLinks.validate(decodedKey);
+            setValidating(false);
             setValidated(true);
             setLoading(true);
             const registrationEvent : RegistrationEvent = await agent.EmailLinks.getRegistrationEvent(decodedKey);
@@ -147,7 +148,7 @@ function formatDate(date : Date) {
            const hcontent = stateToHTML(contentState);
            const registrationDTO : registrationDTO = {decodedKey, hcontent, ...registration }
            await agent.EmailLinks.createUpdateRegistration(registrationDTO);
-           navigate(`/thankyouforregistering/${registration.id}/encryptedKey!`);
+           navigate(`/thankyouforregisteringfromlink/${encryptedKey}`);
           } catch (error: any) {
             console.log(error);
             if (error && error.message) {

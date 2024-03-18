@@ -6,9 +6,10 @@ import { observer } from 'mobx-react-lite';
 import { NavLink, useNavigate} from 'react-router-dom';
 
 export default observer(function RegistrantNavbar() {
-    const { responsiveStore } = useStore();
+    const { responsiveStore, userStore } = useStore();
     const {isMobile} = responsiveStore
     const [sidebarVisible, setSidebarVisible] = useState(false);
+    const { logout, user } = userStore;
 
 
     return (
@@ -22,6 +23,15 @@ export default observer(function RegistrantNavbar() {
             <Menu.Item style={{ flexGrow: 1, justifyContent: 'center', display: 'flex' }}>
               <ArmyLogo content='REGISTRATION PORTAL' size="1em" textColor="#FFF" outerStarColor="yellow" innerStarColor="grey" />
             </Menu.Item>
+            {user && 
+            <Menu.Item style={{ flexShrink: 0 }}>
+              <Dropdown trigger={<><Icon name="user" /> {user?.displayName}</>}>
+                <Dropdown.Menu>
+                  <Dropdown.Item icon="power" text="Logout" onClick={logout} />
+                </Dropdown.Menu>
+              </Dropdown>
+            </Menu.Item>
+           }
           </Menu>
           <Sidebar
             as={Menu}
@@ -45,6 +55,15 @@ export default observer(function RegistrantNavbar() {
               <ArmyLogo content='REGISTRATION PORTAL' size="1.7em" textColor="#FFF" outerStarColor="yellow" innerStarColor="grey" />
             </Menu.Item>
             <Menu.Item as={NavLink} to='/viewallevents'>View All Events</Menu.Item>
+            {user && 
+            <Menu.Item position="right">
+              <Dropdown trigger={<><Icon name="user" /> {user?.displayName}</>}>
+                <Dropdown.Menu>
+                  <Dropdown.Item icon="power" text="Logout" onClick={logout} />
+                </Dropdown.Menu>
+              </Dropdown>
+            </Menu.Item>
+           }
           </Menu>
         </div>
       )}
