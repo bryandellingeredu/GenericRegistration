@@ -336,7 +336,7 @@ export default observer(function RegisterForEvent() {
           </FormField>
             ))}
           {registration.registered && 
-            <Button type='button' size='huge' color='red' floated="right" content='Cancel Registration' onClick={() => navigate(`/deregisterforevent/${id}`)}  />
+            <Button type='button' size='huge' color='red' floated="right" content='Cancel Registration' onClick={() => navigate(`/deregisterforevent/${registration.id}`)}  />
             }
             <Button type='submit' size='huge' primary floated="right" content={registration.registered ? 'Update Registration': 'Register'} loading={saving} />
         </Form>

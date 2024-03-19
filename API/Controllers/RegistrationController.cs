@@ -21,5 +21,8 @@ namespace API.Controllers
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(Guid id) => HandleResult(await Mediator.Send(new Delete.Command { Id = id }));
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> Details(Guid id) => HandleResult(await Mediator.Send(new Details.Query { Id = id }));
     }
 }

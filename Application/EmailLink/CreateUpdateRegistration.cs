@@ -4,6 +4,7 @@ using Domain;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Graph.Models;
 using Persistence;
 using System.Text;
 
@@ -61,8 +62,8 @@ namespace Application.EmailLink
                         try
                         {
                             await _context.SaveChangesAsync();
-                            await SendEmail(request.RegistrationDTO);
-                            await SendEmailToEventOwner(request.RegistrationDTO);
+                            await SendEmail(request.RegistrationDTO, "Updated", request.RegistrationDTO.DecodedKey);
+                            await SendEmailToEventOwner(request.RegistrationDTO, "Updated");
                             return Result<Unit>.Success(Unit.Value);
                         }
                         catch (Exception ex)
@@ -86,8 +87,8 @@ namespace Application.EmailLink
                         _context.Registrations.Add(newRegistration);
                         var result = await _context.SaveChangesAsync() > 0;
                         if (!result) return Result<Unit>.Failure("Failed to create registration");
-                        await SendEmail(request.RegistrationDTO);
-                        await SendEmailToEventOwner(request.RegistrationDTO);
+                        await SendEmail(request.RegistrationDTO, "New", request.RegistrationDTO.DecodedKey);
+                        await SendEmailToEventOwner(request.RegistrationDTO, "New");
                         return Result<Unit>.Success(Unit.Value);
                     }
 
@@ -97,15 +98,15 @@ namespace Application.EmailLink
                
             }
 
-            private async Task SendEmailToEventOwner(RegistrationDTO registration)
+            private async Task SendEmailToEventOwner(RegistrationDTO registration, string status)
             {
                 Settings s = new Settings();
                 var settings = s.LoadSettings(_config);
                 GraphHelper.InitializeGraph(settings, (info, cancel) => Task.FromResult(0));
                 RegistrationEvent registrationEvent = await _context.RegistrationEvents.FindAsync(registration.RegistrationEventId);
                 List<CustomQuestion> customQuestions = await _context.CustomQuestions.Where(x => x.RegistrationEventId == registration.RegistrationEventId).ToListAsync();
-                string title = $"{registration.FirstName} {registration.LastName} has registered for {registrationEvent.Title}";
-                string body = $"{registration.FirstName} {registration.LastName} has registered for {registrationEvent.Title}";
+                string title = $"{registration.FirstName} {registration.LastName} has {(status == "New" ? "registered" : "updated their registration")} for {registrationEvent.Title}";
+                string body = $"{registration.FirstName} {registration.LastName} has {(status == "New" ? "registered" : "updated their registration")} for {registrationEvent.Title}";
                 body = body + $"<p><strong>First Name: </strong> {registration.FirstName}</p>";
                 body = body + $"<p><strong>Last Name: </strong> {registration.LastName}</p>";
                 body += $"<p><strong>Email: </strong> <a href='mailto:{registration.Email}'>{registration.Email}</a></p>";
@@ -124,17 +125,22 @@ namespace Application.EmailLink
                     throw;
                 }
             }
-            private async Task SendEmail(RegistrationDTO registration)
+            private async Task SendEmail(RegistrationDTO registration, string status, string encryptedKey)
             {
                 Settings s = new Settings();
                 var settings = s.LoadSettings(_config);
                 GraphHelper.InitializeGraph(settings, (info, cancel) => Task.FromResult(0));
                 RegistrationEvent registrationEvent = await _context.RegistrationEvents.FindAsync(registration.RegistrationEventId);
-                string title = $"Thank You for Registering for {registrationEvent.Title}";
+                var urlEncodedEncryptedKey = Uri.EscapeDataString(encryptedKey);
+                var registrationLinkUrl = $"{settings.BaseUrl}/registerfromlink?key={urlEncodedEncryptedKey}";
+                var cancelRegistrationUrl = $"{settings.BaseUrl}/deregisterforeventfromlink/{urlEncodedEncryptedKey}";
+                string title = $"Thank you for {(status == "New" ? "registering" : "updating your registration")} for {registrationEvent.Title}";
                 string body = $"<p>Thank You for Registering for {registrationEvent.Title}</p>";
                 body = body + $"<p>  <strong>Location:</strong> {registrationEvent.Location}</p>";
                 body = body + $"<p><strong>Start:</strong> {registrationEvent.StartDate.ToString("MM/dd/yyyy")}</p>";
                 body = body + $"<p><strong>End:</strong> {registrationEvent.EndDate.ToString("MM/dd/yyyy")}</p><p></p> ";
+                body = body + $"<p> To make changes to your answers you may <a href={registrationLinkUrl}> Update Your Registration </a></p>";
+                body = body + $"<p> If you are no longer able to attend you may <a href={cancelRegistrationUrl}> Cancel Your Registration </a></p><p></p> ";
                 body = body + registration.Hcontent;
                 var icalContent = CreateICalContent(registrationEvent);
                 var icalFileName = "event_invite.ics";

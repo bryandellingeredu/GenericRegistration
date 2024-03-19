@@ -105,7 +105,7 @@ return(
 </Segment>
 <Segment color='teal' clearing>
 <ButtonGroup size={isMobile ? 'tiny': 'huge'} floated="right">
-   <Button type='button' primary content='Update Registration' onClick={() => navigate(`/registerfromlink?key=${encodeURIComponent(encryptedKey!)}`)} />
+   <Button type='button' primary content='Back To Registration' onClick={() => navigate(`/registerfromlink?key=${encodeURIComponent(encryptedKey!)}`)} />
    <Button type='button' secondary content='View Events' onClick={() => navigate('/viewallevents')} />
 </ButtonGroup>
 </Segment>

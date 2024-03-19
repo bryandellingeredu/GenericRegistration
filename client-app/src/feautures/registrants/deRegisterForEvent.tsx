@@ -65,10 +65,11 @@ export default observer(function DeRegisterForEvent() {
       const getData = async () => {
         setLoading(true);
         try{
-            const registrationEvent : RegistrationEvent = await agent.RegistrationEvents.details(id!);
+          const registrationData : Registration = await agent.Registrations.details(id!);
+          setRegistration(registrationData);
+            const registrationEvent : RegistrationEvent = await agent.RegistrationEvents.details(registrationData.registrationEventId);
             setRegistrationEvent(registrationEvent);
-            const registrationData : Registration = await agent.Registrations.getRegistration(user!.mail, registrationEvent.id);
-            setRegistration(registrationData);
+          
           }catch (error: any) {
           console.log(error);
           if (error && error.message) {
@@ -98,7 +99,7 @@ export default observer(function DeRegisterForEvent() {
         </Segment>
         <Segment clearing color='teal'>
           <ButtonGroup floated="right" size={isMobile ? 'tiny' : 'huge'}>
-             <Button type="button" color='grey' content='Go Back' onClick={() => navigate(`/registerforevent/${id}`)}/>
+             <Button type="button" color='grey' content='Go Back' onClick={() => navigate(`/registerforevent/${registrationEvent.id}`)}/>
              <Button type="button"
               primary content='Cancel My Registration'
               onClick={handleCancelRegistration}
