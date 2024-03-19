@@ -30,7 +30,8 @@ export default observer(function ThankYouForRegisteringFromLink() {
         endDate: new Date(),
         overview: '',
         published: true,
-      });
+      }
+    );
 
       useEffect(() => {
         if(encryptedKey) getData();     
@@ -104,7 +105,7 @@ return(
 </Segment>
 <Segment color='teal' clearing>
 <ButtonGroup size={isMobile ? 'tiny': 'huge'} floated="right">
-   <Button type='button' primary content='Update Registration' onClick={() => navigate(`/registerfromlink?key=${encryptedKey}`)} />
+   <Button type='button' primary content='Update Registration' onClick={() => navigate(`/registerfromlink?key=${encodeURIComponent(encryptedKey!)}`)} />
    <Button type='button' secondary content='View Events' onClick={() => navigate('/viewallevents')} />
 </ButtonGroup>
 </Segment>

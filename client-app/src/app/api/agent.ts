@@ -59,6 +59,7 @@ const Account = {
 const EmailLinks = {
     sendLink: (emailLink: EmailLinkDTO) => requests.post<void>('/EmailLink', emailLink),
     validate: (encryptedKey: string) => requests.post<void>('/EmailLink/validate', {encryptedKey}),
+    delete: (encryptedKey: string) => requests.post<void>('/EmailLink/delete', {encryptedKey}),
     getRegistrationEvent: (encryptedKey: string) => requests.post<RegistrationEvent>('/EmailLink/getRegistrationEvent', {encryptedKey}),
     getRegistrationLink: (encryptedKey: string) => requests.post<RegistrationLink>('/EmailLink/getRegistrationLink', {encryptedKey}),
     getRegistration: (encryptedKey: string) => requests.post<Registration>('/EmailLink/getRegistration', {encryptedKey}),
@@ -67,7 +68,8 @@ const EmailLinks = {
 
 const Registrations = {
     getRegistration: (email: string, registrationEventId: string) => requests.post<Registration>('/Registration/getRegistration',{email, registrationEventId }),
-    createUpdateRegistration: (data: RegistrationWithHTMLContent) => requests.post<void>('/Registration/createUpdateRegistration', data)
+    createUpdateRegistration: (data: RegistrationWithHTMLContent) => requests.post<void>('/Registration/createUpdateRegistration', data),
+    delete: (id: string) => axios.delete<void>(`/Registration/${id}`),
 }
 
 const agent = {

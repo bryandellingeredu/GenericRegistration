@@ -36,5 +36,10 @@ namespace API.Controllers
         public async Task<IActionResult> CreateUpdateRegistration([FromBody] RegistrationDTO registrationDTO) =>
         HandleResult(await Mediator.Send(new CreateUpdateRegistration.Command { RegistrationDTO = registrationDTO }));
 
+        [AllowAnonymous]
+        [HttpPost("delete")]
+        public async Task<IActionResult> Delete([FromBody] ValidateDTO validateDTO) =>
+            HandleResult(await Mediator.Send(new Delete.Command { ValidateDTO = validateDTO }));
+
     }
 }

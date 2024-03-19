@@ -148,7 +148,7 @@ function formatDate(date : Date) {
            const hcontent = stateToHTML(contentState);
            const registrationDTO : registrationDTO = {decodedKey, hcontent, ...registration }
            await agent.EmailLinks.createUpdateRegistration(registrationDTO);
-           navigate(`/thankyouforregisteringfromlink/${encryptedKey}`);
+           navigate(`/thankyouforregisteringfromlink/${encodeURIComponent(encryptedKey!)}`);
           } catch (error: any) {
             console.log(error);
             if (error && error.message) {
@@ -311,7 +311,7 @@ function formatDate(date : Date) {
           </FormField>
             ))}
             {registration.registered && 
-            <Button type='button' size='huge' color='red' floated="right" content='Cancel Registration'  />
+            <Button type='button' size='huge' color='red' floated="right" content='Cancel Registration' onClick={() => navigate(`/deregisterforeventfromlink/${encodeURIComponent(encryptedKey!)}`)}  />
             }
             <Button type='submit' size='huge' primary floated="right" content={registration.registered ? 'Update Registration': 'Register'} loading={saving} />
         </Form>

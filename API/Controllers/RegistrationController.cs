@@ -1,4 +1,5 @@
 ﻿
+
 using Application.Registrations;
 using Domain;
 using Microsoft.AspNetCore.Mvc;
@@ -17,5 +18,8 @@ namespace API.Controllers
         public async Task<IActionResult> CreateUpdateRegistration([FromBody] RegistrationWithHTMLContent registration) =>
             HandleResult(await Mediator.Send(
                 new CreateUpdateRegistration.Command { Registration = registration, Email = User.FindFirstValue(ClaimTypes.Email) }));
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(Guid id) => HandleResult(await Mediator.Send(new Delete.Command { Id = id }));
     }
 }
