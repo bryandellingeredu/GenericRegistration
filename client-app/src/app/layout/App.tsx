@@ -16,7 +16,9 @@ const query = new URLSearchParams(location.search);
 
 useEffect(() => {
   const redirecttopage = query.get('redirecttopage');
+  const loginType = query.get('logintype')
   if(redirecttopage) commonStore.setRedirectToPage(redirecttopage)
+  if(loginType) commonStore.setLoginType(loginType);
   }, [commonStore])
 
 useEffect(() => {

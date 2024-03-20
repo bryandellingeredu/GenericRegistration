@@ -18,41 +18,9 @@ export default class RegistrationStore{
         a.lastName > b.lastName ? 1 : -1);
       }
 
-      loadRegistrations = async () => {
-        this.setRegistrationLoadingInitial(true);
-        try{
-         const registrations = await agent.Registrations.list();
-         registrations.forEach(registration =>{
-            registration.registrationDate = new Date(registration.registrationDate)
-            this.addRegistration(registration);
-         })
-         this.setRegistrationLoadingInitial(false);
-        }
-        catch(error){
-            this.setRegistrationLoadingInitial(false);
-           console.log(error) 
-        }
-      }
 
-      saveRegistration = async (registration: Registration, operation: 'create' | 'update') => {
-        this.setRegistrationLoading(true);
-    
-        try {
-            if (operation === 'create') {
-                registration.id = uuid(); // Assign a new UUID for creation
-                await agent.Registrations.create(registration);
-            } else if (operation === 'update') {
-                await agent.Registrations.update(registration);
-            }
-    
-            this.addRegistration(registration);
-            this.selectRegistration(registration.id);
-        } catch (error) {
-            console.log(error);
-        } finally {
-            this.setRegistrationLoading(false);
-        }
-    }
+
+
 
       deleteRegistration = async (id: string) =>{
         this.setRegistrationLoading(true);

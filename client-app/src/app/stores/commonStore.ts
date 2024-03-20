@@ -5,6 +5,7 @@ export default class CommonStore {
     token: string | null = localStorage.getItem('jwtregistration');
     donotautologin : string | null = localStorage.getItem('donotautologin');
     redirectToPage : string | null = localStorage.getItem('redirectToPage');
+    loginType: string | null = localStorage.getItem('loginType');
 
     appLoaded = false;
 
@@ -42,6 +43,17 @@ export default class CommonStore {
                 }
             }
         )
+
+        reaction(
+            () => this.loginType,
+            (newLoginType) => { 
+                if(newLoginType){
+                    localStorage.setItem('loginType', newLoginType);
+                } else {
+                    localStorage.removeItem('loginType');
+                }
+            }
+        )
   
     }
 
@@ -61,5 +73,9 @@ export default class CommonStore {
 
     setRedirectToPage = (redirectToPage: string | null) => {
         this.redirectToPage = redirectToPage
+    }
+
+    setLoginType = (loginType: string | null) => {
+        this.loginType = loginType
     }
 }

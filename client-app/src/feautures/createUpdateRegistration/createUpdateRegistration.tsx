@@ -15,6 +15,8 @@ import { useNavigate } from "react-router-dom";
 import CreateUpdateRegistrationQuestions from './createUpdateRegistrationQuestions';
 import { CustomQuestion } from '../../app/models/customQuestion';
 import ReviewAndPublishRegistration from './reviewAndPublishRegistration';
+import { RegistrationEventOwner } from '../../app/models/registrationEventOwner';
+import CreateUpdateRegistrationOwners from './createUpdateRegistrationOwners';
 
 export default observer(function CreateUpdateRegistration() {
     const navigate = useNavigate();
@@ -45,10 +47,15 @@ export default observer(function CreateUpdateRegistration() {
     );
     const [registrationEventId, setRegistrationEventId] = useState(uuidv4());
     const [customQuestions, setCustomQuestions] = useState<CustomQuestion[]>([]);
+    const [registrationEventOwners, setRegistrationEventOwners] = useState<RegistrationEventOwner[]>([]);
     const [loading, setLoading] = useState(false);
 
     const handleSetRegistrationEvent = (event: RegistrationEvent) =>{
         setRegistrationEvent(event);
+    }
+
+    const handleSetRegistrationEventOwners = (newRegistrationEventOwners: RegistrationEventOwner[]) =>{
+      setRegistrationEventOwners(newRegistrationEventOwners);
     }
 
     const handleSetContent = (newContent : string) =>{
@@ -63,9 +70,6 @@ export default observer(function CreateUpdateRegistration() {
       setActiveStep('Design');
     }
 
- 
-
-    
 
     useEffect(() => {
         if(id) getRegistrationEvent();     
@@ -86,6 +90,8 @@ export default observer(function CreateUpdateRegistration() {
               if(registrationEventWebsite && registrationEventWebsite) setContent(registrationEventWebsite.content)
               const customQuestionData : CustomQuestion[] = await agent.CustomQuestions.details(id!);
               if(customQuestionData && customQuestionData.length) setCustomQuestions(customQuestionData);
+              const registrationEventOwnersData : RegistrationEventOwner[] = await agent.RegistrationEventOwners.list(id!);
+              if(registrationEventOwnersData && registrationEventOwnersData.length) setRegistrationEventOwners(registrationEventOwnersData);
           }catch (error: any) {
             console.log(error);
             if (error && error.message) {
@@ -197,6 +203,7 @@ export default observer(function CreateUpdateRegistration() {
             await agent.RegistrationEvents.createUpdate(data);
             await agent.RegistrationEventWebsites.createUpdate({registrationEventId, content});
             await agent.CustomQuestions.createUpdate(registrationEventId, customQuestions);
+            await agent.RegistrationEventOwners.createUpdate(registrationEventId, registrationEventOwners);
             toast.success("Save was successful!"); 
             setFormisDirty(false);
             if(!id)  navigate(`/editregistration/${registrationEventId}`)
@@ -257,17 +264,33 @@ export default observer(function CreateUpdateRegistration() {
                           setRegistrationEvent={handleSetRegistrationEvent}
                           formSubmitted={formSubmitted}
                           setFormDirty={handleSetFormDirty}
-         
                          />
                           
                           <Header as='h2' textAlign="center">
                         <Icon name='info' />
                             <Header.Content>
                                 Event Info
-                                <Header.Subheader>Enter information about your event, Overview, Agenda, Speakers etc.</Header.Subheader> {/* Add your subheader text here */}
+                                <Header.Subheader>Enter information about your event, Overview, Agenda, Speakers etc.</Header.Subheader> 
                              </Header.Content>
                         </Header>
                         <CreateUpdateRegistrationInfo content={content} setContent={handleSetContent} setFormDirty={handleSetFormDirty}/>
+
+                        <Header as='h2' textAlign="center">
+                        <Icon name='user plus' />
+                            <Header.Content>
+                                Additional Event Administrators
+                                <Header.Subheader>Enter additional administrators for this event</Header.Subheader> 
+                                <Header.Subheader>Pro Tip! If you logged in with your Edu account add your .Mil account here</Header.Subheader> 
+                             </Header.Content>
+                        </Header>
+                        <CreateUpdateRegistrationOwners
+                        registrationEventOwners={registrationEventOwners}
+                        setRegistrationEventOwners={handleSetRegistrationEventOwners}
+                        registrationEventId={registrationEventId}
+                        setFormDirty={handleSetFormDirty}
+                        
+                         />
+
                         {formisDirty && !savingFromStepClick && 
                         <Button floated='right' color='blue' basic size='huge' loading={saving} onClick={saveForm}> Save Pending Changes</Button>
                         }

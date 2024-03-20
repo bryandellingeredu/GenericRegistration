@@ -17,10 +17,17 @@ namespace Persistence
         public DbSet<RegistrationEventWebsite> RegistrationEventsWebsites { get; set; } 
         public DbSet<RegistrationLink> RegistrationLinks { get; set; }
         public DbSet<Answer> Answers { get; set; }
+        public DbSet<RegistrationEventOwner> RegistrationEventOwners { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder); // Ensure Identity configurations are applied
+
+            modelBuilder.Entity<RegistrationEvent>()
+             .HasMany(e => e.RegistrationEventOwners)
+             .WithOne(q => q.RegistrationEvent)
+             .HasForeignKey(q => q.RegistrationEventId)
+             .OnDelete(DeleteBehavior.Cascade);
 
             // Configuration for RegistrationEvent to CustomQuestions
             modelBuilder.Entity<RegistrationEvent>()

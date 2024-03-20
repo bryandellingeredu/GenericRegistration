@@ -31,7 +31,21 @@ namespace Application.RegistrationEvents
             }
             public async Task<Result<List<RegistrationEvent>>> Handle(Query request, CancellationToken cancellationToken)
             {
-                return Result<List<RegistrationEvent>>.Success(await _context.RegistrationEvents.Where(x => x.CreatedBy == request.Email).ToListAsync(cancellationToken));
+                var result = await _context.RegistrationEvents
+                .Where(x => x.CreatedBy == request.Email || x.RegistrationEventOwners.Any(o => o.Email == request.Email))
+                .Select(x => new RegistrationEvent
+                {
+                    Id = x.Id,
+                    Title = x.Title,
+                    Location = x.Location,
+                    Overview = x.Overview,
+                    StartDate = x.StartDate,
+                    EndDate = x.EndDate,
+                    Published = x.Published,
+                })
+     .ToListAsync();
+
+                return Result<List<RegistrationEvent>>.Success(result);
             }
         }
     }

@@ -11,7 +11,7 @@ export default observer ( function HomePage() {
     const {isLoggedIn} = userStore
     const navigate = useNavigate()
     const {isMobile} = responsiveStore
-    const {redirectToPage, setDoNotAutoLogin, setRedirectToPage} = commonStore;
+    const {redirectToPage, setDoNotAutoLogin, setRedirectToPage, setLoginType} = commonStore;
 
     useEffect(() => {
         // Call the method from the store to handle the redirect
@@ -19,6 +19,7 @@ export default observer ( function HomePage() {
             if (isLoggedIn) {
                 const redirect = redirectToPage;
                 setRedirectToPage(null);
+                setLoginType(null);
                 navigate(`/${redirect}`)
             }else{
                 navigate('/login');

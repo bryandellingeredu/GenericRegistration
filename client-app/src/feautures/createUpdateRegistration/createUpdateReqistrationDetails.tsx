@@ -1,5 +1,4 @@
 import { observer } from "mobx-react-lite";
-import { useEffect, useState } from "react";
 import { RegistrationEvent } from "../../app/models/registrationEvent";
 import { Form, FormField, Input } from "semantic-ui-react";
 import DatePicker from "react-datepicker";
@@ -7,9 +6,9 @@ import "react-datepicker/dist/react-datepicker.css";
 
 interface Props{
     registrationEvent: RegistrationEvent
-    setRegistrationEvent: (event : RegistrationEvent) => void;
-    formSubmitted: boolean,
-    setFormDirty: () => void;
+    setRegistrationEvent: (event : RegistrationEvent) => void
+    formSubmitted: boolean
+    setFormDirty: () => void
 }
 
 export default observer (function CreateUpdateRegistrationDetails(

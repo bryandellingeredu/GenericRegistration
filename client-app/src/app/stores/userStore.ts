@@ -111,6 +111,7 @@ myMSALObj = new PublicClientApplication(this.armyMsalConfig);
         localStorage.clear();
         store.commonStore.setToken(null);
         store.commonStore.setDoNotAutoLogin('true');
+        store.commonStore.setLoginType(null);
         this.user = null;
         router.navigate('/')
     }

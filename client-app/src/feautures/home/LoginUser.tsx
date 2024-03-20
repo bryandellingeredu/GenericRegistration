@@ -16,7 +16,7 @@ export default observer ( function LoginUser() {
     const [isLoggingIn, setIsLoggingIn] = useState(false);
     const {responsiveStore} = useStore();
     const {isMobile} = responsiveStore
-    const {redirectToPage} = commonStore;
+    const {redirectToPage, loginType} = commonStore;
     const navigate = useNavigate();
 
 
@@ -79,37 +79,38 @@ export default observer ( function LoginUser() {
 
  { !isLoggingIn &&  !isMobile &&         
 <Segment color='black'  >
-    <Grid columns={(redirectToPage && redirectToPage.toLocaleLowerCase().includes('registerforevent')) ? 3 : 2 } stackable textAlign='center'>
-      {!redirectToPage && <Divider vertical>Or</Divider>}
+    <Grid 
+    columns={(redirectToPage && redirectToPage.toLocaleLowerCase().includes('registerforevent')) 
+      ? loginType ? 2 : 3
+      : loginType ? 1 : 2 } stackable textAlign='center'>
+      {!redirectToPage && !loginType && <Divider vertical>Or</Divider>}
 
       <Grid.Row verticalAlign='middle'>
+      {(!loginType || loginType === 'EDU') && 
         <Grid.Column>
           <Header icon>
             <Icon name='graduation cap' />
             Login EDU
           </Header>
-
-         <Login  loginCompleted={loginCompleted} loginInitiated={loginInitiated}/>
+            <Login  loginCompleted={loginCompleted} loginInitiated={loginInitiated}/> 
         </Grid.Column>
-
+       }
+          {(!loginType || loginType === 'CAC') && 
         <Grid.Column>
           <Header icon>
             <Icon name='id badge' />
             Login CAC
-          </Header>
-
-          <Button basic onClick={handleLoginCAC}>Sign In</Button>
-     
+          </Header>      
+            <Button basic onClick={handleLoginCAC}>Sign In</Button>
         </Grid.Column>
-       {redirectToPage && redirectToPage.toLocaleLowerCase().includes('registerforevent') &&
+        }
+       {redirectToPage && redirectToPage.toLocaleLowerCase().includes('registerforevent') && !loginType &&
           <Grid.Column>
           <Header icon>
             <Icon name='envelope' />
             Email Link
           </Header>
-
-          <Button basic onClick={handleSendLink}>Send Link</Button>
-     
+          <Button basic onClick={handleSendLink}>Send Link</Button> 
         </Grid.Column>
         }
 
@@ -120,25 +121,26 @@ export default observer ( function LoginUser() {
 
 { !isLoggingIn &&  isMobile && 
  <Segment color='black'  >
-    <Grid columns={(redirectToPage && redirectToPage.toLocaleLowerCase().includes('registerforevent')) ? 2 : 1 } stackable textAlign='center'>
+    <Grid columns={(redirectToPage && redirectToPage.toLocaleLowerCase().includes('registerforevent') && !loginType) ? 2 : 1 } stackable textAlign='center'>
 
 
    <Grid.Row verticalAlign='middle'>
-     <Grid.Column>
+   {(!loginType || loginType === 'EDU') &&
+     <Grid.Column> 
        <Header icon>
          <Icon name='graduation cap' />
          Login EDU
        </Header>
-
       <Login  loginCompleted={loginCompleted} loginInitiated={loginInitiated}/>
      </Grid.Column>
-     {redirectToPage && redirectToPage.toLocaleLowerCase().includes('registerforevent') &&
+    }
+     {redirectToPage && redirectToPage.toLocaleLowerCase().includes('registerforevent') && !loginType &&
           <Grid.Column>
           <Header icon>
             <Icon name='envelope' />
             Email Link
           </Header>
-          <Button basic onClick={handleSendLink}>Send Link</Button>   
+          <Button basic onClick={handleSendLink}>Send Link</Button>  
         </Grid.Column>
         }
    </Grid.Row>

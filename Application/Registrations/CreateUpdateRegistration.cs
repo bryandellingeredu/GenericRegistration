@@ -55,7 +55,7 @@ namespace Application.Registrations
                     try
                     {
                         await _context.SaveChangesAsync();
-                        await SendEmail(request.Registration, "Updated");
+                        await SendEmail(request.Registration, "Updated", request.Email);
                         await SendEmailToEventOwner(request.Registration, "Updated");  
                         return Result<Unit>.Success(Unit.Value);
                     }
@@ -81,7 +81,7 @@ namespace Application.Registrations
                     _context.Registrations.Add(newRegistration);
                     var result = await _context.SaveChangesAsync() > 0;
                     if (!result) return Result<Unit>.Failure("Failed to create registration");
-                    await SendEmail(request.Registration, "New");
+                    await SendEmail(request.Registration, "New", request.Email);
                     await SendEmailToEventOwner(request.Registration, "New");
                     return Result<Unit>.Success(Unit.Value);
                 }
@@ -115,14 +115,15 @@ namespace Application.Registrations
                 }
             }
 
-            private async Task SendEmail(RegistrationWithHTMLContent registration, string status    )
+            private async Task SendEmail(RegistrationWithHTMLContent registration, string status, string email    )
             {
+                string loginType = email.ToLower().Trim().EndsWith("army.mil") ? "CAC" : "EDU";
                 Settings s = new Settings();
                 var settings = s.LoadSettings(_config);
                 GraphHelper.InitializeGraph(settings, (info, cancel) => Task.FromResult(0));
                 RegistrationEvent registrationEvent = await _context.RegistrationEvents.FindAsync(registration.RegistrationEventId);
-                var registrationLinkUrl = $"{settings.BaseUrl}?redirecttopage=registerforevent/{registration.RegistrationEventId}";
-                var cancelRegistrationUrl = $"{settings.BaseUrl}?redirecttopage=deregisterforevent/{registration.Id}";
+                var registrationLinkUrl = $"{settings.BaseUrl}?redirecttopage=registerforevent/{registration.RegistrationEventId}&logintype={loginType}";
+                var cancelRegistrationUrl = $"{settings.BaseUrl}?redirecttopage=deregisterforevent/{registration.Id}&logintype={loginType}";
                 string title = $"Thank You for {(status == "New" ? "registering" : "updating your registration")} for {registrationEvent.Title}";
                 string body = $"<p>Thank You for {(status == "New" ? "registering" : "updating your registration")} for {registrationEvent.Title}</p>";
                 body = body + $"<p>  <strong>Location:</strong> {registrationEvent.Location}</p>";
