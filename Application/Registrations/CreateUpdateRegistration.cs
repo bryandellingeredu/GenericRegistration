@@ -89,10 +89,23 @@ namespace Application.Registrations
 
             private async Task SendEmailToEventOwner(RegistrationWithHTMLContent registration, string status)
             {
+                List<string> emails = new List<string>();
+
+                RegistrationEvent registrationEvent = await _context.RegistrationEvents
+                    .Where(x => x.Id == registration.RegistrationEventId)
+                    .FirstAsync();
+                emails.Add(registrationEvent.CreatedBy);
+
+                List<RegistrationEventOwner> registrationEventOwners = await _context.RegistrationEventOwners
+                    .AsNoTracking()
+                    .Where(x => x.RegistrationEventId == registration.RegistrationEventId).ToListAsync();
+                foreach (RegistrationEventOwner owner in registrationEventOwners)
+                {
+                    emails.Add(owner.Email);    
+                }
                 Settings s = new Settings();
                 var settings = s.LoadSettings(_config);
                 GraphHelper.InitializeGraph(settings, (info, cancel) => Task.FromResult(0));
-                RegistrationEvent registrationEvent = await _context.RegistrationEvents.FindAsync(registration.RegistrationEventId);
                 List<CustomQuestion> customQuestions = await _context.CustomQuestions.Where(x => x.RegistrationEventId == registration.RegistrationEventId).ToListAsync();
                 string title = $"{registration.FirstName} {registration.LastName}  has {(status == "New" ? "registered" : "updated their registration")} for {registrationEvent.Title}";
                 string body = $"{registration.FirstName} {registration.LastName}  has {(status == "New" ? "registered" : "updated their registration")} for {registrationEvent.Title}";
@@ -106,7 +119,7 @@ namespace Application.Registrations
                 }
                 try
                 {
-                    await GraphHelper.SendEmail(new[] { registrationEvent.CreatedBy }, title, body);
+                    await GraphHelper.SendEmail(emails.ToArray(), title, body);
                 }
                 catch (Exception ex)
                 {
@@ -117,7 +130,7 @@ namespace Application.Registrations
 
             private async Task SendEmail(RegistrationWithHTMLContent registration, string status, string email    )
             {
-                string loginType = email.ToLower().Trim().EndsWith("army.mil") ? "CAC" : "EDU";
+                string loginType = email.ToLower().Trim().EndsWith("armywarcollege.edu") ? "EDU" : "CAC";
                 Settings s = new Settings();
                 var settings = s.LoadSettings(_config);
                 GraphHelper.InitializeGraph(settings, (info, cancel) => Task.FromResult(0));
