@@ -36,6 +36,12 @@ namespace Application.EmailLink
                 var encryptedKeyBytes = Convert.FromBase64String(request.RegistrationDTO.DecodedKey);
                 var decryptedKey = _encryptionHelper.DecryptStringFromBytes_Aes(encryptedKeyBytes);
                 var registrationLink = await _context.RegistrationLinks.Where(x => x.RandomKey == decryptedKey).FirstOrDefaultAsync();
+
+                var registrationEvent = await _context.RegistrationEvents
+                    .Where(x => x.Id == registrationLink.RegistrationEventId)
+                    .AsNoTracking()
+                    .FirstAsync();
+
                 if (registrationLink != null)
                 {
                     var existingRegistration =await _context.Registrations
@@ -48,6 +54,7 @@ namespace Application.EmailLink
                         existingRegistration.LastName = request.RegistrationDTO.LastName;
                         existingRegistration.Phone = request.RegistrationDTO.Phone;
                         existingRegistration.Email = request.RegistrationDTO.Email;
+                        existingRegistration.Registered = request.RegistrationDTO.Registered;
                         if (existingRegistration.Answers.Any())
                         {
                             foreach (var answer in existingRegistration.Answers)
@@ -82,7 +89,7 @@ namespace Application.EmailLink
                         newRegistration.Phone = request.RegistrationDTO.Phone;
                         newRegistration.Email = request.RegistrationDTO.Email;
                         newRegistration.RegistrationDate = DateTime.UtcNow;
-                        newRegistration.Registered = true;
+                        newRegistration.Registered = registrationEvent.AutoApprove;
                         newRegistration.Answers = request.RegistrationDTO.Answers;
                         _context.Registrations.Add(newRegistration);
                         var result = await _context.SaveChangesAsync() > 0;
@@ -156,6 +163,10 @@ namespace Application.EmailLink
                 body = body + $"<p><strong>End:</strong> {registrationEvent.EndDate.ToString("MM/dd/yyyy")}</p><p></p> ";
                 body = body + $"<p> To make changes to your answers you may <a href={registrationLinkUrl}> Update Your Registration </a></p>";
                 body = body + $"<p> If you are no longer able to attend you may <a href={cancelRegistrationUrl}> Cancel Your Registration </a></p><p></p> ";
+                if (!registrationEvent.AutoApprove && !registration.Registered)
+                {
+                    body = body + "<p>Your Registration is under review, you will receive an email when you have been approved for this event.</p><p></p>";
+                }
                 body = body + registration.Hcontent;
                 var icalContent = CreateICalContent(registrationEvent);
                 var icalFileName = "event_invite.ics";

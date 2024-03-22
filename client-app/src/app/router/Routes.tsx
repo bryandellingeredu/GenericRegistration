@@ -13,6 +13,7 @@ import ThankYouForRegistering from "../../feautures/registrants/thankYouForRegis
 import ThankYouForRegisteringFromLink from "../../feautures/registrants/thankYouForRegisteringFromLink";
 import DeRegisterForEvent from "../../feautures/registrants/deRegisterForEvent";
 import DeRegisterForEventFromLink from "../../feautures/registrants/deRegisterForEventFromLink";
+import AdministerRegistrants from "../../feautures/administerRegistrants/administerRegistrants";
 
 
 export const routes: RouteObject[] = [
@@ -35,6 +36,7 @@ export const routes: RouteObject[] = [
             { path: 'thankyouforregisteringfromlink/:encryptedKey', element: <ThankYouForRegisteringFromLink /> },
             { path: 'deregisterforevent/:id', element: <DeRegisterForEvent /> },
             { path: 'deregisterforeventfromlink/:encryptedKey', element: <DeRegisterForEventFromLink /> },
+            { path: 'administerregistrants/:id', element: <AdministerRegistrants /> },
         ]
     }
 ];

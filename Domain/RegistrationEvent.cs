@@ -22,6 +22,9 @@ namespace Domain
 
         public bool Published {get; set;}
 
+        public bool Public { get; set; }
+        public bool AutoApprove { get; set;}    
+
         public DateTime CreatedAt { get; set; }
         public string CreatedBy { get; set; }
         public DateTime LastUpdatedAt { get; set; }

@@ -5,5 +5,7 @@ export interface RegistrationEvent{
     overview: string,
     startDate: Date,
     endDate: Date,
-    published: boolean
+    published: boolean,
+    public: boolean,
+    autoApprove: boolean,
 }

@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Graph.Models;
 using Persistence;
+using Persistence.Migrations;
 using System.Text;
 
 
@@ -36,12 +37,19 @@ namespace Application.Registrations
                 var existingRegistration = await _context.Registrations
                     .Include(x => x.Answers)
                     .Where(x => x.Id == request.Registration.Id).FirstOrDefaultAsync();
+
+                var registrationEvent = await _context.RegistrationEvents
+                   .Where(x => x.Id == request.Registration.RegistrationEventId)
+                   .AsNoTracking()
+                   .FirstAsync();
+
                 if (existingRegistration != null)
                 {
                     existingRegistration.FirstName = request.Registration.FirstName;
                     existingRegistration.LastName = request.Registration.LastName;
                     existingRegistration.Phone = request.Registration.Phone;
                     existingRegistration.Email = request.Registration.Email;
+                    existingRegistration.Registered = request.Registration.Registered;
                     if(existingRegistration.Answers.Any()) {
                         foreach(var answer in existingRegistration.Answers)
                         {
@@ -77,7 +85,7 @@ namespace Application.Registrations
                     newRegistration.UserEmail = request.Email;
                     newRegistration.RegistrationDate = DateTime.UtcNow;
                     newRegistration.Answers = request.Registration.Answers;
-                    newRegistration.Registered = true;
+                    newRegistration.Registered = registrationEvent.AutoApprove;
                     _context.Registrations.Add(newRegistration);
                     var result = await _context.SaveChangesAsync() > 0;
                     if (!result) return Result<Unit>.Failure("Failed to create registration");
@@ -144,6 +152,10 @@ namespace Application.Registrations
                 body = body + $"<p><strong>End:</strong> {registrationEvent.EndDate.ToString("MM/dd/yyyy")}</p><p></p> ";
                 body = body + $"<p> To make changes to your answers you may <a href={registrationLinkUrl}> Update Your Registration </a></p>";
                 body = body + $"<p> If you are no longer able to attend you may <a href={cancelRegistrationUrl}> Cancel Your Registration </a></p><p></p> ";
+                if (!registrationEvent.AutoApprove && !registration.Registered)
+                {
+                    body = body + "<p>Your Registration is under review, you will receive an email when you have been approved for this event.</p><p></p>";
+                }
                 body = body + registration.Hcontent;
                 var icalContent = CreateICalContent(registrationEvent);
                 var icalFileName = "event_invite.ics";

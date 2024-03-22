@@ -30,6 +30,8 @@ namespace Application.Registrant
                         await _context.RegistrationEvents
                          .Where(x => x.EndDate >= DateTime.Today)
                          .Where(x => x.Published)
+                         .Where(x => x.Public)
+                         .OrderBy(x => x.Title)
                          .ToListAsync(cancellationToken)
                    );
                     return result;

@@ -36,6 +36,8 @@ namespace Application.RegistrationEvents
                     existingRegistrationEvent.Title = request.RegistrationEvent.Title;
                     existingRegistrationEvent.Overview = request.RegistrationEvent.Overview;
                     existingRegistrationEvent.Location = request.RegistrationEvent.Location;
+                    existingRegistrationEvent.Public = request.RegistrationEvent.Public;
+                    existingRegistrationEvent.AutoApprove = request.RegistrationEvent.AutoApprove;
                     existingRegistrationEvent.StartDate = request.RegistrationEvent.StartDate;
                     existingRegistrationEvent.EndDate = request.RegistrationEvent.EndDate;
                     existingRegistrationEvent.LastUpdatedBy = request.Email;

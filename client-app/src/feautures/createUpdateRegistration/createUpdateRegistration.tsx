@@ -17,6 +17,7 @@ import { CustomQuestion } from '../../app/models/customQuestion';
 import ReviewAndPublishRegistration from './reviewAndPublishRegistration';
 import { RegistrationEventOwner } from '../../app/models/registrationEventOwner';
 import CreateUpdateRegistrationOwners from './createUpdateRegistrationOwners';
+import CreateUpdateRegistrationSettings from './createUpdateRegistrationSettings';
 
 export default observer(function CreateUpdateRegistration() {
     const navigate = useNavigate();
@@ -43,6 +44,8 @@ export default observer(function CreateUpdateRegistration() {
           endDate: new Date(),
           overview: '',
           published: false,
+          autoApprove: true,
+          public: true,
         }  
     );
     const [registrationEventId, setRegistrationEventId] = useState(uuidv4());
@@ -164,7 +167,6 @@ export default observer(function CreateUpdateRegistration() {
 
       const handleUnpublish = async() => {
         try{
-          debugger;
           setPublishing(true);
           await agent.RegistrationEvents.unpublish(registrationEventId);
           setRegistrationEvent(prevState => ({
@@ -224,9 +226,6 @@ export default observer(function CreateUpdateRegistration() {
       if (loading) return <LoadingComponent content="Loading Data..."/>
     return (
         <>
-
-
-
             <ManageRegistrationNavbar />
             <StepGroup fluid size='huge'>
     <Step active onClick={handleDesignClick}>
@@ -287,9 +286,23 @@ export default observer(function CreateUpdateRegistration() {
                         registrationEventOwners={registrationEventOwners}
                         setRegistrationEventOwners={handleSetRegistrationEventOwners}
                         registrationEventId={registrationEventId}
-                        setFormDirty={handleSetFormDirty}
-                        
+                        setFormDirty={handleSetFormDirty} 
                          />
+
+                      <Header as='h2' textAlign="center">
+                      <Icon name='settings' />
+                      <Header.Content>
+                          Settings
+                           <Header.Subheader>
+                              Configure your event
+                            </Header.Subheader> 
+                          </Header.Content>
+                      </Header>
+                      <CreateUpdateRegistrationSettings
+                        registrationEvent={registrationEvent}
+                        setRegistrationEvent={handleSetRegistrationEvent}
+                        setFormDirty={handleSetFormDirty}
+                       />
 
                         {formisDirty && !savingFromStepClick && 
                         <Button floated='right' color='blue' basic size='huge' loading={saving} onClick={saveForm}> Save Pending Changes</Button>
