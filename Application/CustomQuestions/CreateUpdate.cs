@@ -29,7 +29,15 @@ namespace Application.CustomQuestions
 
             public async Task<Result<Unit>> Handle(Command request, CancellationToken cancellationToken)
             {
- 
+                List<Registration> registrations = await _context.Registrations
+                    .Where(x => x.RegistrationEventId == request.RegistrationEventId)
+                    .AsNoTracking()
+                    .ToListAsync();
+
+                if (registrations.Any())
+                {
+                    return Result<Unit>.Success(Unit.Value);
+                }
                 List<CustomQuestion> existingCustomQuestions = await _context.CustomQuestions
                     .Include(x => x.Options)
                     .Where(x => x.RegistrationEventId == request.RegistrationEventId)

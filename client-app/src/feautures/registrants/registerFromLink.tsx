@@ -47,6 +47,8 @@ function formatDate(date : Date) {
           endDate: new Date(),
           overview: '',
           published: true,
+          public: true,
+          autoApprove: true
         }  
     );
     const [registration, setRegistration] = useState<Registration>({

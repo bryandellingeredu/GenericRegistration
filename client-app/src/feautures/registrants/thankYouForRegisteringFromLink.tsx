@@ -30,6 +30,8 @@ export default observer(function ThankYouForRegisteringFromLink() {
         endDate: new Date(),
         overview: '',
         published: true,
+        public: true,
+        autoApprove: true
       }
     );
 

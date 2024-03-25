@@ -18,6 +18,7 @@ import ReviewAndPublishRegistration from './reviewAndPublishRegistration';
 import { RegistrationEventOwner } from '../../app/models/registrationEventOwner';
 import CreateUpdateRegistrationOwners from './createUpdateRegistrationOwners';
 import CreateUpdateRegistrationSettings from './createUpdateRegistrationSettings';
+import { Registration } from '../../app/models/registration';
 
 export default observer(function CreateUpdateRegistration() {
     const navigate = useNavigate();
@@ -32,6 +33,7 @@ export default observer(function CreateUpdateRegistration() {
     const handleSetFormClean = () => setFormisDirty(false);
     const [formSubmitted, setFormSubmitted] = useState(false);
     const [activeStep, setActiveStep] = useState('Design');
+    const [registeredUsersIndicator, setRegisteredUsersIndicator] = useState(false);
     const handeSetActiveStepToDesign = () => {
       setActiveStep('Design');
     }
@@ -96,6 +98,10 @@ export default observer(function CreateUpdateRegistration() {
               if(customQuestionData && customQuestionData.length) setCustomQuestions(customQuestionData);
               const registrationEventOwnersData : RegistrationEventOwner[] = await agent.RegistrationEventOwners.list(id!);
               if(registrationEventOwnersData && registrationEventOwnersData.length) setRegistrationEventOwners(registrationEventOwnersData);
+              debugger;
+              const registrations : Registration[] = await agent.Registrations.list(registrationEvent.id)
+              debugger;
+              if (registrations && registrations.length) setRegisteredUsersIndicator(true);
           }catch (error: any) {
             console.log(error);
             if (error && error.message) {
@@ -205,7 +211,7 @@ export default observer(function CreateUpdateRegistration() {
           try {
             await agent.RegistrationEvents.createUpdate(data);
             await agent.RegistrationEventWebsites.createUpdate({registrationEventId, content});
-            await agent.CustomQuestions.createUpdate(registrationEventId, customQuestions);
+            if(!registeredUsersIndicator) await agent.CustomQuestions.createUpdate(registrationEventId, customQuestions);
             await agent.RegistrationEventOwners.createUpdate(registrationEventId, registrationEventOwners);
             toast.success("Save was successful!"); 
             setFormisDirty(false);
@@ -314,7 +320,9 @@ export default observer(function CreateUpdateRegistration() {
                         <Icon name='question' />
                             <Header.Content>
                                 Event Questions
-                                <Header.Subheader>Use the add button to design questions for your form</Header.Subheader> {/* Add your subheader text here */}
+                                <Header.Subheader>
+                                  {registeredUsersIndicator ? 'People have already registred for your event you MAY NOT change questions' : 'Use the add button to design questions for your form'}
+                                  </Header.Subheader> 
                              </Header.Content>
                         </Header>
                         <CreateUpdateRegistrationQuestions 
@@ -322,6 +330,7 @@ export default observer(function CreateUpdateRegistration() {
                         setCustomQuestions={handleSetCustomQuestions}
                         setFormDirty={handleSetFormDirty}
                         registrationEventId={registrationEventId}
+                        registeredUsersIndicator={registeredUsersIndicator}
                         />
                          <Button icon labelPosition='right' floated='right' color='blue' basic size='huge'
                           disabled = {savingFromStepClick || !registrationEvent.title || !registrationEvent.title.trim() || !registrationEvent.location || !registrationEvent.location.trim() || !registrationEvent.startDate || !registrationEvent.endDate  }

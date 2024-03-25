@@ -1,7 +1,6 @@
 ﻿
 
 using Application.Registrations;
-using Domain;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
@@ -22,8 +21,13 @@ namespace API.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(Guid id) => HandleResult(await Mediator.Send(new Delete.Command { Id = id }));
 
+        [HttpPost("GetByRegistrationId/{id}")]
+        public async Task<IActionResult> List(Guid id) => HandleResult(await Mediator.Send(new List.Query { Id = id }));
+
         [HttpGet("{id}")]
         public async Task<IActionResult> Details(Guid id) => HandleResult(await Mediator.Send(new Details.Query { Id = id }));
+
+  
 
         [HttpPut("changeRegistered/{id}")]
         public async Task<IActionResult> ChangeRegistered(Guid id, RegisteredDTO registeredDTO) =>

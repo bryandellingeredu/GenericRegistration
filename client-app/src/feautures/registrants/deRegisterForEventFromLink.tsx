@@ -30,6 +30,8 @@ export default observer(function DeRegisterForEventFromLink() {
           endDate: new Date(),
           overview: '',
           published: true,
+          public: true,
+          autoApprove: true
         }
     );
 

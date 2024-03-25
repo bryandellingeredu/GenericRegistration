@@ -10,13 +10,14 @@ interface Props{
     setCustomQuestions: (newCustomQuestions: CustomQuestion[]) => void;
     setFormDirty: () => void;
     registrationEventId: string
+    registeredUsersIndicator: boolean
 }
 
 type PopoverVisibilityState = {
     [key: string]: boolean;
 };
 
-export default observer(function CreateUpdateRegistrationQuestions({customQuestions, setCustomQuestions, setFormDirty, registrationEventId} : Props) {
+export default observer(function CreateUpdateRegistrationQuestions({customQuestions, setCustomQuestions, setFormDirty, registrationEventId, registeredUsersIndicator} : Props) {
     const [popoverVisibility, setPopoverVisibility] = useState<PopoverVisibilityState>({});
     const togglePopover = (questionId: string) => {
         setPopoverVisibility((prev: PopoverVisibilityState) => ({
@@ -196,10 +197,6 @@ export default observer(function CreateUpdateRegistrationQuestions({customQuesti
         setCustomQuestions(newCustomQuestions);
     };
     
-    
-
-
-
 
     return(
         <>
@@ -228,6 +225,7 @@ export default observer(function CreateUpdateRegistrationQuestions({customQuesti
         <FormGroup>
             <FormField width='9'>
             <input
+              readOnly={registeredUsersIndicator}
               value={'Last Name'}
               style={{
                 border: 'none',
@@ -296,6 +294,7 @@ export default observer(function CreateUpdateRegistrationQuestions({customQuesti
          <FormGroup>
             <FormField width='9'>
             <input
+              readOnly={registeredUsersIndicator}
               value={question.questionText}
               onChange={(e) => handleTextChange(e.target.value, question.id)}
               style={{
@@ -311,6 +310,7 @@ export default observer(function CreateUpdateRegistrationQuestions({customQuesti
             </FormField>
             <FormField  width='3'>
             <Checkbox label='Required'
+                readOnly={registeredUsersIndicator}
                 checked={question.required}
                 onChange={(e, data) => handleRequiredChange(data.checked === true, question.id)}
              />
@@ -318,7 +318,8 @@ export default observer(function CreateUpdateRegistrationQuestions({customQuesti
             </FormField>
             <FormField width='4'>
             <ButtonGroup size='tiny'>
-            <Button animated='vertical' color='red' basic size='tiny' 
+            <Button animated='vertical' color='red' basic size='tiny'
+            disabled={registeredUsersIndicator} 
             onClick={() => deleteQuestion(question.id)}
             >
                 <ButtonContent hidden>Delete</ButtonContent>
@@ -331,6 +332,7 @@ export default observer(function CreateUpdateRegistrationQuestions({customQuesti
     key={question.id} // Ensure each Popup has a unique key
     trigger={
       <Button animated='vertical' color='green' basic size='tiny'
+      disabled={registeredUsersIndicator} 
       onClick={() => togglePopover(question.id)}> {/* Toggle visibility for this specific question */}
         <ButtonContent hidden>+Question</ButtonContent>
         <ButtonContent visible>
@@ -373,6 +375,7 @@ export default observer(function CreateUpdateRegistrationQuestions({customQuesti
              <FormField width={2} />
              <FormField width='8'>
             <input
+              readOnly={registeredUsersIndicator} 
               value={option.optionText}
               onChange={(e) => handleOptionTextChange(e.target.value, question.id, option.id)}
               style={{
@@ -390,6 +393,7 @@ export default observer(function CreateUpdateRegistrationQuestions({customQuesti
               <ButtonGroup size='tiny'>
             <Button animated='vertical' color='red' basic size='tiny'
             onClick={() => deleteChoice(question.id, option.id)}
+            disabled={registeredUsersIndicator} 
            >
                 <ButtonContent hidden>Delete</ButtonContent>
             <ButtonContent visible>
@@ -398,6 +402,7 @@ export default observer(function CreateUpdateRegistrationQuestions({customQuesti
          </Button>
         
             <Button animated='vertical' color='teal' basic size='tiny'
+             disabled={registeredUsersIndicator} 
             onClick={() => addChoice(question.id, option.index, 'Choice')}
             >
                 <ButtonContent hidden>+Choice</ButtonContent>
@@ -440,7 +445,8 @@ export default observer(function CreateUpdateRegistrationQuestions({customQuesti
         <Segment>
         <Popup
       trigger={
-        <Button icon labelPosition='left' basic color='green' onClick={handleOpen}>
+        <Button icon labelPosition='left' basic color='green' onClick={handleOpen} disabled={registeredUsersIndicator} >
+
         <Icon name='plus' />
         Add a Question
       </Button>

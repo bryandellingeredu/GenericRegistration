@@ -27,6 +27,8 @@ export default observer(function ThankYouForRegistering() {
         endDate: new Date(),
         overview: '',
         published: true,
+        public: true,
+        autoApprove: true
       }  
   );
 
