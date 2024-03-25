@@ -24,5 +24,9 @@ namespace API.Controllers
 
         [HttpGet("{id}")]
         public async Task<IActionResult> Details(Guid id) => HandleResult(await Mediator.Send(new Details.Query { Id = id }));
+
+        [HttpPut("changeRegistered/{id}")]
+        public async Task<IActionResult> ChangeRegistered(Guid id, RegisteredDTO registeredDTO) =>
+            HandleResult(await Mediator.Send(new ChangeRegistered.Command { Id = id, RegisteredDTO = registeredDTO }));
     }
 }

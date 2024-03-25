@@ -1,4 +1,5 @@
 ﻿using Application.Core;
+using Domain;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Persistence;
@@ -31,6 +32,11 @@ namespace Application.RegistrationEvents
 
                 if (registrationEvent == null) return null;
 
+                var registrationLinks = await _context.RegistrationLinks
+                 .Where(x => x.RegistrationEventId == request.Id)
+                 .ToListAsync();
+
+                if(registrationLinks.Any()) _context.Remove(registrationLinks);
                 _context.Remove(registrationEvent);
                 var result = await _context.SaveChangesAsync() > 0;
 

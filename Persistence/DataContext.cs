@@ -29,6 +29,12 @@ namespace Persistence
              .HasForeignKey(q => q.RegistrationEventId)
              .OnDelete(DeleteBehavior.Cascade);
 
+             modelBuilder.Entity<RegistrationEvent>()
+             .HasMany(e => e.Registrations)
+             .WithOne(q => q.RegistrationEvent)
+             .HasForeignKey(q => q.RegistrationEventId)
+             .OnDelete(DeleteBehavior.Cascade);
+
             // Configuration for RegistrationEvent to CustomQuestions
             modelBuilder.Entity<RegistrationEvent>()
                 .HasMany(e => e.CustomQuestions)

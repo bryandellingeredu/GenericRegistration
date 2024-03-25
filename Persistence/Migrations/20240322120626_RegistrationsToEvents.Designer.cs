@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Persistence;
 
@@ -11,9 +12,11 @@ using Persistence;
 namespace Persistence.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20240322120626_RegistrationsToEvents")]
+    partial class RegistrationsToEvents
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -471,13 +474,11 @@ namespace Persistence.Migrations
 
             modelBuilder.Entity("Domain.Registration", b =>
                 {
-                    b.HasOne("Domain.RegistrationEvent", "RegistrationEvent")
+                    b.HasOne("Domain.RegistrationEvent", null)
                         .WithMany("Registrations")
                         .HasForeignKey("RegistrationEventId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("RegistrationEvent");
                 });
 
             modelBuilder.Entity("Domain.RegistrationEventOwner", b =>

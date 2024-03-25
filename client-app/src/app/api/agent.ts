@@ -71,7 +71,8 @@ const Registrations = {
     getRegistration: (email: string, registrationEventId: string) => requests.post<Registration>('/Registration/getRegistration',{email, registrationEventId }),
     createUpdateRegistration: (data: RegistrationWithHTMLContent) => requests.post<void>('/Registration/createUpdateRegistration', data),
     delete: (id: string) => axios.delete<void>(`/Registration/${id}`),
-    details: (id: string) => requests.get<Registration>(`/Registration/${id}`)
+    details: (id: string) => requests.get<Registration>(`/Registration/${id}`),
+    changeRegistered: (id: string, registered: boolean) => requests.put<void>(`/Registration/changeRegistered/${id}`, {registered})
 }
 
 const RegistrationEventOwners = {

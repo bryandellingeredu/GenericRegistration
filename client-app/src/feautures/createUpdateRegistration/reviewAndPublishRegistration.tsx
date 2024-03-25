@@ -140,14 +140,6 @@ export default observer(function ReviewAndPublishRegistration(
       <Grid  stackable style={{padding: '40px' }}>
       <Grid.Row>
       <Grid.Column width={8}>
-      <Editor
-            editorState={editorState}
-            readOnly={true}
-            toolbarHidden={true}
-            wrapperClassName="wrapper-class-preview"
-            editorClassName="editor-class-preview"
-            toolbarClassName="toolbar-class-hidden"
-        />
         <Header as='h3'>
         <Icon name='pencil' />
          <Header.Content>
@@ -166,6 +158,14 @@ export default observer(function ReviewAndPublishRegistration(
          {displayDateRange(registrationEvent.startDate, registrationEvent.endDate)}
          </Header.Content>
         </Header> 
+        <Editor
+            editorState={editorState}
+            readOnly={true}
+            toolbarHidden={true}
+            wrapperClassName="wrapper-class-preview"
+            editorClassName="editor-class-preview"
+            toolbarClassName="toolbar-class-hidden"
+        />
         </Grid.Column>
         <Grid.Column width={8}>
         <Form>

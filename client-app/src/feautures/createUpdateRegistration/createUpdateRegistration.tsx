@@ -46,6 +46,7 @@ export default observer(function CreateUpdateRegistration() {
           published: false,
           autoApprove: true,
           public: true,
+          registrations: []
         }  
     );
     const [registrationEventId, setRegistrationEventId] = useState(uuidv4());

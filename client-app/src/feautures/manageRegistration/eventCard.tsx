@@ -124,13 +124,30 @@ export default observer (function EventCard({event, removeEvent} : Props) {
             </Header>
           </CardMeta>
          }
+          {event.published && 
+          <CardMeta style={{paddingBottom: '10px'}}>
+          <Header as='h4' color='grey'>
+             <Icon name='user' />
+               <HeaderContent>
+               {event.registrations ? event.registrations.length  : '0'}
+                {event.registrations && event.registrations.length === 1 ? ' User' : ' Users'} Registered
+                </HeaderContent>
+            </Header>
+          </CardMeta>
+         }
           <CardDescription>
             {event.overview}
           </CardDescription>
         </CardContent>
         <CardContent extra>
         {event.published && 
-          <div className='ui four buttons'>
+          <div className={event.registrations && event.registrations.length > 0 ? 'ui five buttons' : 'ui four buttons' } >
+            {event.registrations && event.registrations.length > 0 &&
+               <Button basic color='brown'
+               onClick={() => navigate(`/administerregistrants/${event.id}`)}>
+                 Manage Users
+               </Button>
+            }
             <Button basic color='green'
             onClick={() => navigate(`/editregistration/${event.id}`)}>
               Edit

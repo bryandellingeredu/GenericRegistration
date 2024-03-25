@@ -16,6 +16,8 @@ namespace Domain
 
         public Guid RegistrationEventId { get; set;}
 
+        public RegistrationEvent RegistrationEvent { get; set; }
+
         public List<Answer> Answers { get; set;}
 
     }

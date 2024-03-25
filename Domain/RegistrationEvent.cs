@@ -32,6 +32,8 @@ namespace Domain
 
         public List<CustomQuestion> CustomQuestions { get; set; }
 
+        public List<Registration> Registrations { get; set; }
+
         public List<RegistrationEventOwner> RegistrationEventOwners { get; set; }
 
         public RegistrationEventWebsite RegistrationEventWebsite { get; set; }
