@@ -5,10 +5,16 @@ import { store } from "./store";
 import { router } from "../router/Routes";
 import { PublicClientApplication } from "@azure/msal-browser";
 import { toast } from "react-toastify";
+import { Providers } from '@microsoft/mgt-element';
 
 
 export default class UserStore {
     user : User | null = null;
+    loggingIn: boolean = false;
+
+    logoutRequest = {
+        postLogoutRedirectUri: "/", 
+    };
 
     armyMsalConfig = {
         auth: {
@@ -82,6 +88,7 @@ myMSALObj = new PublicClientApplication(this.armyMsalConfig);
 
 
     login = async (token: string) => {
+        this.loggingIn = true;
         try{
             const user = await agent.Account.login(token);
             store.commonStore.setToken(user.token);
@@ -95,7 +102,6 @@ myMSALObj = new PublicClientApplication(this.armyMsalConfig);
                 router.navigate('/myregistrations')  
             }
         } catch (error){
-            debugger;
             sessionStorage.clear(); 
             localStorage.clear();
             store.commonStore.setToken(null);
@@ -103,8 +109,12 @@ myMSALObj = new PublicClientApplication(this.armyMsalConfig);
             this.user = null;
             console.log(error);
             router.navigate('/loginerror')
+     }finally{
+        this.loggingIn = false;
      }
     }
+
+
 
     logout = () => {
         sessionStorage.clear(); 
@@ -113,7 +123,12 @@ myMSALObj = new PublicClientApplication(this.armyMsalConfig);
         store.commonStore.setDoNotAutoLogin('true');
         store.commonStore.setLoginType(null);
         this.user = null;
-        router.navigate('/')
+        if (this.myMSALObj) {
+            this.myMSALObj.logoutRedirect(this.logoutRequest);
+        }else{
+            router.navigate('/')
+        }
+
     }
 
     getUser = async () => {

@@ -12,7 +12,7 @@ import { useNavigate } from "react-router-dom";
 
 export default observer ( function LoginUser() {
     const {userStore, commonStore} = useStore();
-    const {login, signInArmy,  handleGraphRedirect} = userStore;
+    const {login, signInArmy,  handleGraphRedirect, loggingIn} = userStore;
     const [isLoggingIn, setIsLoggingIn] = useState(false);
     const {responsiveStore} = useStore();
     const {isMobile} = responsiveStore
@@ -36,10 +36,11 @@ export default observer ( function LoginUser() {
         }
     }
 
-
+    const logoutComplete = () => {
+      navigate('/');
+    }
 
     const loginCompleted = async () => {
-        debugger;
         setIsLoggingIn(true);
         try {
             const provider = Providers.globalProvider;
@@ -75,7 +76,7 @@ export default observer ( function LoginUser() {
                 </Header>
                 }
 
-                    {isLoggingIn && <LoadingComponent content='Logging in...' />}
+                    {(isLoggingIn || loggingIn) && <LoadingComponent content='Logging in...' />}
 
  { !isLoggingIn &&  !isMobile &&         
 <Segment color='black'  >
@@ -131,7 +132,7 @@ export default observer ( function LoginUser() {
          <Icon name='graduation cap' />
          Login EDU
        </Header>
-      <Login  loginCompleted={loginCompleted} loginInitiated={loginInitiated}/>
+      <Login  loginCompleted={loginCompleted} loginInitiated={loginInitiated} logoutCompleted={logoutComplete}/>
      </Grid.Column>
     }
      {redirectToPage && redirectToPage.toLocaleLowerCase().includes('registerforevent') && !loginType &&
