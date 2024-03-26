@@ -120,7 +120,6 @@ namespace Application.Registrations
                 body = body + $"<p><strong>First Name: </strong> {registration.FirstName}</p>";
                 body = body + $"<p><strong>Last Name: </strong> {registration.LastName}</p>";
                 body += $"<p><strong>Email: </strong> <a href='mailto:{registration.Email}'>{registration.Email}</a></p>";
-                body += $"<p><strong>Phone: </strong> <a href='tel:{registration.Phone}'>{registration.Phone}</a></p>";
                 foreach (var question in customQuestions)
                 {
                     body = body + $"<p><strong>{question.QuestionText}: </strong> {registration.Answers.Where(x => x.CustomQuestionId == question.Id).FirstOrDefault().AnswerText ?? string.Empty}</p>";

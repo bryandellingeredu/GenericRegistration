@@ -36,7 +36,11 @@ namespace Application.RegistrationEvents
                  .Where(x => x.RegistrationEventId == request.Id)
                  .ToListAsync();
 
-                if(registrationLinks.Any()) _context.Remove(registrationLinks);
+                if (registrationLinks.Any())
+                {
+                    _context.RemoveRange(registrationLinks);
+                    await _context.SaveChangesAsync();
+                }
                 _context.Remove(registrationEvent);
                 var result = await _context.SaveChangesAsync() > 0;
 

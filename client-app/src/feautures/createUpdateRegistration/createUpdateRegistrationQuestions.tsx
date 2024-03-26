@@ -267,27 +267,6 @@ export default observer(function CreateUpdateRegistrationQuestions({customQuesti
              />
             </FormField>
         </FormGroup>
-        <FormGroup>
-            <FormField width='9'>
-            <input
-              value={'Phone'}
-              style={{
-                border: 'none',
-                borderBottom: '1px solid #ddd',
-                borderRadius: 0,
-                boxShadow: 'none',
-                padding: 0,
-                height: 'auto',
-                backgroundColor: 'transparent',
-              }}
-            />
-            </FormField>
-            <FormField  width='3'>
-            <Checkbox label='Required'
-                checked
-             />
-            </FormField>
-        </FormGroup>
         {
           customQuestions.sort((a, b) => a.index - b.index).map((question) => (
             <Segment key={question.id} style={{backgroundColor: '#f4f4f4'}}>

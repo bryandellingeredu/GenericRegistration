@@ -65,9 +65,6 @@ export default function AdministerRegistrantCard(
                     {registration.email}
               </a>
              </CardMeta>
-             <CardMeta>
-                <Icon name='phone' /> {registration.phone}
-             </CardMeta>
              </CardContent>
              <CardContent>
              <CardDescription>

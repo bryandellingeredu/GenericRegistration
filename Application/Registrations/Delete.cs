@@ -41,7 +41,6 @@ namespace Application.Registrations
                 body = body + $"<p><strong>First Name: </strong> {registration.FirstName}</p>";
                 body = body + $"<p><strong>Last Name: </strong> {registration.LastName}</p>";
                 body += $"<p><strong>Email: </strong> <a href='mailto:{registration.Email}'>{registration.Email}</a></p>";
-                body += $"<p><strong>Phone: </strong> <a href='tel:{registration.Phone}'>{registration.Phone}</a></p>";
 
                 _context.Remove(registration);
                 var result = await _context.SaveChangesAsync() > 0;

@@ -9,8 +9,11 @@ import { toast } from "react-toastify";
 
 import LoadingComponent from "../../app/layout/LoadingComponent";
 import RegistrantEventCard from "./registrantEventCard";
+import { useStore } from "../../app/stores/store";
 
 export default observer (function ViewAllEvents() {
+    const { responsiveStore } = useStore();
+    const {isMobile} = responsiveStore
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
     const [registrationEvents, setRegistrationEvents] = useState<RegistrationEvent[]>([]);
@@ -51,7 +54,7 @@ export default observer (function ViewAllEvents() {
                         </Header>
                     </div>
         </div>
-        <CardGroup itemsPerRow={3} style={{padding: '40px'}}>
+        <CardGroup itemsPerRow= {isMobile ? '1' : '3'} style={{padding: '40px'}}>
                     {registrationEvents.map((event) => (
                         <RegistrantEventCard key={event.id} event={event}/>
                     ))}

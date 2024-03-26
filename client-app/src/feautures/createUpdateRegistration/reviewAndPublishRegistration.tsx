@@ -181,10 +181,6 @@ export default observer(function ReviewAndPublishRegistration(
              <label> Email</label>
             <Input value={''}/>
        </FormField>
-       <FormField required >
-             <label>Phone</label>
-            <Input placeholder='(###) ### - ####' value={''}/>
-        </FormField>
        {customQuestions.sort((a, b) => a.index - b.index).map((question) => (
           <FormField key={question.id} required={question.required}>
             <label>{question.questionText}</label>

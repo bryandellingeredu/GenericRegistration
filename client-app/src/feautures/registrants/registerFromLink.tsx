@@ -130,8 +130,7 @@ function formatDate(date : Date) {
       setFormisDirty(true);
       let formHasError =
        !registration.firstName || !registration.firstName.trim() ||
-       !registration.lastName || !registration.lastName.trim() ||
-       !registration.phone || !registration.phone.trim();
+       !registration.lastName || !registration.lastName.trim() 
 
        const customQuestionsErrors = customQuestions.some(question => 
         question.required &&
@@ -272,12 +271,6 @@ function formatDate(date : Date) {
              <label> Email</label>
             <Input value={registration.email}/>
        </FormField>
-       <FormField required error={formisDirty && (!registration.phone || !registration.phone.trim()) }  >
-             <label>Phone</label>
-            <Input placeholder='(###) ### - ####' value={registration.phone}
-            name="phone"
-            onChange={handleInputChange} />
-        </FormField>
         {customQuestions.sort((a, b) => a.index - b.index).map((question) => (
           <FormField key={question.id} required={question.required}
           error={formisDirty && question.required &&

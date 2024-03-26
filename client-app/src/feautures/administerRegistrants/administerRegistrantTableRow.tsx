@@ -89,7 +89,6 @@ export default function AdministerRegistrantTableRow(
           <TableCell rowSpan={maxRowSpan}>     <a href={`mailto:{registration.email}`} style={{color: ' #0000FF'}}>
                     {registration.email}
               </a></TableCell>
-          <TableCell rowSpan={maxRowSpan}>{registration.phone}</TableCell>
           <TableCell rowSpan={maxRowSpan}>{`Registered on ${formattedDate}`}</TableCell>
     
           {showQuestions && (

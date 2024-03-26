@@ -183,7 +183,6 @@ export default observer(function RegisterForEvent() {
     let formHasError =
      !registration.firstName || !registration.firstName.trim() ||
      !registration.lastName || !registration.lastName.trim() ||
-     !registration.phone || !registration.phone.trim() ||
      !registration.email || !registration.email.trim() || !isValidEmail(registration.email);
 
      const customQuestionsErrors = customQuestions.some(question => 
@@ -297,12 +296,6 @@ export default observer(function RegisterForEvent() {
             <Input value={registration.email}
             name="email"
             onChange={handleInputChange}/>
-        </FormField>
-       <FormField required error={formisDirty && (!registration.phone || !registration.phone.trim()) }  >
-             <label>Phone</label>
-            <Input placeholder='(###) ### - ####' value={registration.phone}
-            name="phone"
-            onChange={handleInputChange} />
         </FormField>
         {customQuestions.sort((a, b) => a.index - b.index).map((question) => (
           <FormField key={question.id} required={question.required}

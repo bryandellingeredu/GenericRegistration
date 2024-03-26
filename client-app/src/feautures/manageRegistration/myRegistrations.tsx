@@ -8,6 +8,7 @@ import { RegistrationEvent } from "../../app/models/registrationEvent";
 import agent from "../../app/api/agent";
 import LoadingComponent from "../../app/layout/LoadingComponent";
 import EventCard from "./eventCard";
+import { useStore } from "../../app/stores/store";
 
 
 
@@ -15,6 +16,8 @@ export default observer (function MyRegistrations() {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
     const [registrationEvents, setRegistrationEvents] = useState<RegistrationEvent[]>([]);
+    const { responsiveStore } = useStore();
+    const {isMobile} = responsiveStore
 
     useEffect(() => {
         getRegistrationEvents();
@@ -58,11 +61,11 @@ export default observer (function MyRegistrations() {
                             </Header.Subheader>
                         </Header>
                     </div>
-                    <Button color='green' size='large' style={{ position: 'absolute', right: '20px', top: '60px' }} onClick={() => {navigate('/newregistration')}}>
-                        <Icon name='add' /> Create New Event
+                    <Button color='green' size={isMobile ? 'tiny' : 'large'} style={{ position: 'absolute', right: '20px', top: '60px' }} onClick={() => {navigate('/newregistration')}}>
+                        <Icon name='add' /> {isMobile ? 'New' :'Create New Event'}
                     </Button>
                 </div>
-                <CardGroup itemsPerRow={2} style={{padding: '40px'}}>
+                <CardGroup itemsPerRow={isMobile ? '1' : '2'} style={{padding: isMobile ? '5px' : '40px'}}>
                     {registrationEvents.map((event) => (
                         <EventCard key={event.id} event={event} removeEvent={handleRemoveRegistrationEvent}/>
                     ))}

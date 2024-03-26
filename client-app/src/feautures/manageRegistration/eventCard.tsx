@@ -1,6 +1,6 @@
 import { observer } from "mobx-react-lite";
 import { RegistrationEvent } from "../../app/models/registrationEvent";
-import { Button, Card, CardContent, CardDescription, CardHeader, CardMeta, Header, HeaderContent, Icon, Label } from "semantic-ui-react";
+import { Button, ButtonGroup, Card, CardContent, CardDescription, CardHeader, CardMeta, Header, HeaderContent, Icon, Label } from "semantic-ui-react";
 import { useNavigate } from "react-router-dom";
 import { useStore } from "../../app/stores/store";
 import Confirmation from "../../app/common/modals/Confirmation";
@@ -21,6 +21,8 @@ export default observer (function EventCard({event, removeEvent} : Props) {
   const {modalStore} = useStore();
   const {openModal, closeModal} = modalStore;
   const [deleting, setDeleting] = useState(false)
+  const { responsiveStore } = useStore();
+  const {isMobile} = responsiveStore
 
   const copyLink = () => {
     const websiteUrl = `${baseUrl}/registerforevent/${event.id}`;
@@ -113,8 +115,9 @@ export default observer (function EventCard({event, removeEvent} : Props) {
 
             </Header> 
           </CardMeta>
-          {event.published && 
+          {event.published && !isMobile &&
           <CardMeta style={{paddingBottom: '10px'}}>
+            
           <Header as='h4' color='grey'>
              <Icon name='paperclip' />
                <HeaderContent>
@@ -124,6 +127,7 @@ export default observer (function EventCard({event, removeEvent} : Props) {
             </Header>
           </CardMeta>
          }
+
           {event.published && 
           <CardMeta style={{paddingBottom: '10px'}}>
           <Header as='h4' color='grey'>
@@ -141,40 +145,40 @@ export default observer (function EventCard({event, removeEvent} : Props) {
         </CardContent>
         <CardContent extra>
         {event.published && 
-          <div className={event.registrations && event.registrations.length > 0 ? 'ui five buttons' : 'ui four buttons' } >
+          <ButtonGroup fluid  >
             {event.registrations && event.registrations.length > 0 &&
                <Button basic color='brown'
                onClick={() => navigate(`/administerregistrants/${event.id}`)}>
-                 Manage Users
+                 {isMobile ?  <Icon name='users' size='large'/> : 'Manage Registrants' }
                </Button>
             }
             <Button basic color='green'
             onClick={() => navigate(`/editregistration/${event.id}`)}>
-              Edit
+              {isMobile ?  <Icon name='edit' size='large'/> : 'Edit' }
             </Button>
             <Button basic color='teal'
             onClick={copyLink}>
-              Copy Link To Clipboard
+             {isMobile ?  <Icon name='copy' size='large'/> : 'Copy Link to Clipboard' }
             </Button>
             <Button basic color='orange'
             onClick={downloadQRCode}>
-              Create QR Code
+               {isMobile ?  'QR': 'Create QR Code' }
             </Button>
             <Button basic color='red' onClick={handleDeleteClick} loading={deleting}>
-              Delete
+            {isMobile ?  <Icon name='trash' size='large'/> : 'Delete' }
             </Button>
-          </div>
+            </ButtonGroup>
          }
           {!event.published && 
-          <div className='ui two buttons'>
+          <ButtonGroup fluid>
             <Button basic color='green'
             onClick={() => navigate(`/editregistration/${event.id}`)}>
-              Edit
+              {isMobile ?  <Icon name='edit' size='large'/> : 'Edit' }
             </Button>
             <Button basic color='red' onClick={handleDeleteClick} loading={deleting}>
-              Delete
+            {isMobile ?  <Icon name='trash' size='large'/> : 'Delete' }
             </Button>
-          </div>
+            </ButtonGroup>
          }
         </CardContent>
       </Card>

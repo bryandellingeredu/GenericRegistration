@@ -32,7 +32,7 @@ namespace API.Controllers
                 return NotFound();
             }
 
-            var header = "First Name, Last Name, Email, Phone";
+            var header = "First Name, Last Name, Email";
             foreach (var question in registrationEvent.CustomQuestions.OrderBy(x => x.Index))
             {
                 header += $",\"{question.QuestionText.Replace("\"", "\"\"")}\""; 
@@ -41,7 +41,7 @@ namespace API.Controllers
 
             foreach (var registration in registrationEvent.Registrations.OrderBy(x => x.LastName))
             {
-                var line = $"\"{registration.FirstName}\",\"{registration.LastName}\",\"{registration.Email}\",\"{registration.Phone}\"";
+                var line = $"\"{registration.FirstName}\",\"{registration.LastName}\",\"{registration.Email}\"";
                 foreach (var question in registrationEvent.CustomQuestions.OrderBy(x => x.Index))
                 {
                     var answer = GetAnswer(question.Id, registration.Answers);
