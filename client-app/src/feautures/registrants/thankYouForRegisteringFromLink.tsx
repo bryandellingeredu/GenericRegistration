@@ -83,6 +83,7 @@ return(
               <Menu.Item>
                 <ArmyLogo content={registrationEvent.title} size="2em" textColor="#FFF" outerStarColor="yellow" innerStarColor="black" />
             </Menu.Item>
+            {!isMobile && 
             <Menu.Item>
               <Header as='h4' inverted>
                 <Icon name='user' color='teal'/>
@@ -91,6 +92,7 @@ return(
                   </Header.Content>
               </Header> 
             </Menu.Item>
+            }
           </Menu>
           <SegmentGroup style={{padding: '40px'}}>
 <Segment color='teal'>

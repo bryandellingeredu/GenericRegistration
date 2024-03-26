@@ -29,6 +29,9 @@ function formatDate(date : Date) {
   }
 
   export default observer(function RegisterFromLink() {
+
+    const { responsiveStore } = useStore();
+    const {isMobile} = responsiveStore
     const navigate = useNavigate();
     const [formisDirty, setFormisDirty] = useState(false);
     const [editorState, setEditorState] = useState(() => EditorState.createEmpty());
@@ -214,6 +217,7 @@ function formatDate(date : Date) {
               <Menu.Item>
                 <ArmyLogo content={registrationEvent.title} size="2em" textColor="#FFF" outerStarColor="yellow" innerStarColor="black" />
             </Menu.Item>
+            {!isMobile && 
             <Menu.Item>
               <Header as='h4' inverted>
                 <Icon name='user' color='teal'/>
@@ -222,6 +226,7 @@ function formatDate(date : Date) {
                   </Header.Content>
               </Header> 
             </Menu.Item>
+           }
           </Menu>
            <Grid stackable style={{padding: '40px' }}>
               <Grid.Row>

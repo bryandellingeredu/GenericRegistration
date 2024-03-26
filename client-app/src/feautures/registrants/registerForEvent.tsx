@@ -230,7 +230,7 @@ export default observer(function RegisterForEvent() {
       <ArmyLogo content={registrationEvent.title} size="2em" textColor="#FFF" outerStarColor="yellow" innerStarColor="black" />
       </Menu.Item>
       
-      {user &&
+      {user && !isMobile &&
          <Menu.Item>
       <Dropdown trigger={
       <>
@@ -338,6 +338,7 @@ export default observer(function RegisterForEvent() {
         </Grid.Column> }
         {!user && <Grid.Column width={8}>
             <Message info>
+              {!isMobile && 
               <Message.Header>
               <Divider horizontal>
       <Header as='h4'>
@@ -345,7 +346,7 @@ export default observer(function RegisterForEvent() {
         Register For {registrationEvent.title}
       </Header>
     </Divider>
-              </Message.Header>
+              </Message.Header>}
               <Message.Content>
                 <h4>
                 In order to register for this event you will need to sign in 
