@@ -31,7 +31,8 @@ export default observer(function ThankYouForRegisteringFromLink() {
         overview: '',
         published: true,
         public: true,
-        autoApprove: true
+        autoApprove: true,
+        certified: true
       }
     );
 

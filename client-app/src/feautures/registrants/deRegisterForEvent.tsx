@@ -28,7 +28,8 @@ export default observer(function DeRegisterForEvent() {
           overview: '',
           published: true,
           public: true,
-          autoApprove: true
+          autoApprove: true,
+          certified: true,
         }  
     );
     const [registration, setRegistration] = useState<Registration>({

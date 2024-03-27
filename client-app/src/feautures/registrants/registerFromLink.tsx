@@ -51,7 +51,8 @@ function formatDate(date : Date) {
           overview: '',
           published: true,
           public: true,
-          autoApprove: true
+          autoApprove: true,
+          certified: true
         }  
     );
     const [registration, setRegistration] = useState<Registration>({

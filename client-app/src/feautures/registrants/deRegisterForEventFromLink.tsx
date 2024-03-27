@@ -31,7 +31,8 @@ export default observer(function DeRegisterForEventFromLink() {
           overview: '',
           published: true,
           public: true,
-          autoApprove: true
+          autoApprove: true,
+          certified: true
         }
     );
 

@@ -48,7 +48,8 @@ export default observer(function CreateUpdateRegistration() {
           published: false,
           autoApprove: true,
           public: true,
-          registrations: []
+          registrations: [],
+          certified: false
         }  
     );
     const [registrationEventId, setRegistrationEventId] = useState(uuidv4());
@@ -199,6 +200,8 @@ export default observer(function CreateUpdateRegistration() {
         if (!registrationEvent.title || !registrationEvent.title.trim()) error = true;
         if (!registrationEvent.location || !registrationEvent.location.trim()) error = true;
         if(!registrationEvent.startDate  || !registrationEvent.startDate) error = true;
+        if(!registrationEvent.certified) error = true;
+        if(error) window.scrollTo(0,0);
         if(!error){
             setSaving(true);
             setRegistrationEvent(prevState => ({
@@ -245,7 +248,7 @@ export default observer(function CreateUpdateRegistration() {
 
     <Step 
     onClick={handleReviewClick}
-    disabled = {savingFromStepClick || !registrationEvent.title || !registrationEvent.title.trim() || !registrationEvent.location || !registrationEvent.location.trim() || !registrationEvent.startDate || !registrationEvent.endDate  }>
+    disabled = {savingFromStepClick || !registrationEvent.title || !registrationEvent.title.trim() || !registrationEvent.location || !registrationEvent.location.trim() || !registrationEvent.startDate || !registrationEvent.endDate || !registrationEvent.certified  }>
      {savingFromStepClick && <Loader active inline /> }
      {!savingFromStepClick && <Icon name='check' />} 
       <StepContent>
@@ -333,7 +336,7 @@ export default observer(function CreateUpdateRegistration() {
                         registeredUsersIndicator={registeredUsersIndicator}
                         />
                          <Button icon labelPosition='right' floated='right' color='blue' basic size='huge'
-                          disabled = {savingFromStepClick || !registrationEvent.title || !registrationEvent.title.trim() || !registrationEvent.location || !registrationEvent.location.trim() || !registrationEvent.startDate || !registrationEvent.endDate  }
+                          disabled = {savingFromStepClick || !registrationEvent.title || !registrationEvent.title.trim() || !registrationEvent.location || !registrationEvent.location.trim() || !registrationEvent.startDate || !registrationEvent.endDate || !registrationEvent.certified  }
                           loading={savingFromStepClick}
                           onClick={handleReviewClick}
                          >

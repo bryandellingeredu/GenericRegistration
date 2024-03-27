@@ -21,6 +21,7 @@ namespace Domain
         public DateTime EndDate { get; set; }
 
         public bool Published {get; set;}
+        public bool Certified {get; set;}
 
         public bool Public { get; set; }
         public bool AutoApprove { get; set;}    

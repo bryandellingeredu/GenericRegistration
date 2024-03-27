@@ -1,8 +1,10 @@
 import { observer } from "mobx-react-lite";
 import { RegistrationEvent } from "../../app/models/registrationEvent";
-import { Form, FormField, Input } from "semantic-ui-react";
+import { Button, Divider, Form, FormCheckbox, FormField, Input, Radio } from "semantic-ui-react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import { useStore } from "../../app/stores/store";
+import CUIWarningModal from "./CUIWarningModal";
 
 interface Props{
     registrationEvent: RegistrationEvent
@@ -15,6 +17,8 @@ export default observer (function CreateUpdateRegistrationDetails(
     {registrationEvent, setRegistrationEvent, formSubmitted, setFormDirty} : Props
 ){
 
+    const {modalStore} = useStore();
+    const {openModal} = modalStore;
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -36,8 +40,32 @@ export default observer (function CreateUpdateRegistrationDetails(
         }
       };
 
+      const handleCertifiedChange = () => {
+        setRegistrationEvent({ ...registrationEvent, certified: !registrationEvent.certified });
+        setFormDirty();
+      }
+
+      const handleCertifyButtonClick = () => {
+        openModal(<CUIWarningModal />)
+      }
+
     return(
       <Form>
+      <FormField required error={!registrationEvent.certified && formSubmitted}>
+       <label>I certify I will not require any  &nbsp;
+       <Button color='black' basic CUI size='tiny' content='CUI' onClick={handleCertifyButtonClick} />
+        or &nbsp;
+        <Button color='black' basic CUI size='tiny' content='PII' onClick={handleCertifyButtonClick} />
+          when creating questions
+       </label>
+       <Radio
+                slider
+                label={registrationEvent.certified ? 'Certified' : 'Not Certified'}
+                checked={registrationEvent.certified}
+                onChange={handleCertifiedChange}
+              />
+       <Divider />
+      </FormField>
       <FormField error={(!registrationEvent.title || !registrationEvent.title.trim()) && formSubmitted} required>
     <label>Event Title</label>
     <Input

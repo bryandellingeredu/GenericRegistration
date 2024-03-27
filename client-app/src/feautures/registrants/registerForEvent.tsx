@@ -48,6 +48,7 @@ export default observer(function RegisterForEvent() {
           published: true,
           public: true,
           autoApprove: true,
+          certified: true
         }  
     );
     const [registration, setRegistration] = useState<Registration>({

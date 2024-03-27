@@ -28,7 +28,8 @@ export default observer(function ThankYouForRegistering() {
         overview: '',
         published: true,
         public: true,
-        autoApprove: true
+        autoApprove: true,
+        certified: true
       }  
   );
 

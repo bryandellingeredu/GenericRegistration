@@ -11,6 +11,7 @@ export interface RegistrationEvent{
     published: boolean,
     public: boolean
     autoApprove: boolean
+    certified: boolean
     registrations?: Registration[]
     customQuestions?: CustomQuestion[]
 }
