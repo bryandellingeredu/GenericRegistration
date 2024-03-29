@@ -4,6 +4,7 @@ import { CardGroup, Container, Table, TableBody, TableCell, TableHeaderCell, Tab
 import AdministerRegistrantTableRow from "./administerRegistrantTableRow";
 import AdministerRegistrantCard from "./administerRegistrantsCard";
 import { useStore } from "../../app/stores/store";
+import { Registration } from "../../app/models/registration";
 
 
 interface Props{
@@ -14,23 +15,51 @@ interface Props{
     searchFilter: string
     showQuestions: boolean
     showTable: boolean
+    queryOrder: string
 }
 
 export default observer(function AdministerRegistrantTable (
     {registrationEvent, setRegistrationEvent, deleteRegistration,
-     changeRegistered, searchFilter, showQuestions, showTable} : Props
+     changeRegistered, searchFilter, showQuestions, showTable, queryOrder} : Props
 ){
     const {responsiveStore } = useStore();
-    const {isMobile} = responsiveStore
+    const {isMobile} = responsiveStore;
 
-    const filteredRegistrations = searchFilter ?
-    registrationEvent.registrations!.filter(
-        x =>
-        x.firstName.toLocaleLowerCase().includes(searchFilter.toLocaleLowerCase()) ||
-        x.lastName.toLocaleLowerCase().includes(searchFilter.toLocaleLowerCase()) ||
-        x.email.toLocaleLowerCase().includes(searchFilter.toLocaleLowerCase()) 
-        )
-     : registrationEvent.registrations;
+    const sortRegistrations = (registrations: Registration[], queryOrder: string): Registration[] => {
+      return registrations.sort((a, b) => {
+        switch (queryOrder) {
+          case 'registerDtAsc':
+            return new Date(a.registrationDate).getTime() - new Date(b.registrationDate).getTime();
+          case 'registerDtDesc':
+            return new Date(b.registrationDate).getTime() - new Date(a.registrationDate).getTime();
+          case 'lastNameAsc':
+            const nameA = a.lastName.toUpperCase();
+            const nameB = b.lastName.toUpperCase();
+            return nameA.localeCompare(nameB);
+          case 'lastNameDesc':
+            const nameADesc = a.lastName.toUpperCase();
+            const nameBDesc = b.lastName.toUpperCase();
+            return nameBDesc.localeCompare(nameADesc);
+          default:
+            // Handle default case or throw an error if unexpected value
+            return 0;
+        }
+      });
+    };
+
+    const getFilteredAndSortedRegistrations = (registrations: Registration[], searchFilter: string, queryOrder: string): Registration[] => {
+      const filtered = searchFilter
+        ? registrations.filter(x =>
+            x.firstName.toLocaleLowerCase().includes(searchFilter.toLocaleLowerCase()) ||
+            x.lastName.toLocaleLowerCase().includes(searchFilter.toLocaleLowerCase()) ||
+            x.email.toLocaleLowerCase().includes(searchFilter.toLocaleLowerCase())
+          )
+        : registrations;
+    
+      return sortRegistrations(filtered, queryOrder);
+    };
+
+    const filteredSortedRegistrations = getFilteredAndSortedRegistrations(registrationEvent.registrations!, searchFilter, queryOrder);
 
 
     return(
@@ -38,17 +67,7 @@ export default observer(function AdministerRegistrantTable (
         {showTable && 
         <Table celled structured color='teal'>
             <TableBody>
-            {filteredRegistrations!.sort((a, b) => {
-  const nameA = a.lastName.toUpperCase(); // ignore upper and lowercase
-  const nameB = b.lastName.toUpperCase(); // ignore upper and lowercase
-  if (nameA < nameB) {
-    return -1;
-  }
-  if (nameA > nameB) {
-    return 1;
-  }
-  return 0; // names must be equal
-}).map((registration) => (
+            {(filteredSortedRegistrations).map((registration) => (
                <AdministerRegistrantTableRow key={registration.id}
                 registration={registration}
                 questions={registrationEvent.customQuestions!}
@@ -62,17 +81,7 @@ export default observer(function AdministerRegistrantTable (
         }
         {!showTable && 
         <CardGroup itemsPerRow={isMobile ? '1' : '3'}>
-                 {filteredRegistrations!.sort((a, b) => {
-  const nameA = a.lastName.toUpperCase(); // ignore upper and lowercase
-  const nameB = b.lastName.toUpperCase(); // ignore upper and lowercase
-  if (nameA < nameB) {
-    return -1;
-  }
-  if (nameA > nameB) {
-    return 1;
-  }
-  return 0; // names must be equal
-}).map((registration) => (
+                {(filteredSortedRegistrations).map((registration) => (
                <AdministerRegistrantCard key={registration.id}
                 registration={registration}
                 questions={registrationEvent.customQuestions!}

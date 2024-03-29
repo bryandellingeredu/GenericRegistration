@@ -1,5 +1,5 @@
 import { observer } from "mobx-react-lite";
-import { Button, Divider, Form, FormField, FormGroup, Grid, Input, Radio } from "semantic-ui-react";
+import { Button, Divider, DropdownProps, Form, FormField, FormGroup, Grid, Input, Radio, Select } from "semantic-ui-react";
 
 interface Props{
     registrationEventId : string
@@ -9,9 +9,12 @@ interface Props{
     showTable: boolean
     setShowQuestions: (newShowQuestions : boolean) => void
     setShowTable: (newShowTable : boolean) => void
+    queryOrder: string
+    setQueryOrder: (newQueryOrder: string) => void
 }
+
 export default observer(function AdministerRegistrantsFilter(
-    {searchFilter, setSearchFilter, showQuestions, showTable, setShowQuestions, setShowTable, registrationEventId} : Props
+    {searchFilter, setSearchFilter, showQuestions, showTable, setShowQuestions, setShowTable, registrationEventId, queryOrder, setQueryOrder} : Props
 ){
 
     const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -46,6 +49,19 @@ export default observer(function AdministerRegistrantsFilter(
               link.click();
             });
         }
+
+        const handleChange = (e: React.SyntheticEvent<HTMLElement>, data: DropdownProps) => {
+            if (typeof data.value === 'string') {
+              setQueryOrder(data.value);
+            }
+          };
+ 
+        const orderOptions = [
+            {key: '1', value: 'registerDtAsc', text: 'order by registered first'},
+            {key: '2', value: 'registerDtDesc', text: 'order by registered last'},
+            {key: '3', value: 'lastNameAsc', text: 'order by last name (A - Z)'},
+            {key: '4', value: 'lastNameDesc', text: 'order by last name (Z - A)'},
+        ]
     
 
     return(
@@ -84,6 +100,12 @@ export default observer(function AdministerRegistrantsFilter(
                         onChange={handleShowTableChange}
                     />
                 </Form.Field>
+            </Grid.Column>
+            <Grid.Column width={3}>
+                <FormField>
+                    <Select options={orderOptions} value={queryOrder}    onChange={handleChange} />
+                     
+                </FormField>
             </Grid.Column>
             <Grid.Column width={2}>
                 <Form.Field>

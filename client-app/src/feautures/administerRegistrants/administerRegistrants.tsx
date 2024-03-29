@@ -17,6 +17,7 @@ export default observer(function AdministerRegistrants() {
   const [searchFilter, setSearchFilter] = useState('');
 
   const LOCAL_STORAGE_KEY_SHOW_QUESTIONS = 'showQuestions';
+
   const [showQuestions, setShowQuestions] = useState(() => {
     const storedShowQuestions = localStorage.getItem(LOCAL_STORAGE_KEY_SHOW_QUESTIONS);
     return storedShowQuestions !== null ? JSON.parse(storedShowQuestions) : false;
@@ -24,6 +25,16 @@ export default observer(function AdministerRegistrants() {
   useEffect(() => {
     localStorage.setItem(LOCAL_STORAGE_KEY_SHOW_QUESTIONS, JSON.stringify(showQuestions));
   }, [showQuestions]);
+
+  const LOCAL_STORAGE_KEY_QUERY_ORDER = 'queryOrder';
+  const [queryOrder, setQueryOrder] = useState(() => {
+    const storedQueryOrder = localStorage.getItem(LOCAL_STORAGE_KEY_QUERY_ORDER);
+    return storedQueryOrder !== null ? JSON.parse(storedQueryOrder) : 'registerDtAsc';
+  });
+
+  useEffect(() => {
+    localStorage.setItem(LOCAL_STORAGE_KEY_QUERY_ORDER, JSON.stringify(queryOrder));
+  }, [queryOrder]);
 
   const LOCAL_STORAGE_KEY_SHOW_TABLE = 'showTable';
   const [showTable, setShowTable] = useState(() => {
@@ -37,6 +48,7 @@ export default observer(function AdministerRegistrants() {
 
   const handleSetShowQuestions = (newShowQuestions : boolean) => setShowQuestions(newShowQuestions);
   const handleSetShowTable = (newShowTable : boolean) => setShowTable(newShowTable);
+  const handleSetQueryOrder = (newQueryOrder : string) => setQueryOrder(newQueryOrder);
   const handleSetSearchFilter = (newSearchFilter : string) => setSearchFilter(newSearchFilter);
   const [registrationEvent, setRegistrationEvent] = useState<RegistrationEvent>(
     {
@@ -149,6 +161,8 @@ export default observer(function AdministerRegistrants() {
                showTable={showTable}
                setShowTable={handleSetShowTable}
                registrationEventId={id!}
+               queryOrder={queryOrder}
+               setQueryOrder={handleSetQueryOrder}
                />
              }
              {registrationEvent && registrationEvent.registrations && registrationEvent.registrations.length > 0 &&
@@ -160,6 +174,7 @@ export default observer(function AdministerRegistrants() {
                searchFilter={searchFilter}
                showQuestions={showQuestions}
                showTable={showTable}
+               queryOrder={queryOrder}
               />
              }
           </Container>
