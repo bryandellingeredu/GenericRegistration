@@ -388,21 +388,14 @@ export default observer(function RegisterForEvent() {
             {question.questionType === QuestionType.Attachment &&  !findAnswerAttachmentByQuestionId(question.id) &&
                    <>
                    <Divider color="black" />
-                   <Grid>
-                     <Grid.Row>
-                       <Grid.Column width={4}>
-                         <strong>{question.questionText}:</strong>
-                       </Grid.Column>
-                       <Grid.Column width={12}>
+                 
                        <DocumentUploadWidget
                         uploadDocument={handleDocumentUpload}
                         loading={uploading}
                         color={'black'}
                         questionId={question.id}
                         />
-                       </Grid.Column>
-                     </Grid.Row>
-                   </Grid>
+
                    <Divider color="black" />
                  </>
             }
