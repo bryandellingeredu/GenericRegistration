@@ -9,6 +9,7 @@ namespace Domain
     public enum QuestionType
     {
         TextInput,
-        Choice
+        Choice,
+        Attachment
     }
 }

@@ -7,7 +7,7 @@ import { RegistrationEventWebsite } from "../../app/models/registrationEventWebs
 import agent from "../../app/api/agent";
 import { toast } from "react-toastify";
 import LoadingComponent from "../../app/layout/LoadingComponent";
-import { FormField, Grid, Header, Icon, Input, Menu, Form, Select, Button, Message, Divider, MessageList, MessageItem, Dropdown, DropdownProps } from "semantic-ui-react";
+import { FormField, Grid, Header, Icon, Input, Menu, Form, Select, Button, Message, Divider, MessageList, MessageItem, Dropdown, DropdownProps, ButtonContent } from "semantic-ui-react";
 import ArmyLogo from "../home/ArmyLogo";
 import { Editor } from "react-draft-wysiwyg";
 import { EditorState, convertFromRaw  } from "draft-js";
@@ -19,8 +19,11 @@ import { convertToRaw } from 'draft-js';
 import { stateToHTML } from 'draft-js-export-html';
 import { RegistrationWithHTMLContent } from "../../app/models/registrationWithHTMLContent";
 import { useNavigate } from "react-router-dom";
+import { AnswerAttachment } from "../../app/models/answerAttachment";
+import { v4 as uuid } from "uuid";
+import DocumentUploadWidget from "../documentUpload/documentUploadWidget";
 
-
+const apiUrl = import.meta.env.VITE_API_URL;
 
 function formatDate(date : Date) {
   return new Date(date).toLocaleDateString('en-US', {
@@ -32,9 +35,11 @@ function formatDate(date : Date) {
 
 export default observer(function RegisterForEvent() {
   const navigate = useNavigate();
-  const { userStore, responsiveStore } = useStore();
+  const { userStore, responsiveStore, attachmentStore, commonStore } = useStore();
+  const {token} = commonStore;
   const {isMobile} = responsiveStore
   const { user, logout } = userStore;
+  const {uploadAnswerDocument, uploading}  = attachmentStore
     const { id } = useParams();
     const [content, setContent] = useState('');
     const [registrationEvent, setRegistrationEvent] = useState<RegistrationEvent>(
@@ -52,7 +57,7 @@ export default observer(function RegisterForEvent() {
         }  
     );
     const [registration, setRegistration] = useState<Registration>({
-      id: '',
+      id: uuid(),
       registrationEventId: '',
       firstName: '',
       lastName: '',
@@ -62,6 +67,7 @@ export default observer(function RegisterForEvent() {
       registered: false,
       }
     )
+    const [answerAttachments, setAnswerAttachments] = useState<AnswerAttachment[]>([]);
     const [formisDirty, setFormisDirty] = useState(false);
     const [saving, setSaving] = useState(false);
     const [customQuestions, setCustomQuestions] = useState<CustomQuestion[]>([]);
@@ -109,6 +115,11 @@ export default observer(function RegisterForEvent() {
         try{
           const registrationData : Registration = await agent.Registrations.getRegistration(user!.mail, registrationEvent.id);
           setRegistration(registrationData);
+          if(registrationData && registrationData.id ){
+           debugger;
+            const answerAttachmentData : AnswerAttachment[] = await agent.AnswerAttachments.list(registrationData.id)
+            setAnswerAttachments(answerAttachmentData);
+          }
          }catch (error: any) {
           console.log(error);
           if (error && error.message) {
@@ -187,7 +198,7 @@ export default observer(function RegisterForEvent() {
      !registration.email || !registration.email.trim() || !isValidEmail(registration.email);
 
      const customQuestionsErrors = customQuestions.some(question => 
-      question.required &&
+      question.required && question.questionType !== QuestionType.Attachment &&
       (!registration.answers?.find(x => x.customQuestionId === question.id)?.answerText ||
        !registration.answers?.find(x => x.customQuestionId === question.id)?.answerText.trim())
     );
@@ -221,6 +232,74 @@ export default observer(function RegisterForEvent() {
     const emailRegex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@(([^<>()[\]\\.,;:\s@"]+\.)+[^<>()[\]\\.,;:\s@"]{2,})$/i;
     return emailRegex.test(email);
   };
+
+
+
+    const findAnswerAttachmentByQuestionId = (questionId: string): AnswerAttachment | null => {
+      debugger;
+      return answerAttachments.find(x => x.customQuestionLookup === questionId) || null;
+    };
+
+  
+  const handleDocumentUpload = async (file: any, customQuestionId : string) => {
+    const answerAttachmentId = uuid();
+    const fileName = file.name;
+    const fileType = file.type;
+    try{
+    await uploadAnswerDocument(file, answerAttachmentId, customQuestionId, registration.id )
+
+        const answerAttachment: AnswerAttachment = {
+          id: answerAttachmentId,
+          customQuestionLookup: customQuestionId,
+          registrationLookup: registration.id,
+          fileName: fileName,
+          fileType: fileType
+        };
+
+        setAnswerAttachments([...answerAttachments, answerAttachment]);
+        toast.success(`${answerAttachment.fileName} successfully uploaded`);
+      }
+      catch(error :any) {
+        console.log(error);
+        toast.error(`Error uploading ${fileName}: ${error.message}`);
+      }
+    }
+
+
+    const downloadAttachment = async (questionId: string) => {
+      const answerAttachment = answerAttachments.find(x => x.customQuestionLookup === questionId);
+      if (answerAttachment) {
+        try {
+          const headers = new Headers();
+          headers.append("Authorization", `Bearer ${token}`);
+    
+          const requestOptions = {
+            method: "GET",
+            headers: headers,
+          };
+          
+          const attachmentData = await fetch(`${apiUrl}/upload/${answerAttachment.id}`, requestOptions);
+          
+          if (!attachmentData.ok) {
+            throw new Error('Network response was not ok.');
+          }
+    
+          const data = await attachmentData.arrayBuffer();
+          const file = new Blob([data], { type: answerAttachment.fileType });
+          const fileUrl = window.URL.createObjectURL(file);
+          const a = document.createElement("a");
+          a.href = fileUrl;
+          a.download = answerAttachment.fileName;
+          document.body.appendChild(a);
+          a.click();
+          window.URL.revokeObjectURL(fileUrl);
+        } catch (err) {
+          console.error(err);
+        }
+      }
+    };
+    
+
   
 
     if (loading || loading2) return <LoadingComponent content="Loading Data..."/>
@@ -306,6 +385,35 @@ export default observer(function RegisterForEvent() {
             }
             >
             <label>{question.questionText}</label>
+            {question.questionType === QuestionType.Attachment &&  !findAnswerAttachmentByQuestionId(question.id) &&
+                   <>
+                   <Divider color="black" />
+                   <Grid>
+                     <Grid.Row>
+                       <Grid.Column width={4}>
+                         <strong>{question.questionText}:</strong>
+                       </Grid.Column>
+                       <Grid.Column width={12}>
+                       <DocumentUploadWidget
+                        uploadDocument={handleDocumentUpload}
+                        loading={uploading}
+                        color={'black'}
+                        questionId={question.id}
+                        />
+                       </Grid.Column>
+                     </Grid.Row>
+                   </Grid>
+                   <Divider color="black" />
+                 </>
+            }
+              {question.questionType === QuestionType.Attachment   && findAnswerAttachmentByQuestionId(question.id)?.fileName &&
+                <Button animated='vertical' basic color='blue' onClick={() => downloadAttachment(question.id)} type="button">
+                <ButtonContent hidden>Download</ButtonContent>
+                <ButtonContent visible>
+                  <Icon name='paperclip' />{findAnswerAttachmentByQuestionId(question.id)?.fileName} 
+                </ButtonContent>
+              </Button>
+              }
             {question.questionType === QuestionType.TextInput &&
                <Input value={registration.answers?.find(x => x.customQuestionId === question.id)?.answerText} 
                 name={question.id}

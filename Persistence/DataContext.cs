@@ -18,6 +18,8 @@ namespace Persistence
         public DbSet<RegistrationLink> RegistrationLinks { get; set; }
         public DbSet<Answer> Answers { get; set; }
         public DbSet<RegistrationEventOwner> RegistrationEventOwners { get; set; }
+        public DbSet<Attachment> Attachments  {get; set;}
+        public DbSet<AnswerAttachment> AnswerAttachments {get; set;}
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

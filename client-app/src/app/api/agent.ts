@@ -10,6 +10,7 @@ import { RegistrationLink } from '../models/registrationLink';
 import { registrationDTO } from '../models/registrationDTO';
 import { RegistrationWithHTMLContent } from '../models/registrationWithHTMLContent';
 import { RegistrationEventOwner } from '../models/registrationEventOwner';
+import { AnswerAttachment } from '../models/answerAttachment';
 
 axios.defaults.baseURL = import.meta.env.VITE_API_URL;
 
@@ -81,6 +82,23 @@ const RegistrationEventOwners = {
     createUpdate: (registrationEventId: string, registrationEventOwners: RegistrationEventOwner[]) => requests.post<void>(`/registrationEventOwners/${registrationEventId}`, registrationEventOwners)
 }
 
+const AnswerAttachments = {
+    list: (registrationId : string) => requests.get<AnswerAttachment[]>(`/AnswerAttachments/${registrationId}`)
+}
+
+const Uploads = {
+    uploadAnswerAttachment: (file: any, answerAttachmentId: string, customQuestionId: string, registrationId: string ) => {
+        let formData = new FormData();
+        formData.append('File', file);
+        formData.append('answerAttachmentId', answerAttachmentId);
+        formData.append('customQuestionId', customQuestionId);
+        formData.append('registrationId', registrationId);
+        return axios.post('upload/addAnswerAttachment', formData, {
+            headers: {'Content-Type': 'multipart/form-data'}
+          })
+    }
+}
+
 const agent = {
     Registrants,
     Account,
@@ -89,7 +107,9 @@ const agent = {
     CustomQuestions,
     EmailLinks,
     Registrations,
-    RegistrationEventOwners
+    RegistrationEventOwners,
+    AnswerAttachments,
+    Uploads
 }
 
 export default agent;

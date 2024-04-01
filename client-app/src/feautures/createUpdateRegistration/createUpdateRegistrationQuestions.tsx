@@ -60,6 +60,28 @@ export default observer(function CreateUpdateRegistrationQuestions({customQuesti
         setCustomQuestions([...updatedQuestions, customQuestion]);
     };
 
+    const addAttachmentQuestion = (index: number) => {
+      setFormDirty();
+      let newIndex = index + 1;
+      const updatedQuestions = customQuestions.map(question => {
+          if (question.index >= newIndex) {
+              return { ...question, index: question.index + 1 };
+          }
+          return question;
+      });
+  
+      const customQuestion = {
+          id: uuidv4(), 
+          index: newIndex,
+          registrationEventId: registrationEventId, 
+          questionText: 'Upload your document',
+          questionType: QuestionType.Attachment, 
+          required: false
+      };
+
+      setCustomQuestions([...updatedQuestions, customQuestion]);
+  };
+
     const addChoiceQuestion = (index: number) => {
         setFormDirty(); 
         let newIndex = index + 1;
@@ -272,6 +294,7 @@ export default observer(function CreateUpdateRegistrationQuestions({customQuesti
             <Segment key={question.id} style={{backgroundColor: '#f4f4f4'}}>
          <FormGroup>
             <FormField width='9'>
+            {question.questionType === QuestionType.Attachment && <Icon name='paperclip' />}
             <input
               readOnly={registeredUsersIndicator}
               value={question.questionText}
@@ -342,6 +365,15 @@ export default observer(function CreateUpdateRegistrationQuestions({customQuesti
         }}
       >
         Choice
+      </Menu.Item>
+      <Menu.Item
+        name='attachment'
+        onClick={() => {
+          addAttachmentQuestion(question.index);
+          togglePopover(question.id); // Close the popup after action
+        }}
+      >
+        Attachment
       </Menu.Item>
     </Menu>
   </Popup>
@@ -453,6 +485,15 @@ export default observer(function CreateUpdateRegistrationQuestions({customQuesti
           }}
         >
           Choice
+        </Menu.Item>
+        <Menu.Item
+          name='attachment'
+          onClick={() => {
+            addAttachmentQuestion(customQuestions.length > 0 ? Math.max(...customQuestions.map(x => x.index)) : 0);
+            handleClose();
+          }}
+        >
+          Attachment
         </Menu.Item>
       </Menu>
     </Popup>
