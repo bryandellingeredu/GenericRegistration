@@ -11,7 +11,6 @@ export default class AttachmentStore {
       }
 
       uploadAnswerDocument = async (file: any, answerAttachmentId: string, customQuestionId : string, registrationId: string ) => {
-        debugger;
         this.uploading = true;
         try{
           const response = await agent.Uploads.uploadAnswerAttachment(file, answerAttachmentId, customQuestionId, registrationId );

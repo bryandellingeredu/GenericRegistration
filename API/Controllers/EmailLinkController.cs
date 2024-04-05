@@ -32,6 +32,11 @@ namespace API.Controllers
           HandleResult(await Mediator.Send(new GetRegistration.Command { ValidateDTO = validateDTO }));
 
         [AllowAnonymous]
+        [HttpPost("getAnswerAttachments")]
+        public async Task<IActionResult> GetAnswerAttachments([FromBody] ValidateDTO validateDTO) =>
+         HandleResult(await Mediator.Send(new GetAnswerAttachments.Command { ValidateDTO = validateDTO }));
+
+        [AllowAnonymous]
         [HttpPost("createUpdateRegistration")]
         public async Task<IActionResult> CreateUpdateRegistration([FromBody] RegistrationDTO registrationDTO) =>
         HandleResult(await Mediator.Send(new CreateUpdateRegistration.Command { RegistrationDTO = registrationDTO }));
@@ -40,6 +45,11 @@ namespace API.Controllers
         [HttpPost("delete")]
         public async Task<IActionResult> Delete([FromBody] ValidateDTO validateDTO) =>
             HandleResult(await Mediator.Send(new Delete.Command { ValidateDTO = validateDTO }));
+
+        [AllowAnonymous]
+        [HttpPost("deleteAnswerAttachment/{id}")]
+        public async Task<IActionResult> DeleteAnswerAttachment(Guid id, [FromBody] ValidateDTO validateDTO) =>
+          HandleResult(await Mediator.Send(new DeleteAnswerAttachment.Command {AnswerAttachmentId = id, ValidateDTO = validateDTO }));
 
     }
 }

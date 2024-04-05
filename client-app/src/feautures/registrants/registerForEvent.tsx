@@ -7,7 +7,7 @@ import { RegistrationEventWebsite } from "../../app/models/registrationEventWebs
 import agent from "../../app/api/agent";
 import { toast } from "react-toastify";
 import LoadingComponent from "../../app/layout/LoadingComponent";
-import { FormField, Grid, Header, Icon, Input, Menu, Form, Select, Button, Message, Divider, MessageList, MessageItem, Dropdown, DropdownProps, ButtonContent } from "semantic-ui-react";
+import { FormField, Grid, Header, Icon, Input, Menu, Form, Select, Button, Message, Divider, MessageList, MessageItem, Dropdown, DropdownProps, ButtonContent, ButtonGroup, Loader } from "semantic-ui-react";
 import ArmyLogo from "../home/ArmyLogo";
 import { Editor } from "react-draft-wysiwyg";
 import { EditorState, convertFromRaw  } from "draft-js";
@@ -116,7 +116,6 @@ export default observer(function RegisterForEvent() {
           const registrationData : Registration = await agent.Registrations.getRegistration(user!.mail, registrationEvent.id);
           setRegistration(registrationData);
           if(registrationData && registrationData.id ){
-           debugger;
             const answerAttachmentData : AnswerAttachment[] = await agent.AnswerAttachments.list(registrationData.id)
             setAnswerAttachments(answerAttachmentData);
           }
@@ -197,14 +196,19 @@ export default observer(function RegisterForEvent() {
      !registration.lastName || !registration.lastName.trim() ||
      !registration.email || !registration.email.trim() || !isValidEmail(registration.email);
 
-     const customQuestionsErrors = customQuestions.some(question => 
+     const customQuestionsErrors = customQuestions
+     .some(question => 
       question.required && question.questionType !== QuestionType.Attachment &&
       (!registration.answers?.find(x => x.customQuestionId === question.id)?.answerText ||
        !registration.answers?.find(x => x.customQuestionId === question.id)?.answerText.trim())
     );
 
-    formHasError = formHasError || customQuestionsErrors;
+    const attachmentErrors = customQuestions.some(question =>
+      question.required && question.questionType === QuestionType.Attachment &&
+      !findAnswerAttachmentByQuestionId(question.id) 
+      );
 
+    formHasError = formHasError || customQuestionsErrors || attachmentErrors;
 
      if(!formHasError){
        try{
@@ -234,9 +238,7 @@ export default observer(function RegisterForEvent() {
   };
 
 
-
     const findAnswerAttachmentByQuestionId = (questionId: string): AnswerAttachment | null => {
-      debugger;
       return answerAttachments.find(x => x.customQuestionLookup === questionId) || null;
     };
 
@@ -257,7 +259,6 @@ export default observer(function RegisterForEvent() {
         };
 
         setAnswerAttachments([...answerAttachments, answerAttachment]);
-        toast.success(`${answerAttachment.fileName} successfully uploaded`);
       }
       catch(error :any) {
         console.log(error);
@@ -265,6 +266,22 @@ export default observer(function RegisterForEvent() {
       }
     }
 
+    const deleteAttachment = async (questionId: string) => {
+      const answerAttachment = answerAttachments.find(x => x.customQuestionLookup === questionId);
+      if(answerAttachment){
+        try{
+          setAnswerAttachments(answerAttachments.filter(x => x.id !== answerAttachment.id));
+          agent.AnswerAttachments.delete(answerAttachment.id);
+        }  catch (error: any) {
+          console.log(error);
+          if (error && error.message) {
+            toast.error("An error occurred: " + error.message);
+          } else {
+            toast.error("an error occured during save");
+          }
+        } 
+      }
+    }
 
     const downloadAttachment = async (questionId: string) => {
       const answerAttachment = answerAttachments.find(x => x.customQuestionLookup === questionId);
@@ -379,13 +396,29 @@ export default observer(function RegisterForEvent() {
         </FormField>
         {customQuestions.sort((a, b) => a.index - b.index).map((question) => (
           <FormField key={question.id} required={question.required}
-          error={formisDirty && question.required &&
-            (!registration.answers?.find(x => x.customQuestionId === question.id)?.answerText ||
-             !registration.answers?.find(x => x.customQuestionId === question.id)?.answerText.trim()) 
-            }
+          error={
+                  formisDirty &&
+                  question.required &&
+                  (
+                    (question.questionType !== QuestionType.Attachment &&
+                      (!registration.answers?.find(x => x.customQuestionId === question.id)?.answerText ||
+                       !registration.answers?.find(x => x.customQuestionId === question.id)?.answerText.trim()
+                      )
+                    ) 
+                    ||
+                    (
+                      question.questionType === QuestionType.Attachment &&
+                      !findAnswerAttachmentByQuestionId(question.id) 
+                    )
+                 )
+              }
             >
             <label>{question.questionText}</label>
-            {question.questionType === QuestionType.Attachment &&  !findAnswerAttachmentByQuestionId(question.id) &&
+            {question.questionType === QuestionType.Attachment && uploading &&
+             <Loader active inline />
+            }
+
+            {question.questionType === QuestionType.Attachment &&  !findAnswerAttachmentByQuestionId(question.id) && !uploading &&
                    <>
                    <Divider color="black" />
                  
@@ -394,18 +427,27 @@ export default observer(function RegisterForEvent() {
                         loading={uploading}
                         color={'black'}
                         questionId={question.id}
+                        error={formisDirty && question.required && !findAnswerAttachmentByQuestionId(question.id)}
                         />
 
                    <Divider color="black" />
                  </>
             }
-              {question.questionType === QuestionType.Attachment   && findAnswerAttachmentByQuestionId(question.id)?.fileName &&
+              {question.questionType === QuestionType.Attachment  && !uploading  && findAnswerAttachmentByQuestionId(question.id)?.fileName &&
+              <ButtonGroup >
                 <Button animated='vertical' basic color='blue' onClick={() => downloadAttachment(question.id)} type="button">
                 <ButtonContent hidden>Download</ButtonContent>
                 <ButtonContent visible>
                   <Icon name='paperclip' />{findAnswerAttachmentByQuestionId(question.id)?.fileName} 
                 </ButtonContent>
               </Button>
+              <Button animated='vertical' basic color='red' onClick={() => deleteAttachment(question.id)} type="button">
+                <ButtonContent hidden>Delete</ButtonContent>
+                <ButtonContent visible>
+                  <Icon name='x' />
+                </ButtonContent>
+              </Button>
+              </ButtonGroup>
               }
             {question.questionType === QuestionType.TextInput &&
                <Input value={registration.answers?.find(x => x.customQuestionId === question.id)?.answerText} 

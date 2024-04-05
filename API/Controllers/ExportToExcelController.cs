@@ -27,10 +27,19 @@ namespace API.Controllers
                     .ThenInclude(x => x.Answers)
                 .FirstOrDefault(x => x.Id == id);
 
+
+
             if (registrationEvent == null)
             {
                 return NotFound();
             }
+
+            var answerAttachments = _context.AnswerAttachments
+                   .Where(aa => _context.Registrations
+                           .Where(r => r.RegistrationEventId == id)
+                           .Select(r => r.Id)
+                   .Contains(aa.RegistrationLookup))
+                   .ToList();
 
             var header = "First Name, Last Name, Email";
             foreach (var question in registrationEvent.CustomQuestions.OrderBy(x => x.Index))
@@ -44,7 +53,7 @@ namespace API.Controllers
                 var line = $"\"{registration.FirstName}\",\"{registration.LastName}\",\"{registration.Email}\"";
                 foreach (var question in registrationEvent.CustomQuestions.OrderBy(x => x.Index))
                 {
-                    var answer = GetAnswer(question.Id, registration.Answers);
+                    var answer = GetAnswer(question.Id, registration.Answers, question.QuestionType, answerAttachments, registration.Id);
                     line += $",\"{answer.Replace("\"", "\"\"")}\""; 
                 }
                 builder.AppendLine(line);
@@ -53,10 +62,27 @@ namespace API.Controllers
             return File(Encoding.UTF8.GetBytes(builder.ToString()), "text/csv", "registrations.csv");
         }
 
-        private string GetAnswer(Guid questionId, IEnumerable<Answer> answers)
+        private string GetAnswer(Guid questionId, IEnumerable<Answer> answers, QuestionType questionType, List<AnswerAttachment> answerAttachments, Guid id)
         {
-            var answer = answers.FirstOrDefault(x => x.CustomQuestionId == questionId);
-            return answer?.AnswerText.Replace("\r\n", " ").Replace("\n", " ").Replace("\r", " ") ?? string.Empty;
+            if(questionType == QuestionType.Attachment)
+            {
+                if (!answerAttachments.Any()) return string.Empty;
+
+                AnswerAttachment answerAttachment = answerAttachments
+                    .Where(x => x.CustomQuestionLookup == questionId)
+                    .Where(x => x.RegistrationLookup == id)
+                    .FirstOrDefault();
+
+                if (answerAttachment != null) return answerAttachment.FileName.Replace("\r\n", " ").Replace("\n", " ").Replace("\r", " ");
+                return string.Empty;    
+
+            }
+            else
+            {
+                var answer = answers.FirstOrDefault(x => x.CustomQuestionId == questionId);
+                return answer?.AnswerText.Replace("\r\n", " ").Replace("\n", " ").Replace("\r", " ") ?? string.Empty;
+            }
+ 
         }
     }
 }

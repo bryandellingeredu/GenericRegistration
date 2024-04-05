@@ -43,6 +43,66 @@ namespace Application
             }
         }
 
+        public static async Task SendEmailWithAttachments(string[] emails, string subject, string body, EmailAttachment[] emailAttachments = null)
+        {
+            EnsureGraphForAppOnlyAuth();
+            _ = _appClient ?? throw new NullReferenceException("Graph has not been initialized for app-only auth");
+
+            var recipients = emails.Select(email => new Recipient
+            {
+                EmailAddress = new EmailAddress { Address = email }
+            }).ToList();
+
+            var message = new Message
+            {
+                Subject = subject,
+                Body = new ItemBody
+                {
+                    ContentType = BodyType.Html,
+                    Content = body
+                },
+                ToRecipients = recipients
+            };
+
+            // Handle attachments
+            if (emailAttachments != null && emailAttachments.Length > 0)
+            {
+                // Initialize the Attachments collection if it's null
+                message.Attachments = message.Attachments ?? new List<Attachment>();
+
+                foreach (var emailAttachment in emailAttachments)
+                {
+                    byte[] contentBytes = emailAttachment.BinaryData;
+                    var fileAttachment = new FileAttachment
+                    {
+                        // ODataType might not be necessary depending on your Graph SDK version
+                        ContentBytes = contentBytes,
+                        ContentType = emailAttachment.ContentType,
+                        Name = emailAttachment.Name
+                    };
+
+                    message.Attachments.Add(fileAttachment);
+                }
+            }
+
+            Microsoft.Graph.Users.Item.SendMail.SendMailPostRequestBody mailbody = new()
+            {
+                Message = message,
+                SaveToSentItems = false
+            };
+
+            try
+            {
+                await _appClient.Users[_settings.ServiceAccount]
+                .SendMail
+                .PostAsync(mailbody);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
         public static async Task SendEmail(string[] emails, string subject, string body, string icalContent = null, string icalFileName = "invite.ics")
         {
             EnsureGraphForAppOnlyAuth();

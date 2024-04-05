@@ -7,5 +7,12 @@ namespace API.Controllers
     {
         [HttpGet("{id}")]
         public async Task<IActionResult> Details(Guid id) => HandleResult(await Mediator.Send(new List.Query { RegistrationId = id }));
+
+        [HttpGet("GetByRegistrationEvent/{id}")]
+        public async Task<IActionResult> GetByRegistrationEvent(Guid id) => HandleResult(await Mediator.Send(new ListByRegistrationEvent.Query { RegistrationEventId = id }));
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(Guid id) => HandleResult(await Mediator.Send(new Delete.Command { Id = id }));
     }
 }
+

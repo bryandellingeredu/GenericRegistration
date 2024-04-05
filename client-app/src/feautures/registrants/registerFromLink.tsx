@@ -9,7 +9,7 @@ import { EditorState, convertFromRaw  } from "draft-js";
 import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
 import { QuestionType } from "../../app/models/questionType";
 import { useStore } from '../../app/stores/store';
-import { Button, DropdownProps, Form, FormField, Grid, Header, Icon, Input, Menu, Message, Select } from "semantic-ui-react";
+import { Button, ButtonContent, ButtonGroup, Divider, DropdownProps, Form, FormField, Grid, Header, Icon, Input, Loader, Menu, Message, Select } from "semantic-ui-react";
 import { RegistrationEvent } from "../../app/models/registrationEvent";
 import { RegistrationLink } from "../../app/models/registrationLink";
 import { RegistrationEventWebsite } from "../../app/models/registrationEventWebsite";
@@ -18,6 +18,11 @@ import { Registration } from "../../app/models/registration";
 import { registrationDTO } from "../../app/models/registrationDTO";
 import { stateToHTML } from "draft-js-export-html";
 import { useNavigate } from "react-router-dom";
+import { AnswerAttachment } from "../../app/models/answerAttachment";
+import { v4 as uuid } from "uuid";
+import DocumentUploadWidget from "../documentUpload/documentUploadWidget";
+
+const apiUrl = import.meta.env.VITE_API_URL;
 
 const query = new URLSearchParams(location.search);
 function formatDate(date : Date) {
@@ -30,8 +35,9 @@ function formatDate(date : Date) {
 
   export default observer(function RegisterFromLink() {
 
-    const { responsiveStore } = useStore();
+    const { responsiveStore, attachmentStore } = useStore();
     const {isMobile} = responsiveStore
+    const {uploadAnswerDocument, uploading}  = attachmentStore
     const navigate = useNavigate();
     const [formisDirty, setFormisDirty] = useState(false);
     const [editorState, setEditorState] = useState(() => EditorState.createEmpty());
@@ -56,7 +62,7 @@ function formatDate(date : Date) {
         }  
     );
     const [registration, setRegistration] = useState<Registration>({
-      id: '',
+      id: uuid(),
       registrationEventId: '',
       firstName: '',
       lastName: '',
@@ -66,6 +72,7 @@ function formatDate(date : Date) {
       registered: false
       }
     )
+    const [answerAttachments, setAnswerAttachments] = useState<AnswerAttachment[]>([]);
     const [customQuestions, setCustomQuestions] = useState<CustomQuestion[]>([]);
     const [email, setEmail] = useState('');
 
@@ -114,8 +121,14 @@ function formatDate(date : Date) {
             if(registrationEventWebsite && registrationEventWebsite) setContent(registrationEventWebsite.content);
             const customQuestionData : CustomQuestion[] = await agent.CustomQuestions.details(registrationEvent.id);
             if(customQuestionData && customQuestionData.length) setCustomQuestions(customQuestionData);
-            const registrationData : Registration = await agent.EmailLinks.getRegistration(decodedKey)
-            setRegistration(registrationData);
+            const registrationData : Registration = await agent.EmailLinks.getRegistration(decodedKey);
+            if(registrationData && registrationData.id && registrationData.email){
+              setRegistration(registrationData);
+              const answerAttachmentData : AnswerAttachment[] = await agent.EmailLinks.getAnswerAttachments(decodedKey);
+              setAnswerAttachments(answerAttachmentData);
+            }  
+
+        
           } catch (error: any) {
             console.log(error);
             if (error && error.message) {
@@ -129,7 +142,12 @@ function formatDate(date : Date) {
           }
     }
 
+    const findAnswerAttachmentByQuestionId = (questionId: string): AnswerAttachment | null => {
+      return answerAttachments.find(x => x.customQuestionLookup === questionId) || null;
+    };
+
     const handleSubmit = async () => {
+      debugger;
       if(!saving){
       setFormisDirty(true);
       let formHasError =
@@ -137,12 +155,21 @@ function formatDate(date : Date) {
        !registration.lastName || !registration.lastName.trim() 
 
        const customQuestionsErrors = customQuestions.some(question => 
-        question.required &&
+        question.required && question.questionType !== QuestionType.Attachment &&
         (!registration.answers?.find(x => x.customQuestionId === question.id)?.answerText ||
          !registration.answers?.find(x => x.customQuestionId === question.id)?.answerText.trim())
       );
 
-      formHasError = formHasError || customQuestionsErrors;
+      const findAnswerAttachmentByQuestionId = (questionId: string): AnswerAttachment | null => {
+        return answerAttachments.find(x => x.customQuestionLookup === questionId) || null;
+      };
+
+      const attachmentErrors = customQuestions.some(question =>
+        question.required && question.questionType === QuestionType.Attachment &&
+        !findAnswerAttachmentByQuestionId(question.id) 
+        );
+
+      formHasError = formHasError || customQuestionsErrors || attachmentErrors;
 
 
        if(!formHasError){
@@ -197,6 +224,83 @@ function formatDate(date : Date) {
         }
       }
     }
+
+    const handleDocumentUpload = async (file: any, customQuestionId : string) => {
+      const answerAttachmentId = uuid();
+      const fileName = file.name;
+      const fileType = file.type;
+      try{
+      await uploadAnswerDocument(file, answerAttachmentId, customQuestionId, registration.id )
+  
+          const answerAttachment: AnswerAttachment = {
+            id: answerAttachmentId,
+            customQuestionLookup: customQuestionId,
+            registrationLookup: registration.id,
+            fileName: fileName,
+            fileType: fileType
+          };
+  
+          setAnswerAttachments([...answerAttachments, answerAttachment]);
+        }
+        catch(error :any) {
+          console.log(error);
+          toast.error(`Error uploading ${fileName}: ${error.message}`);
+        }
+      }
+
+      const deleteAttachment = async (questionId: string) => {
+        const answerAttachment = answerAttachments.find(x => x.customQuestionLookup === questionId);
+        if(answerAttachment){
+          try{
+            setAnswerAttachments(answerAttachments.filter(x => x.id !== answerAttachment.id));
+            const decodedKey = decodeURIComponent(encryptedKey!);
+            agent.EmailLinks.deleteAnswerAttachment(decodedKey, answerAttachment.id);
+          }  catch (error: any) {
+            console.log(error);
+            if (error && error.message) {
+              toast.error("An error occurred: " + error.message);
+            } else {
+              toast.error("an error occured during save");
+            }
+          } 
+        }
+      }
+
+      const downloadAttachment = async (questionId: string) => {
+        const answerAttachment = answerAttachments.find(x => x.customQuestionLookup === questionId);
+        if (answerAttachment) {
+          try {
+            const decodedKey = decodeURIComponent(encryptedKey!);
+            const body = JSON.stringify({
+              id: answerAttachment!.id,
+              encryptedKey: decodedKey
+            });
+            const requestOptions = {
+              method: "POST",
+              headers: { 'Content-Type': 'application/json' }, 
+              body: body 
+            };
+            
+            const attachmentData = await fetch(`${apiUrl}/upload/download`, requestOptions);
+            
+            if (!attachmentData.ok) {
+              throw new Error('Network response was not ok.');
+            }
+      
+            const data = await attachmentData.arrayBuffer();
+            const file = new Blob([data], { type: answerAttachment.fileType });
+            const fileUrl = window.URL.createObjectURL(file);
+            const a = document.createElement("a");
+            a.href = fileUrl;
+            a.download = answerAttachment.fileName;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(fileUrl);
+          } catch (err) {
+            console.error(err);
+          }
+        }
+      };
 
 
 
@@ -279,12 +383,61 @@ function formatDate(date : Date) {
        </FormField>
         {customQuestions.sort((a, b) => a.index - b.index).map((question) => (
           <FormField key={question.id} required={question.required}
-          error={formisDirty && question.required &&
-             (!registration.answers?.find(x => x.customQuestionId === question.id)?.answerText ||
-              !registration.answers?.find(x => x.customQuestionId === question.id)?.answerText.trim()) 
-             }
+          error={
+            formisDirty &&
+            question.required &&
+            (
+              (question.questionType !== QuestionType.Attachment &&
+                (!registration.answers?.find(x => x.customQuestionId === question.id)?.answerText ||
+                 !registration.answers?.find(x => x.customQuestionId === question.id)?.answerText.trim()
+                )
+              ) 
+              ||
+              (
+                question.questionType === QuestionType.Attachment &&
+                !findAnswerAttachmentByQuestionId(question.id) 
+              )
+           )
+        }
           >
             <label>{question.questionText}</label>
+            {question.questionType === QuestionType.Attachment && uploading &&
+             <Loader active inline />
+            }
+
+             {question.questionType === QuestionType.Attachment &&  !findAnswerAttachmentByQuestionId(question.id) && !uploading &&
+                   <>
+                   <Divider color="black" />
+                 
+                       <DocumentUploadWidget
+                        uploadDocument={handleDocumentUpload}
+                        loading={uploading}
+                        color={'black'}
+                        questionId={question.id}
+                        error={formisDirty && question.required && !findAnswerAttachmentByQuestionId(question.id)}
+                        />
+
+                   <Divider color="black" />
+                 </>
+              }
+
+             {question.questionType === QuestionType.Attachment  && !uploading  && findAnswerAttachmentByQuestionId(question.id)?.fileName &&
+              <ButtonGroup >
+                <Button animated='vertical' basic color='blue' onClick={() => downloadAttachment(question.id)} type="button">
+                <ButtonContent hidden>Download</ButtonContent>
+                <ButtonContent visible>
+                  <Icon name='paperclip' />{findAnswerAttachmentByQuestionId(question.id)?.fileName} 
+                </ButtonContent>
+              </Button>
+              <Button animated='vertical' basic color='red' onClick={() => deleteAttachment(question.id)} type="button">
+                <ButtonContent hidden>Delete</ButtonContent>
+                <ButtonContent visible>
+                  <Icon name='x' />
+                </ButtonContent>
+              </Button>
+              </ButtonGroup>
+              }
+
             {question.questionType === QuestionType.TextInput &&
              <Input value={registration.answers?.find(x => x.customQuestionId === question.id)?.answerText} 
               name={question.id}

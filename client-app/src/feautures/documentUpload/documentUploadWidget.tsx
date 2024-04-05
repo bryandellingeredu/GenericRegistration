@@ -7,9 +7,10 @@ interface Props {
   uploadDocument: (file: any, questionId: string) => void;
   color: string;
   questionId: string;
+  error: boolean;
 }
 
-export default function DocumentUploadWidget({ loading, uploadDocument, color, questionId }: Props) {
+export default function DocumentUploadWidget({ loading, uploadDocument, color, questionId, error }: Props) {
   const [files, setFiles] = useState<any>([]);
   const uploadInitiated = useRef<boolean>(false);
 
@@ -26,7 +27,7 @@ export default function DocumentUploadWidget({ loading, uploadDocument, color, q
     <Grid>
       <Grid.Row>
         <Grid.Column width={16}>
-          <DocumentUploadWidgetDropzone setFiles={onFileAdded} />
+          <DocumentUploadWidgetDropzone setFiles={onFileAdded} error={error}/>
           {files.length > 0 && (
             <div style={{ marginTop: '20px', textAlign: 'center' }}>
               <Header as='h2' icon style={{ color: color }}>

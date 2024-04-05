@@ -1,8 +1,14 @@
+import { observer } from "mobx-react-lite";
 import { Registration } from "../../app/models/registration";
 import {  useState } from "react";
 import { CustomQuestion } from "../../app/models/customQuestion";
-import { Button, Card, CardContent, CardDescription, CardHeader, CardMeta, Feed, FeedContent, FeedEvent, FeedLabel, Icon, Popup } from "semantic-ui-react";
+import { Button, ButtonContent, Card, CardContent, CardDescription, CardHeader, CardMeta, Feed, FeedContent, FeedEvent, FeedLabel, Icon, Popup } from "semantic-ui-react";
 import { format } from 'date-fns';
+import { AnswerAttachment } from "../../app/models/answerAttachment";
+import { QuestionType } from "../../app/models/questionType";
+import { useStore } from "../../app/stores/store";
+
+const apiUrl = import.meta.env.VITE_API_URL;
 
 interface Props{
     registration: Registration
@@ -10,17 +16,30 @@ interface Props{
     deleteRegistration: (id: string) => void
     changeRegistered: (id: string, registered: boolean) => void
     showQuestions: boolean
+    answerAttachments: AnswerAttachment[]
 }
 
-export default function AdministerRegistrantCard(
-    {registration, questions, deleteRegistration, changeRegistered, showQuestions } : Props){
+export default observer(function AdministerRegistrantCard(
+    {registration, questions, deleteRegistration, changeRegistered, showQuestions, answerAttachments } : Props){
 
+      const {  commonStore } = useStore();
+      const {token} = commonStore;
         const formattedDate = format(new Date(registration.registrationDate), 'MMM do');
         const orderedQuestions = questions.sort((a, b) => a.index - b.index);
         const [isVisible, setIsVisible] = useState(true);
 
         const getAnswer = (questionId : string) => {
             return  registration.answers!.find(x => x.customQuestionId === questionId)?.answerText || '';
+        }
+
+        const getAttachment = (questionId : string) => {
+          if (!answerAttachments || answerAttachments.length < 1) return null;
+          const filteredAnswerAttachments = answerAttachments.filter(x => x.registrationLookup === registration.id);
+          if(filteredAnswerAttachments && filteredAnswerAttachments.length > 0){
+            return filteredAnswerAttachments.find(x => x.customQuestionLookup === questionId)
+          }else{
+            return null;
+          }
         }
     
 
@@ -56,6 +75,39 @@ export default function AdministerRegistrantCard(
             return null;
           }
 
+          const downloadAttachment = async (questionId: string) => {
+            const answerAttachment = getAttachment(questionId)
+            if (answerAttachment) {
+              try {
+                const headers = new Headers();
+                headers.append("Authorization", `Bearer ${token}`);
+          
+                const requestOptions = {
+                  method: "GET",
+                  headers: headers,
+                };
+                
+                const attachmentData = await fetch(`${apiUrl}/upload/${answerAttachment.id}`, requestOptions);
+                
+                if (!attachmentData.ok) {
+                  throw new Error('Network response was not ok.');
+                }
+          
+                const data = await attachmentData.arrayBuffer();
+                const file = new Blob([data], { type: answerAttachment.fileType });
+                const fileUrl = window.URL.createObjectURL(file);
+                const a = document.createElement("a");
+                a.href = fileUrl;
+                a.download = answerAttachment.fileName;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(fileUrl);
+              } catch (err) {
+                console.error(err);
+              }
+            }
+          };
+
         return(
             <Card color='teal'style={style}>
             <CardContent>
@@ -80,7 +132,23 @@ export default function AdministerRegistrantCard(
                 <FeedEvent key={index}>
                    <FeedContent>
                     <strong>{question.questionText} :</strong>
-                   {getAnswer(question.id)}
+                    {question.questionType !== QuestionType.Attachment && getAnswer(question.id)}
+                    {question.questionType === QuestionType.Attachment && !getAttachment(question.id) && 
+                     <span></span>
+                    }
+                     {question.questionType === QuestionType.Attachment && getAttachment(question.id) && 
+                      <Button animated='vertical'
+                       size='tiny'
+                        basic color='blue'
+                        onClick={() => downloadAttachment(question.id)}
+                         type="button"
+                         style={{marginLeft: '10px'}}>
+                      <ButtonContent hidden>Download</ButtonContent>
+                      <ButtonContent visible>
+                        <Icon name='paperclip' />{getAttachment(question.id)!.fileName || 'file'} 
+                      </ButtonContent>
+                    </Button>
+                     }
                    </FeedContent>
                 </FeedEvent>
                 ))}
@@ -110,4 +178,4 @@ export default function AdministerRegistrantCard(
           </CardContent>
             </Card>
         )
-    }
+    })

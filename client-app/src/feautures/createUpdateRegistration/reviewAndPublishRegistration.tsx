@@ -221,6 +221,7 @@ export default observer(function ReviewAndPublishRegistration(
                       loading={false}
                       color={'black'}
                       questionId={question.id}
+                      error={false}
                     />
                   </Grid.Column>
                 </Grid.Row>

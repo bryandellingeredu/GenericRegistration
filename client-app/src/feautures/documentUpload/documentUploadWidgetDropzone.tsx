@@ -5,13 +5,14 @@ import { Header, Icon } from 'semantic-ui-react';
 
 interface Props{
     setFiles: (files: any) => void;
+    error: boolean
 }
 
-export default function DocumentUploadWidgetDropzone({setFiles}: Props) {
+export default function DocumentUploadWidgetDropzone({setFiles, error}: Props) {
    
     const dzStyles = {
         border: 'dashed 3px #eee',
-        borderColor: '#eee',
+        borderColor: error ? 'red' :'#eee',
         borderRadius: '5px',
         paddingTop: '30px',
         textAlign: 'center' as 'center',
@@ -47,8 +48,8 @@ export default function DocumentUploadWidgetDropzone({setFiles}: Props) {
   return (
     <div {...getRootProps()} style={isDragActive ? {...dzStyles, ...dzActive} : dzStyles}>
             <input {...getInputProps()} />
-            <Icon name='hand point down' size='huge' />
-            <Header content='Drag And Drop, Or Click To Browse' />
+            <Icon name='hand point down' size='huge' color={error ? 'red' : 'black'} />
+            <Header content='Drag And Drop, Or Click To Browse' color={error ? 'red' : 'black'} />
         </div>
   )
 }   

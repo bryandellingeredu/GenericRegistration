@@ -97,12 +97,15 @@ namespace Application.Registrations
 
             private async Task SendEmailToEventOwner(RegistrationWithHTMLContent registration, string status)
             {
+                bool hasAttachments = false;
                 List<string> emails = new List<string>();
 
                 RegistrationEvent registrationEvent = await _context.RegistrationEvents
                     .Where(x => x.Id == registration.RegistrationEventId)
                     .FirstAsync();
                 emails.Add(registrationEvent.CreatedBy);
+
+                List<AnswerAttachment> answerAttachments = await _context.AnswerAttachments.AsNoTracking().Where(x => x.RegistrationLookup == registration.Id).ToListAsync();
 
                 List<RegistrationEventOwner> registrationEventOwners = await _context.RegistrationEventOwners
                     .AsNoTracking()
@@ -122,11 +125,48 @@ namespace Application.Registrations
                 body += $"<p><strong>Email: </strong> <a href='mailto:{registration.Email}'>{registration.Email}</a></p>";
                 foreach (var question in customQuestions)
                 {
-                    body = body + $"<p><strong>{question.QuestionText}: </strong> {registration.Answers.Where(x => x.CustomQuestionId == question.Id).FirstOrDefault().AnswerText ?? string.Empty}</p>";
+                    if (question.QuestionType != QuestionType.Attachment)
+                    {
+                        body = body + $"<p><strong>{question.QuestionText}: </strong> {registration.Answers.Where(x => x.CustomQuestionId == question.Id).FirstOrDefault().AnswerText ?? string.Empty}</p>";
+                    }
+                    if(question.QuestionType == QuestionType.Attachment)
+                    {
+                        if (answerAttachments.Any() && answerAttachments.FirstOrDefault(x => x.CustomQuestionLookup == question.Id) != null)
+                        {
+                            hasAttachments = true;
+                            body = body + $"<p><strong>{question.QuestionText}: </strong> {answerAttachments.First(x => x.CustomQuestionLookup == question.Id).FileName}</p>";
+                        }
+                        else
+                        {
+                            body = body + $"<p><strong>{question.QuestionText}: </strong></p>";
+                        }
+                    }
+                    
                 }
                 try
                 {
-                    await GraphHelper.SendEmail(emails.ToArray(), title, body);
+                    if (hasAttachments)
+                    {
+                        List<EmailAttachment> emailAttachments = new List<EmailAttachment>();
+                        foreach (AnswerAttachment answerAttachment in answerAttachments)
+                        {
+                            Domain.Attachment attachment = await _context.Attachments.FindAsync(answerAttachment.AttachmentId);
+                            byte[] binaryData = attachment.BinaryData;
+                            emailAttachments.Add(new EmailAttachment
+                            {
+                                Name = answerAttachment.FileName,
+                                ContentType = answerAttachment.FileType,
+                                BinaryData = binaryData
+                            });
+                        }
+                        await GraphHelper.SendEmailWithAttachments(emails.ToArray(), title, body, emailAttachments.ToArray());
+                    }
+                    else
+                    {
+                        await GraphHelper.SendEmail(emails.ToArray(), title, body);
+                       
+                    }
+                  
                 }
                 catch (Exception ex)
                 {

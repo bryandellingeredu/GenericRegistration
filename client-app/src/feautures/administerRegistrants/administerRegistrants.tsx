@@ -9,6 +9,7 @@ import ManageRegistrationNavbar from '../../app/layout/ManageRegistrationNavbar'
 import { Container, Header, Icon, Message } from 'semantic-ui-react';
 import AdministerRegistrantTable from './administerRegistrantTable';
 import AdministerRegistrantsFilter from './administerRegistrantsFilter';
+import { AnswerAttachment } from '../../app/models/answerAttachment';
 
 export default observer(function AdministerRegistrants() {
   const navigate = useNavigate();
@@ -66,6 +67,8 @@ export default observer(function AdministerRegistrants() {
     }  
 );
 
+const [answerAttachments, setAnswerAttachments] = useState<AnswerAttachment[]>([]);
+
   useEffect(() => {
     if(id) getRegistrationEvent();     
   }, [id]);
@@ -120,6 +123,8 @@ export default observer(function AdministerRegistrants() {
     try{
       const registrationEvent : RegistrationEvent = await agent.RegistrationEvents.details(id!);
       setRegistrationEvent(registrationEvent);
+      const answerAttachmentData : AnswerAttachment[] = await agent.AnswerAttachments.listByEventRegistration(id!)
+      setAnswerAttachments(answerAttachmentData);
       }catch (error: any) {
             console.log(error);
             if (error && error.message) {
@@ -141,7 +146,7 @@ export default observer(function AdministerRegistrants() {
         <div style={{ textAlign: 'center', width: '100%' }}>
                         <Header as='h1' icon style={{ display: 'inline-block', margin: '0 auto', color: '#0d47a1' }}> {/* Dark blue text */}
                             <Icon name='users' color='teal' /> 
-                            Manage Users
+                            Manage Registrants
                             <Header.Subheader style={{ color: '#666' }}> 
                                 <h3>Manage users that have registered for {registrationEvent.title}</h3>
                             </Header.Subheader>
@@ -168,6 +173,7 @@ export default observer(function AdministerRegistrants() {
              {registrationEvent && registrationEvent.registrations && registrationEvent.registrations.length > 0 &&
              <AdministerRegistrantTable
                registrationEvent={registrationEvent}
+               answerAttachments={answerAttachments}
                setRegistrationEvent={handleSetRegistrationEvent}
                deleteRegistration={handleDeleteRegistration}
                changeRegistered={handleChangeRegistered}

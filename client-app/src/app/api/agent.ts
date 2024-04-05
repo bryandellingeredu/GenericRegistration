@@ -65,7 +65,9 @@ const EmailLinks = {
     getRegistrationEvent: (encryptedKey: string) => requests.post<RegistrationEvent>('/EmailLink/getRegistrationEvent', {encryptedKey}),
     getRegistrationLink: (encryptedKey: string) => requests.post<RegistrationLink>('/EmailLink/getRegistrationLink', {encryptedKey}),
     getRegistration: (encryptedKey: string) => requests.post<Registration>('/EmailLink/getRegistration', {encryptedKey}),
-    createUpdateRegistration: (data: registrationDTO) => requests.post<void>('/EmailLink/createUpdateRegistration', data)
+    createUpdateRegistration: (data: registrationDTO) => requests.post<void>('/EmailLink/createUpdateRegistration', data),
+    getAnswerAttachments: (encryptedKey: string) => requests.post<AnswerAttachment[]>('/EmailLink/getAnswerAttachments', {encryptedKey}),
+    deleteAnswerAttachment: (encryptedKey: string, answerAttachmentId: string) => requests.post<void>(`/EmailLink/deleteAnswerAttachment/${answerAttachmentId}`, {encryptedKey}),
 }
 
 const Registrations = {
@@ -83,7 +85,9 @@ const RegistrationEventOwners = {
 }
 
 const AnswerAttachments = {
-    list: (registrationId : string) => requests.get<AnswerAttachment[]>(`/AnswerAttachments/${registrationId}`)
+    list: (registrationId : string) => requests.get<AnswerAttachment[]>(`/AnswerAttachments/${registrationId}`),
+    listByEventRegistration: (eventRegistrationId: string)  => requests.get<AnswerAttachment[]>(`/AnswerAttachments/GetByRegistrationEvent/${eventRegistrationId}`),
+    delete: (answerAttachmentId: string) => requests.del<void>(`/AnswerAttachments/${answerAttachmentId}`)
 }
 
 const Uploads = {
@@ -97,6 +101,7 @@ const Uploads = {
             headers: {'Content-Type': 'multipart/form-data'}
           })
     }
+    
 }
 
 const agent = {

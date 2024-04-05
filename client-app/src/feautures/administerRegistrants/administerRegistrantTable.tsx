@@ -5,6 +5,7 @@ import AdministerRegistrantTableRow from "./administerRegistrantTableRow";
 import AdministerRegistrantCard from "./administerRegistrantsCard";
 import { useStore } from "../../app/stores/store";
 import { Registration } from "../../app/models/registration";
+import { AnswerAttachment } from "../../app/models/answerAttachment";
 
 
 interface Props{
@@ -16,11 +17,12 @@ interface Props{
     showQuestions: boolean
     showTable: boolean
     queryOrder: string
+    answerAttachments: AnswerAttachment[]
 }
 
 export default observer(function AdministerRegistrantTable (
     {registrationEvent, setRegistrationEvent, deleteRegistration,
-     changeRegistered, searchFilter, showQuestions, showTable, queryOrder} : Props
+     changeRegistered, searchFilter, showQuestions, showTable, queryOrder, answerAttachments} : Props
 ){
     const {responsiveStore } = useStore();
     const {isMobile} = responsiveStore;
@@ -74,6 +76,7 @@ export default observer(function AdministerRegistrantTable (
                 deleteRegistration={deleteRegistration}
                 changeRegistered={changeRegistered}
                 showQuestions={showQuestions}
+                answerAttachments={answerAttachments}
                 />       
             ))}
             </TableBody>
@@ -88,6 +91,7 @@ export default observer(function AdministerRegistrantTable (
                 deleteRegistration={deleteRegistration}
                 changeRegistered={changeRegistered}
                 showQuestions={showQuestions}
+                answerAttachments={answerAttachments}
                 />       
             ))}
         </CardGroup>
