@@ -465,9 +465,9 @@ function formatDate(date : Date) {
           </FormField>
             ))}
             {registration.registered && 
-            <Button type='button' size='huge' color='red' floated="right" content='Cancel Registration' onClick={() => navigate(`/deregisterforeventfromlink/${encodeURIComponent(encryptedKey!)}`)}  />
+            <Button type='button' size={isMobile ? 'tiny' : 'huge'} color='red' floated="right" content='Cancel Registration' onClick={() => navigate(`/deregisterforeventfromlink/${encodeURIComponent(encryptedKey!)}`)}  />
             }
-            <Button type='submit' size='huge' primary floated="right" content={registration.registered ? 'Update Registration': 'Register'} loading={saving} />
+            <Button type='submit' size={isMobile ? 'tiny' : 'huge'}  primary floated="right" content={registration.registered ? 'Update Registration': 'Register'} loading={saving} />
         </Form>
               </Grid.Column>
               </Grid.Row>

@@ -59,7 +59,7 @@ export default observer ( function HomePage() {
                 }
             
               
-                    <ButtonGroup size="huge" color="yellow" inverted>
+                    <ButtonGroup size={isMobile ? 'tiny' : 'huge'} color="yellow" inverted>
                     <Button onClick={() => navigate('/viewallevents')}>   register for events</Button>
                     <Button onClick={navigateBasedOnLoginStatus}> manage events</Button>
                     </ButtonGroup>                                                 

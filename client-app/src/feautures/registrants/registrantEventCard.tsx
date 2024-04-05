@@ -2,13 +2,15 @@ import { observer } from "mobx-react-lite";
 import { RegistrationEvent } from "../../app/models/registrationEvent";
 import { Button, Card, CardContent, CardDescription, CardHeader, CardMeta, Header, HeaderContent, Icon } from "semantic-ui-react";
 import { useNavigate } from "react-router-dom";
+import { useStore } from "../../app/stores/store";
 interface Props {
     event: RegistrationEvent
   }
 
 export default observer (function RegistrantEventCard({event} : Props) {
   const navigate = useNavigate();
-
+  const { responsiveStore } = useStore();
+  const {isMobile} = responsiveStore
     return(
         <Card color='teal'>
         <CardContent>
@@ -44,8 +46,9 @@ export default observer (function RegistrantEventCard({event} : Props) {
  
             <Button  color='teal' fluid size='huge' icon labelPosition='left'
             onClick={() => navigate(`/registerforevent/${event.id}`)}>
-                  <Icon name='world' size="big" />
+              {!isMobile &&  <Icon name='world' size="big" /> }
               Go To Registration Page
+          
             </Button>
         </CardContent>
       </Card>

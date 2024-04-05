@@ -141,6 +141,7 @@ export default observer ( function LoginUser() {
             <Icon name='envelope' />
             Email Link
           </Header>
+          {isMobile && <div></div>}
           <Button basic onClick={handleSendLink}>Send Link</Button>  
         </Grid.Column>
         }

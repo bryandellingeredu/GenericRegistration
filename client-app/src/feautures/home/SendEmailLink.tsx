@@ -74,7 +74,7 @@ export default observer ( function SendEmailLink() {
                 {!emailSent && 
                 <Segment color='teal' >
 
-                  <Form size="huge" onSubmit={handleSubmit}>
+                  <Form size={isMobile ? 'tiny' : 'huge'} onSubmit={handleSubmit} >
                   <Divider horizontal >
                         <Header as='h4' color='teal'>
                         <Icon name='paperclip' />
@@ -82,6 +82,18 @@ export default observer ( function SendEmailLink() {
                         </Header>
                     </Divider>
                     <FormField required={true} error={formIsDirty && !isEmailValid}>
+                    {isMobile &&
+                     <Input 
+                     label={{ icon: 'asterisk' }}
+                     labelPosition='right corner'
+                     placeholder='Enter Email Address...'
+                     icon='envelope' iconPosition='left'
+                     value={email}
+                     onChange={handleEmailChange}
+                     error={!isEmailValid}
+                    />
+                    }
+                    {!isMobile &&
                     <Input 
                         style={{minWidth: '600px'}}
                         label={{ icon: 'asterisk' }}
@@ -92,10 +104,11 @@ export default observer ( function SendEmailLink() {
                         onChange={handleEmailChange}
                         error={!isEmailValid}
                     />
+                  }
       {!isEmailValid && <span style={{color: 'red'}}>Please enter a valid email address.</span>}
     </FormField>
                     <FormField>
-                        <Button type='submit' content='Send Link' size="huge"
+                        <Button type='submit' content='Send Link' size={isMobile ? 'tiny' : 'huge'}
                          color='teal' loading={saving} />
                     </FormField>
                   </Form>
