@@ -15,11 +15,13 @@ namespace API.Controllers
     {
         private readonly DataContext _context;
         private readonly EncryptionHelper _encryptionHelper;
+        private readonly IWebHostEnvironment _env;
 
-        public UploadController(DataContext context, EncryptionHelper encryptionHelper)
+        public UploadController(DataContext context, EncryptionHelper encryptionHelper, IWebHostEnvironment env)
         {
             _context = context;
             _encryptionHelper = encryptionHelper;
+            _env = env; 
         }
 
         [HttpGet("{id}")]
@@ -67,6 +69,74 @@ namespace API.Controllers
             command.CustomQuestionId = Guid.Parse(customQuestionId);
             command.RegistrationId = Guid.Parse(registrationId);    
             return HandleResult(await Mediator.Send(command));
+        }
+
+        [AllowAnonymous]
+        [HttpPost("uploadImage")]
+        public async Task<IActionResult> UploadImage([FromForm] IFormFile imageFile)
+
+        {
+            if (imageFile == null || imageFile.Length == 0)
+            {
+                return BadRequest("No file uploaded.");
+            }
+
+            // Convert the image to a byte array
+            byte[] fileBytes;
+            using (var memoryStream = new MemoryStream())
+            {
+                await imageFile.CopyToAsync(memoryStream);
+                fileBytes = memoryStream.ToArray();
+            }
+
+            Domain.Attachment attachment = new Domain.Attachment { BinaryData = fileBytes };
+            _context.Attachments.Add(attachment);
+            await _context.SaveChangesAsync();
+
+            var answerAttachment = new Domain.AnswerAttachment
+            {
+      
+                FileType = imageFile.ContentType,
+                FileName = imageFile.FileName,
+                AttachmentId = attachment.Id,
+            };
+
+            _context.AnswerAttachments.Add(answerAttachment);
+            await _context.SaveChangesAsync();
+
+
+            // Return success response (consider returning the ID or any other relevant data for the uploaded file)
+
+            string baseUrl;
+            if (_env.IsDevelopment())
+            {
+                baseUrl = "https://localhost:7193";
+            }
+            else
+            {
+                baseUrl = "https://apps.armywarcollege.edu/registration";
+            }
+
+            string imageUrl = $"{baseUrl}/api/upload/image/{answerAttachment.Id}";
+            return Ok(new { data = new { link = imageUrl } });
+        }
+
+        [AllowAnonymous]    
+        [HttpGet("image/{id}")]
+        public async Task<IActionResult> GetImage(Guid id)
+        {
+            var answerAttachment = await _context.AnswerAttachments.FindAsync(id); 
+            
+            var attachment = await _context.Attachments
+                .AsNoTracking()
+                .FirstOrDefaultAsync(a => a.Id == answerAttachment.AttachmentId);
+
+            if (attachment == null || attachment.BinaryData == null)
+            {
+                return NotFound();
+            }
+
+            return File(attachment.BinaryData, answerAttachment.FileType, answerAttachment.FileName);
         }
 
         public class DownloadRequest

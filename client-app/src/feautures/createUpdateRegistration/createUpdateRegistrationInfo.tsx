@@ -16,21 +16,25 @@ function uploadImageCallBack(file : any) {
   return new Promise(
     (resolve, reject) => {
       const xhr = new XMLHttpRequest();
-      xhr.open('POST', 'https://api.imgur.com/3/image');
-      xhr.setRequestHeader('Authorization', 'Client-ID 01f2bf93d2b54b1');
+      // Ensure apiUrl is correctly defined somewhere in your code
+      xhr.open('POST', `${apiUrl}/upload/uploadImage`);
       const data = new FormData();
-      data.append('image', file);
-      debugger;
+      data.append('imageFile', file); // Match this key with your C# method parameter
       xhr.send(data); 
       xhr.addEventListener('load', () => {
         const response = JSON.parse(xhr.responseText);
-        console.log(response)
+        console.log(response);
         resolve(response);
       });
       xhr.addEventListener('error', () => {
-        const error = JSON.parse(xhr.responseText);
-        console.log(error);
-        reject(error);
+        try {
+          const error = JSON.parse(xhr.responseText);
+          console.log(error);
+          reject(error);
+        } catch(e) {
+          console.log('Error parsing JSON response', e);
+          reject('An error occurred during the upload.');
+        }
       });
     }
   );
