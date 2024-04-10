@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { observer } from "mobx-react-lite";
 import { Editor } from "react-draft-wysiwyg";
-import { convertToRaw, EditorState, convertFromRaw  } from "draft-js";
+import { convertToRaw, EditorState, convertFromRaw, Modifier  } from "draft-js";
 import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
 import agent from '../../app/api/agent';
 
@@ -67,6 +67,20 @@ export default observer (function CreateUpdateRegistrationInfo(
     setContent(contentAsString);
   };
 
+  const handlePastedText = (text :string, _html : string, editorState : EditorState) :boolean => {
+    const currentContent = editorState.getCurrentContent();
+    const selectionState = editorState.getSelection();
+
+    const newContentState = Modifier.replaceText(
+      currentContent,
+      selectionState,
+      text, // Replace with just the text, no formatting
+  );
+
+  const newEditorState = EditorState.push(editorState, newContentState, 'insert-characters');
+  setEditorState(newEditorState);
+  return true;
+};
 
 
   return(
@@ -76,6 +90,7 @@ export default observer (function CreateUpdateRegistrationInfo(
                       wrapperClassName="wrapper-class"
                       editorClassName="unique-editor-class"
                       toolbarClassName="toolbar-class"
+                      handlePastedText={handlePastedText}
                       toolbar={{
                         image: { uploadCallback: uploadImageCallBack,
                            alt: { present: true, mandatory: false } },
