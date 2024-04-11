@@ -1,26 +1,37 @@
 import { observer } from "mobx-react-lite";
 import { RegistrationEvent } from "../../app/models/registrationEvent";
 import { Button, Divider, Form, FormField, Grid, Icon, Popup, Radio } from "semantic-ui-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 interface Props{
     registrationEvent: RegistrationEvent
     setRegistrationEvent: (event : RegistrationEvent) => void
     setFormDirty: () => void
+    saveFormInBackground: () => void
 }
 
 export default observer (function CreateUpdateRegistrationSettings(
-    {registrationEvent, setRegistrationEvent, setFormDirty} : Props
+    {registrationEvent, setRegistrationEvent, setFormDirty,  saveFormInBackground } : Props
 ){
+  const [saveForm, setSaveForm] = useState(false);
+
+  useEffect(() => {
+    if (saveForm){
+      saveFormInBackground();
+      setSaveForm(false);
+    }
+  }, [saveForm]);
 
     const handleAutoApproveChange = () => {
         setRegistrationEvent({...registrationEvent, autoApprove :!registrationEvent.autoApprove})
         setFormDirty();
+        setSaveForm(true);
       };
 
       const handlePublicChange = () => {
         setRegistrationEvent({...registrationEvent, public :!registrationEvent.public})
         setFormDirty();
+        setSaveForm(true);
       };
 
       

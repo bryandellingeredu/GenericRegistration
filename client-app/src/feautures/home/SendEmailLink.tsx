@@ -27,7 +27,6 @@ export default observer ( function SendEmailLink() {
        setFormIsDirty(true);
        if (validateEmail(email)){      
         try{
-          debugger;
           setSaving(true);
           const emailLinkDTO : EmailLinkDTO = {registrationEventId: id!, email: email}
           await agent.EmailLinks.sendLink(emailLinkDTO);

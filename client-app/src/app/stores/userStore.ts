@@ -51,7 +51,6 @@ myMSALObj = new PublicClientApplication(this.armyMsalConfig);
     get isLoggedIn(){return !!this.user;}
 
     handleGraphRedirect = async () => {
-        debugger;
         if (this.myMSALObj) {
             const response = await this.myMSALObj.handleRedirectPromise();
             if (response && !store.commonStore.donotautologin) {
@@ -132,7 +131,6 @@ myMSALObj = new PublicClientApplication(this.armyMsalConfig);
     }
 
     getUser = async () => {
-        debugger;
         try{
       const user =   await agent.Account.current();
         runInAction(() => this.user = user);

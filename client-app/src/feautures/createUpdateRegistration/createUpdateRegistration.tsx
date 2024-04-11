@@ -99,9 +99,7 @@ export default observer(function CreateUpdateRegistration() {
               if(customQuestionData && customQuestionData.length) setCustomQuestions(customQuestionData);
               const registrationEventOwnersData : RegistrationEventOwner[] = await agent.RegistrationEventOwners.list(id!);
               if(registrationEventOwnersData && registrationEventOwnersData.length) setRegistrationEventOwners(registrationEventOwnersData);
-              debugger;
               const registrations : Registration[] = await agent.Registrations.list(registrationEvent.id)
-              debugger;
               if (registrations && registrations.length) setRegisteredUsersIndicator(true);
           }catch (error: any) {
             console.log(error);
@@ -191,6 +189,37 @@ export default observer(function CreateUpdateRegistration() {
           }
         } finally {
             setPublishing(false);
+        }
+      }
+
+      const saveFormInBackground = async() => {
+        let error = false;
+        if (!registrationEvent.title || !registrationEvent.title.trim()) error = true;
+        if (!registrationEvent.location || !registrationEvent.location.trim()) error = true;
+        if(!registrationEvent.startDate  || !registrationEvent.startDate) error = true;
+        if(!registrationEvent.certified) error = true;
+        if(!error){
+            setRegistrationEvent(prevState => ({
+                ...prevState,
+                id: registrationEventId
+              }));
+
+          const data = {...registrationEvent, id: registrationEventId}
+
+          try {
+            await agent.RegistrationEvents.createUpdate(data);
+            await agent.RegistrationEventWebsites.createUpdate({registrationEventId, content});
+            if(!registeredUsersIndicator) await agent.CustomQuestions.createUpdate(registrationEventId, customQuestions);
+            await agent.RegistrationEventOwners.createUpdate(registrationEventId, registrationEventOwners); 
+            setFormisDirty(false);
+        } catch (e: any) {
+          console.log(e);
+          if (error && e.message) {
+            toast.error("An error occurred: " + e.message);
+          } else {
+            toast.error("Save failed!");
+          }
+        } 
         }
       }
 
@@ -297,6 +326,7 @@ export default observer(function CreateUpdateRegistration() {
                         setRegistrationEventOwners={handleSetRegistrationEventOwners}
                         registrationEventId={registrationEventId}
                         setFormDirty={handleSetFormDirty} 
+                        saveFormInBackground={saveFormInBackground}
                          />
 
                       <Header as='h2' textAlign="center">
@@ -312,6 +342,7 @@ export default observer(function CreateUpdateRegistration() {
                         registrationEvent={registrationEvent}
                         setRegistrationEvent={handleSetRegistrationEvent}
                         setFormDirty={handleSetFormDirty}
+                        saveFormInBackground={saveFormInBackground}
                        />
 
                         {formisDirty && !savingFromStepClick && 

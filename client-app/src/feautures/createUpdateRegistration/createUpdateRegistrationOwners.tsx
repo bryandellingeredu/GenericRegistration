@@ -1,7 +1,7 @@
 import { observer } from "mobx-react-lite";
 import { Button, Form, FormField, FormGroup, Header, Icon, Input, Label, Message, Segment, SegmentGroup } from "semantic-ui-react";
 import { RegistrationEventOwner } from "../../app/models/registrationEventOwner";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { v4 as uuidv4 } from 'uuid';
 
 interface Props{
@@ -9,12 +9,13 @@ interface Props{
     setRegistrationEventOwners: (newRegistrationEventOwners : RegistrationEventOwner[]) => void
     registrationEventId: string
     setFormDirty: () => void
+    saveFormInBackground: () => void
 }
 
 export default observer (function CreateUpdateRegistrationOwners(
-    {registrationEventOwners, setRegistrationEventOwners, registrationEventId, setFormDirty} : Props
+    {registrationEventOwners, setRegistrationEventOwners, registrationEventId, setFormDirty, saveFormInBackground} : Props
 ){
-
+    const [saveForm, setSaveForm] = useState(false);
     const [newOwnerEmail, setNewOwnerEmail] = useState('');
     const [newOwnerEmailError, setNewOwnerEmailError] = useState(false);
 
@@ -42,13 +43,22 @@ export default observer (function CreateUpdateRegistrationOwners(
         }
         setRegistrationEventOwners([...registrationEventOwners, newRegistrationEventOwner])
         setNewOwnerEmail('');
+        setSaveForm(true);
         setFormDirty();
        }
     }
 
+    useEffect(() => {
+      if (saveForm){
+        saveFormInBackground();
+        setSaveForm(false);
+      }
+    }, [saveForm]);
+
     const handleDeleteButton = (id : string) => {
         setRegistrationEventOwners(registrationEventOwners.filter(owner => owner.id !== id));
         setFormDirty();
+        setSaveForm(true);
     }
     return(
      <SegmentGroup>

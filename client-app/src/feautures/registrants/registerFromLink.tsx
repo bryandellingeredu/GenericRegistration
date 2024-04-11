@@ -147,7 +147,6 @@ function formatDate(date : Date) {
     };
 
     const handleSubmit = async () => {
-      debugger;
       if(!saving){
       setFormisDirty(true);
       let formHasError =
