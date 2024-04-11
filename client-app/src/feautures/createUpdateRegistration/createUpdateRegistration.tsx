@@ -193,6 +193,7 @@ export default observer(function CreateUpdateRegistration() {
       }
 
       const saveFormInBackground = async() => {
+        if(id){
         let error = false;
         if (!registrationEvent.title || !registrationEvent.title.trim()) error = true;
         if (!registrationEvent.location || !registrationEvent.location.trim()) error = true;
@@ -222,6 +223,7 @@ export default observer(function CreateUpdateRegistration() {
         } 
         }
       }
+    }
 
       const saveForm = async() => {
         setFormSubmitted(true);
