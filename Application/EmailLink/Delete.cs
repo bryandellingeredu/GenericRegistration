@@ -1,4 +1,5 @@
 ﻿using Application.Core;
+using Domain;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -38,6 +39,15 @@ namespace Application.EmailLink
                                    .FirstOrDefaultAsync();
                 var registrationEvent = await _context.RegistrationEvents.AsNoTracking().FirstAsync(x => x.Id == registration.RegistrationEventId);
 
+                List<string> emails = new List<string>();
+                emails.Add(registrationEvent.CreatedBy);
+                List<RegistrationEventOwner> registrationEventOwners = await _context.RegistrationEventOwners
+                .AsNoTracking()
+                .Where(x => x.RegistrationEventId == registration.RegistrationEventId).ToListAsync();
+                foreach (RegistrationEventOwner owner in registrationEventOwners)
+                {
+                    emails.Add(owner.Email);
+                }
 
                 string title = $"{registration.FirstName} {registration.LastName} has cancelled registration for {registrationEvent.Title}";
                 string body = $"{registration.FirstName} {registration.LastName} has cancelled registration for {registrationEvent.Title}";
@@ -58,17 +68,17 @@ namespace Application.EmailLink
 
                 if (!result) return Result<Unit>.Failure("Failed to delete the registration");
 
-                await SendEmailToEventOwner(title, body, registrationEvent.CreatedBy);
+                await SendEmailToEventOwner(title, body, emails);
 
                 return Result<Unit>.Success(Unit.Value);
 
             }
-            private async Task SendEmailToEventOwner(string title, string body, string createdBy)
+            private async Task SendEmailToEventOwner(string title, string body, List<string> emails)
             {
                 Settings s = new Settings();
                 var settings = s.LoadSettings(_config);
                 GraphHelper.InitializeGraph(settings, (info, cancel) => Task.FromResult(0));
-                await GraphHelper.SendEmail(new[] { createdBy }, title, body);
+                await GraphHelper.SendEmail(emails.ToArray(), title, body);
             }
         }
     }
