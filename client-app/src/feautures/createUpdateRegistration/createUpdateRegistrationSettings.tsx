@@ -28,6 +28,18 @@ export default observer (function CreateUpdateRegistrationSettings(
         setSaveForm(true);
       };
 
+      const handleAutoEmailChange = () => {
+        setRegistrationEvent({...registrationEvent, autoEmail :!registrationEvent.autoEmail})
+        setFormDirty();
+        setSaveForm(true);
+      };
+
+      const handleRegistrationIsOpenChange = () => {
+        setRegistrationEvent({...registrationEvent, registrationIsOpen :!registrationEvent.registrationIsOpen})
+        setFormDirty();
+        setSaveForm(true);
+      };
+
       const handlePublicChange = () => {
         setRegistrationEvent({...registrationEvent, public :!registrationEvent.public})
         setFormDirty();
@@ -84,6 +96,58 @@ export default observer (function CreateUpdateRegistrationSettings(
           <Grid.Column width={3}>
             <Popup
               content="Public events will be displayed on the available events page."
+              trigger={<Button color='teal' basic icon='question' />}
+              on='click'
+              position="top right"
+            />
+          </Grid.Column>
+        </Grid.Row>
+        <Divider/>
+        <Grid.Row columns={3}>
+          <Grid.Column width={8}>
+            <Form.Field>
+              <label>Send Email Notifications</label>
+            </Form.Field>
+          </Grid.Column>
+          <Grid.Column width={5}>
+            <Form.Field>
+              <Radio
+                toggle
+                label={registrationEvent.autoEmail ? 'On' : 'Off'}
+                checked={registrationEvent.autoEmail}
+                onChange={handleAutoEmailChange}
+              />
+            </Form.Field>
+          </Grid.Column>
+          <Grid.Column width={3}>
+            <Popup
+              content="You will receive an email every time a user registers for your event."
+              trigger={<Button color='teal' basic icon='question' />}
+              on='click'
+              position="top right"
+            />
+          </Grid.Column>
+        </Grid.Row>
+        <Divider/>
+        <Grid.Row columns={3}>
+          <Grid.Column width={8}>
+            <Form.Field>
+              <label>Registration Status</label>
+            </Form.Field>
+          </Grid.Column>
+          <Grid.Column width={5}>
+            <Form.Field>
+              <Radio
+                toggle
+                label={registrationEvent.registrationIsOpen ? 'Open' : 'Closed'}
+                checked={registrationEvent.registrationIsOpen }
+                onChange={handleRegistrationIsOpenChange}
+              />
+            </Form.Field>
+          </Grid.Column>
+          <Grid.Column width={3}>
+            <Popup
+              content="Closing the registration will stop any new users from registering for your event."
               trigger={<Button color='teal' basic icon='question' />}
               on='click'
               position="top right"

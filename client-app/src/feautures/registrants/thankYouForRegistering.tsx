@@ -29,6 +29,8 @@ export default observer(function ThankYouForRegistering() {
         published: true,
         public: true,
         autoApprove: true,
+        autoEmail: true,
+        registrationIsOpen: true,
         certified: true
       }  
   );

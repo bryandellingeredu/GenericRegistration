@@ -42,7 +42,8 @@ namespace Application.RegistrationEvents
                     StartDate = x.StartDate,
                     EndDate = x.EndDate,
                     Published = x.Published,
-                    Registrations = x.Registrations,    
+                    Registrations = x.Registrations, 
+                    RegistrationIsOpen = x.RegistrationIsOpen
                 })
                .ToListAsync();
 

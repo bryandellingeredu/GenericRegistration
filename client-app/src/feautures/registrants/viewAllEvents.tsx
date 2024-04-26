@@ -25,6 +25,7 @@ export default observer (function ViewAllEvents() {
         setLoading(true);
         try{
           const data : RegistrationEvent[] = await agent.Registrants.list();
+          debugger;
           setRegistrationEvents(data);
         }catch (error: any) {
         console.log(error);

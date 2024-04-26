@@ -89,7 +89,7 @@ namespace Application.EmailLink
                         newRegistration.Phone = request.RegistrationDTO.Phone;
                         newRegistration.Email = request.RegistrationDTO.Email;
                         newRegistration.RegistrationDate = DateTime.UtcNow;
-                        newRegistration.Registered = registrationEvent.AutoApprove;
+                        newRegistration.Registered = registrationEvent.AutoApprove;   
                         newRegistration.Answers = request.RegistrationDTO.Answers;
                         _context.Registrations.Add(newRegistration);
                         var result = await _context.SaveChangesAsync() > 0;
@@ -116,73 +116,77 @@ namespace Application.EmailLink
                     .FirstAsync();
                 emails.Add(registrationEvent.CreatedBy);
 
-                List<AnswerAttachment> answerAttachments = await _context.AnswerAttachments.AsNoTracking().Where(x => x.RegistrationLookup == registration.Id).ToListAsync();
-
-                List<RegistrationEventOwner> registrationEventOwners = await _context.RegistrationEventOwners
-                    .AsNoTracking()
-                    .Where(x => x.RegistrationEventId == registration.RegistrationEventId).ToListAsync();
-                foreach (RegistrationEventOwner owner in registrationEventOwners)
+                if (registrationEvent.AutoEmail)
                 {
-                    emails.Add(owner.Email);
-                }
 
-                Settings s = new Settings();
-                var settings = s.LoadSettings(_config);
-                GraphHelper.InitializeGraph(settings, (info, cancel) => Task.FromResult(0));
-                List<CustomQuestion> customQuestions = await _context.CustomQuestions.Where(x => x.RegistrationEventId == registration.RegistrationEventId).ToListAsync();
-                string title = $"{registration.FirstName} {registration.LastName} has {(status == "New" ? "registered" : "updated their registration")} for {registrationEvent.Title}";
-                string body = $"{registration.FirstName} {registration.LastName} has {(status == "New" ? "registered" : "updated their registration")} for {registrationEvent.Title}";
-                body = body + $"<p><strong>First Name: </strong> {registration.FirstName}</p>";
-                body = body + $"<p><strong>Last Name: </strong> {registration.LastName}</p>";
-                body += $"<p><strong>Email: </strong> <a href='mailto:{registration.Email}'>{registration.Email}</a></p>";
-                foreach (var question in customQuestions)
-                {
-                    if (question.QuestionType != QuestionType.Attachment)
+                    List<AnswerAttachment> answerAttachments = await _context.AnswerAttachments.AsNoTracking().Where(x => x.RegistrationLookup == registration.Id).ToListAsync();
+
+                    List<RegistrationEventOwner> registrationEventOwners = await _context.RegistrationEventOwners
+                        .AsNoTracking()
+                        .Where(x => x.RegistrationEventId == registration.RegistrationEventId).ToListAsync();
+                    foreach (RegistrationEventOwner owner in registrationEventOwners)
                     {
-                        body = body + $"<p><strong>{question.QuestionText}: </strong> {registration.Answers.Where(x => x.CustomQuestionId == question.Id).FirstOrDefault().AnswerText ?? string.Empty}</p>";
+                        emails.Add(owner.Email);
                     }
-                    if (question.QuestionType == QuestionType.Attachment)
+
+                    Settings s = new Settings();
+                    var settings = s.LoadSettings(_config);
+                    GraphHelper.InitializeGraph(settings, (info, cancel) => Task.FromResult(0));
+                    List<CustomQuestion> customQuestions = await _context.CustomQuestions.Where(x => x.RegistrationEventId == registration.RegistrationEventId).ToListAsync();
+                    string title = $"{registration.FirstName} {registration.LastName} has {(status == "New" ? "registered" : "updated their registration")} for {registrationEvent.Title}";
+                    string body = $"{registration.FirstName} {registration.LastName} has {(status == "New" ? "registered" : "updated their registration")} for {registrationEvent.Title}";
+                    body = body + $"<p><strong>First Name: </strong> {registration.FirstName}</p>";
+                    body = body + $"<p><strong>Last Name: </strong> {registration.LastName}</p>";
+                    body += $"<p><strong>Email: </strong> <a href='mailto:{registration.Email}'>{registration.Email}</a></p>";
+                    foreach (var question in customQuestions)
                     {
-                        if (answerAttachments.Any() && answerAttachments.FirstOrDefault(x => x.CustomQuestionLookup == question.Id) != null)
+                        if (question.QuestionType != QuestionType.Attachment)
                         {
-                            hasAttachments = true;
-                            body = body + $"<p><strong>{question.QuestionText}: </strong> {answerAttachments.First(x => x.CustomQuestionLookup == question.Id).FileName}</p>";
+                            body = body + $"<p><strong>{question.QuestionText}: </strong> {registration.Answers.Where(x => x.CustomQuestionId == question.Id).FirstOrDefault().AnswerText ?? string.Empty}</p>";
+                        }
+                        if (question.QuestionType == QuestionType.Attachment)
+                        {
+                            if (answerAttachments.Any() && answerAttachments.FirstOrDefault(x => x.CustomQuestionLookup == question.Id) != null)
+                            {
+                                hasAttachments = true;
+                                body = body + $"<p><strong>{question.QuestionText}: </strong> {answerAttachments.First(x => x.CustomQuestionLookup == question.Id).FileName}</p>";
+                            }
+                            else
+                            {
+                                body = body + $"<p><strong>{question.QuestionText}: </strong></p>";
+                            }
+                        }
+
+                    }
+                    try
+                    {
+                        if (hasAttachments)
+                        {
+                            List<EmailAttachment> emailAttachments = new List<EmailAttachment>();
+                            foreach (AnswerAttachment answerAttachment in answerAttachments)
+                            {
+                                Domain.Attachment attachment = await _context.Attachments.FindAsync(answerAttachment.AttachmentId);
+                                byte[] binaryData = attachment.BinaryData;
+                                emailAttachments.Add(new EmailAttachment
+                                {
+                                    Name = answerAttachment.FileName,
+                                    ContentType = answerAttachment.FileType,
+                                    BinaryData = binaryData
+                                });
+                            }
+                            await GraphHelper.SendEmailWithAttachments(emails.ToArray(), title, body, emailAttachments.ToArray());
                         }
                         else
                         {
-                            body = body + $"<p><strong>{question.QuestionText}: </strong></p>";
+                            await GraphHelper.SendEmail(emails.ToArray(), title, body);
+
                         }
                     }
-
-                }
-                try
-                {
-                    if (hasAttachments)
+                    catch (Exception ex)
                     {
-                        List<EmailAttachment> emailAttachments = new List<EmailAttachment>();
-                        foreach (AnswerAttachment answerAttachment in answerAttachments)
-                        {
-                            Domain.Attachment attachment = await _context.Attachments.FindAsync(answerAttachment.AttachmentId);
-                            byte[] binaryData = attachment.BinaryData;
-                            emailAttachments.Add(new EmailAttachment
-                            {
-                                Name = answerAttachment.FileName,
-                                ContentType = answerAttachment.FileType,
-                                BinaryData = binaryData
-                            });
-                        }
-                        await GraphHelper.SendEmailWithAttachments(emails.ToArray(), title, body, emailAttachments.ToArray());
-                    }
-                    else
-                    {
-                        await GraphHelper.SendEmail(emails.ToArray(), title, body);
 
+                        throw;
                     }
-                }
-                catch (Exception ex)
-                {
-
-                    throw;
                 }
             }
             private async Task SendEmail(RegistrationDTO registration, string status, string encryptedKey)

@@ -63,7 +63,9 @@ export default observer(function AdministerRegistrants() {
       autoApprove: true,
       public: true,
       registrations: [],
-      certified: true
+      certified: true,
+      autoEmail: true,
+      registrationIsOpen: true,
     }  
 );
 

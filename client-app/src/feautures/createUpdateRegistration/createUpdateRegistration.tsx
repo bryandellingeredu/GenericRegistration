@@ -47,6 +47,8 @@ export default observer(function CreateUpdateRegistration() {
           overview: '',
           published: false,
           autoApprove: true,
+          autoEmail: true,
+          registrationIsOpen: true,
           public: true,
           registrations: [],
           certified: false

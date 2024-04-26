@@ -24,7 +24,10 @@ namespace Domain
         public bool Certified {get; set;}
 
         public bool Public { get; set; }
-        public bool AutoApprove { get; set;}    
+        public bool AutoApprove { get; set;}   
+        public bool AutoEmail { get; set;}   
+
+        public bool RegistrationIsOpen {get; set;}  
 
         public DateTime CreatedAt { get; set; }
         public string CreatedBy { get; set; }

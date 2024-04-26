@@ -58,6 +58,8 @@ function formatDate(date : Date) {
           published: true,
           public: true,
           autoApprove: true,
+          autoEmail: true,
+          registrationIsOpen: true,
           certified: true
         }  
     );
@@ -332,6 +334,9 @@ function formatDate(date : Date) {
             </Menu.Item>
            }
           </Menu>
+          {!registrationEvent.registrationIsOpen && !registration.registered &&
+             <Header as={'h1'} content='Registration is Closed For This Event' textAlign="center"/>
+          }
            <Grid stackable style={{padding: '40px' }}>
               <Grid.Row>
               <Grid.Column width={8}>
@@ -364,24 +369,27 @@ function formatDate(date : Date) {
               </Grid.Column>
               <Grid.Column width={8}>
                 <Form onSubmit={handleSubmit}>
-        <FormField required error={formisDirty && (!registration.firstName || !registration.firstName.trim()) } >
+        <FormField required error={formisDirty && (!registration.firstName || !registration.firstName.trim()) } 
+         disabled={!registrationEvent.registrationIsOpen && !registration.registered }>
              <label>First Name</label>
             <Input value={registration.firstName}
             name="firstName"
             onChange={handleInputChange}/>
         </FormField>
-        <FormField required error={formisDirty && (!registration.lastName || !registration.lastName.trim()) } >
+        <FormField required error={formisDirty && (!registration.lastName || !registration.lastName.trim()) }
+         disabled={!registrationEvent.registrationIsOpen && !registration.registered } >
              <label>Last Name</label>
             <Input value={registration.lastName}
             name="lastName"
             onChange={handleInputChange}/>
         </FormField>
-        <FormField required >
+        <FormField required   disabled={!registrationEvent.registrationIsOpen && !registration.registered }>
              <label> Email</label>
             <Input value={registration.email}/>
        </FormField>
         {customQuestions.sort((a, b) => a.index - b.index).map((question) => (
           <FormField key={question.id} required={question.required}
+          disabled={!registrationEvent.registrationIsOpen && !registration.registered }
           error={
             formisDirty &&
             question.required &&
@@ -407,7 +415,7 @@ function formatDate(date : Date) {
              {question.questionType === QuestionType.Attachment &&  !findAnswerAttachmentByQuestionId(question.id) && !uploading &&
                    <>
                    <Divider color="black" />
-                 
+                   {(registrationEvent.registrationIsOpen || registration.registered ) && 
                        <DocumentUploadWidget
                         uploadDocument={handleDocumentUpload}
                         loading={uploading}
@@ -415,7 +423,7 @@ function formatDate(date : Date) {
                         questionId={question.id}
                         error={formisDirty && question.required && !findAnswerAttachmentByQuestionId(question.id)}
                         />
-
+                    }
                    <Divider color="black" />
                  </>
               }
@@ -439,11 +447,13 @@ function formatDate(date : Date) {
 
             {question.questionType === QuestionType.TextInput &&
              <Input value={registration.answers?.find(x => x.customQuestionId === question.id)?.answerText} 
+             disabled={!registrationEvent.registrationIsOpen && !registration.registered }
               name={question.id}
               onChange={handleCustomInputChange }/>
              }
             {question.questionType === QuestionType.Choice &&
              <Select
+             disabled={!registrationEvent.registrationIsOpen && !registration.registered }
              name={question.id}
              value={registration.answers?.find(x => x.customQuestionId === question.id)?.answerText || ''}
              search
@@ -466,7 +476,8 @@ function formatDate(date : Date) {
             {registration.registered && 
             <Button type='button' size={isMobile ? 'tiny' : 'huge'} color='red' floated="right" content='Cancel Registration' onClick={() => navigate(`/deregisterforeventfromlink/${encodeURIComponent(encryptedKey!)}`)}  />
             }
-            <Button type='submit' size={isMobile ? 'tiny' : 'huge'}  primary floated="right" content={registration.registered ? 'Update Registration': 'Register'} loading={saving} />
+            <Button type='submit' size={isMobile ? 'tiny' : 'huge'}  primary floated="right" content={registration.registered ? 'Update Registration': 'Register'} loading={saving}
+             disabled={!registrationEvent.registrationIsOpen && !registration.registered } />
         </Form>
               </Grid.Column>
               </Grid.Row>
