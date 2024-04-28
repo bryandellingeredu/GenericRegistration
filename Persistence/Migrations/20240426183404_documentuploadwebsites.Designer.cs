@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Persistence;
 
@@ -11,9 +12,11 @@ using Persistence;
 namespace Persistence.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20240426183404_documentuploadwebsites")]
+    partial class documentuploadwebsites
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -110,25 +113,6 @@ namespace Persistence.Migrations
                     b.HasIndex("RegistrationEventId");
 
                     b.ToTable("CustomQuestions");
-                });
-
-            modelBuilder.Entity("Domain.DocumentUploadWebsite", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Content")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid>("RegistrationEventId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("RegistrationEventId");
-
-                    b.ToTable("DocumentUploadWebsites");
                 });
 
             modelBuilder.Entity("Domain.QuestionOption", b =>
@@ -519,17 +503,6 @@ namespace Persistence.Migrations
                 {
                     b.HasOne("Domain.RegistrationEvent", "RegistrationEvent")
                         .WithMany("CustomQuestions")
-                        .HasForeignKey("RegistrationEventId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("RegistrationEvent");
-                });
-
-            modelBuilder.Entity("Domain.DocumentUploadWebsite", b =>
-                {
-                    b.HasOne("Domain.RegistrationEvent", "RegistrationEvent")
-                        .WithMany()
                         .HasForeignKey("RegistrationEventId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();

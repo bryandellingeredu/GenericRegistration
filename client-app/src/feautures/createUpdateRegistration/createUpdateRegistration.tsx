@@ -19,12 +19,14 @@ import { RegistrationEventOwner } from '../../app/models/registrationEventOwner'
 import CreateUpdateRegistrationOwners from './createUpdateRegistrationOwners';
 import CreateUpdateRegistrationSettings from './createUpdateRegistrationSettings';
 import { Registration } from '../../app/models/registration';
+import HeaderSubHeader from 'semantic-ui-react/dist/commonjs/elements/Header/HeaderSubheader';
 
 export default observer(function CreateUpdateRegistration() {
     const navigate = useNavigate();
     const { id } = useParams();
     const { step } = useParams();
     const [content, setContent] = useState('');
+    const [documentLibraryContent, setDocumentLibraryContent] = useState('');
     const [saving, setSaving] = useState(false);
     const [publishing, setPublishing] = useState(false);
     const [savingFromStepClick, setSavingFromStepClick] = useState(false);
@@ -71,6 +73,10 @@ export default observer(function CreateUpdateRegistration() {
         setContent(newContent);
     }
 
+    const handleSetDocumentLibraryContent = (newContent: string) =>{
+      setDocumentLibraryContent(newContent)
+    }
+
     const handleSetCustomQuestions = (newCustomQuestions : CustomQuestion[]) => {
         setCustomQuestions(newCustomQuestions);
     }
@@ -95,9 +101,14 @@ export default observer(function CreateUpdateRegistration() {
               const registrationEvent : RegistrationEvent = await agent.RegistrationEvents.details(id!);
               setRegistrationEvent(registrationEvent);
               setRegistrationEventId(registrationEvent.id);
+
               const registrationEventWebsite : RegistrationEventWebsite | null = await agent.RegistrationEventWebsites.details(id!);
-              if(registrationEventWebsite && registrationEventWebsite) setContent(registrationEventWebsite.content)
+              if(registrationEventWebsite) setContent(registrationEventWebsite.content)
               const customQuestionData : CustomQuestion[] = await agent.CustomQuestions.details(id!);
+
+              const documentUploadWebsite : RegistrationEventWebsite | null = await agent.DocumentUploadWebsites.details(id!);
+              if(documentUploadWebsite) setDocumentLibraryContent(documentUploadWebsite.content);
+
               if(customQuestionData && customQuestionData.length) setCustomQuestions(customQuestionData);
               const registrationEventOwnersData : RegistrationEventOwner[] = await agent.RegistrationEventOwners.list(id!);
               if(registrationEventOwnersData && registrationEventOwnersData.length) setRegistrationEventOwners(registrationEventOwnersData);
@@ -115,6 +126,43 @@ export default observer(function CreateUpdateRegistration() {
         }
       }
 
+      const handleDocumentLibraryClick = async() => {
+        if(formisDirty){
+          setSavingFromStepClick(true);
+          setRegistrationEvent(prevState => ({
+            ...prevState,
+            id: registrationEventId
+          }));
+
+         const data = {...registrationEvent, id: registrationEventId}
+
+         try {
+          await agent.RegistrationEvents.createUpdate(data);
+          await agent.RegistrationEventWebsites.createUpdate({registrationEventId, content});
+          await agent.CustomQuestions.createUpdate(registrationEventId, customQuestions);
+          setFormisDirty(false);
+          if(!id){
+            navigate(`/editregistration/${registrationEventId}/Review`)
+          }  else {
+            setActiveStep('Document');
+          }
+      } catch (error: any) {
+        console.log(error);
+        if (error && error.message) {
+          toast.error("An error occurred: " + error.message);
+        } else {
+          toast.error("Save failed!");
+        }
+      } finally {
+        setSavingFromStepClick(false);
+      }
+
+        }else{
+          setActiveStep('Document');
+        }
+  
+      }
+
       const handleReviewClick = async() => {
         if(formisDirty){
           setSavingFromStepClick(true);
@@ -128,6 +176,7 @@ export default observer(function CreateUpdateRegistration() {
          try {
           await agent.RegistrationEvents.createUpdate(data);
           await agent.RegistrationEventWebsites.createUpdate({registrationEventId, content});
+          await agent.DocumentUploadWebsites.createUpdate({registrationEventId, content: documentLibraryContent});
           await agent.CustomQuestions.createUpdate(registrationEventId, customQuestions);
           setFormisDirty(false);
           if(!id){
@@ -212,6 +261,7 @@ export default observer(function CreateUpdateRegistration() {
           try {
             await agent.RegistrationEvents.createUpdate(data);
             await agent.RegistrationEventWebsites.createUpdate({registrationEventId, content});
+            await agent.DocumentUploadWebsites.createUpdate({registrationEventId, content: documentLibraryContent});
             if(!registeredUsersIndicator) await agent.CustomQuestions.createUpdate(registrationEventId, customQuestions);
             await agent.RegistrationEventOwners.createUpdate(registrationEventId, registrationEventOwners); 
             setFormisDirty(false);
@@ -270,26 +320,39 @@ export default observer(function CreateUpdateRegistration() {
     return (
         <>
             <ManageRegistrationNavbar />
-            <StepGroup fluid size='huge'>
-    <Step active onClick={handleDesignClick}>
-      <Icon name='paint brush'  />
-      <StepContent>
-        <StepTitle>Design</StepTitle>
-        <StepDescription>Design Your Registration Form</StepDescription>
-      </StepContent>
-    </Step>
 
-    <Step 
-    onClick={handleReviewClick}
-    disabled = {savingFromStepClick || !registrationEvent.title || !registrationEvent.title.trim() || !registrationEvent.location || !registrationEvent.location.trim() || !registrationEvent.startDate || !registrationEvent.endDate || !registrationEvent.certified  }>
-     {savingFromStepClick && <Loader active inline /> }
-     {!savingFromStepClick && <Icon name='check' />} 
-      <StepContent>
-        <StepTitle>Review and Publish</StepTitle>
-        <StepDescription>Review Your Site and Publish</StepDescription>
-      </StepContent>
-    </Step>
-  </StepGroup>
+            <StepGroup fluid size='huge'>
+               <Step active={activeStep === 'Design'} onClick={handleDesignClick}>
+                <Icon name='paint brush'  />
+                 <StepContent>
+                   <StepTitle>Design</StepTitle>
+                   <StepDescription>Design Your Registration Form</StepDescription>
+                </StepContent>
+              </Step>
+
+             <Step  onClick={handleReviewClick} active={activeStep === 'Review'}
+                    disabled = {savingFromStepClick || !registrationEvent.title || !registrationEvent.title.trim() || !registrationEvent.location || !registrationEvent.location.trim() || !registrationEvent.startDate || !registrationEvent.endDate || !registrationEvent.certified  }>
+                    {savingFromStepClick && <Loader active inline /> }
+                    {!savingFromStepClick && <Icon name='check' />} 
+                   <StepContent>
+                      <StepTitle>Review and Publish</StepTitle>
+                     <StepDescription>Review Your Site and Publish</StepDescription>
+                  </StepContent>
+             </Step>
+
+             <Step onClick={handleDocumentLibraryClick} active={activeStep === 'Document'}
+             disabled = {savingFromStepClick || !registrationEvent.title || !registrationEvent.title.trim() || !registrationEvent.location || !registrationEvent.location.trim() || !registrationEvent.startDate || !registrationEvent.endDate || !registrationEvent.certified  }>
+                 {savingFromStepClick && <Loader active inline /> }
+                {!savingFromStepClick && <Icon name='folder open' /> }
+                 <StepContent>
+                   <StepTitle>Document Library</StepTitle>
+                   <StepDescription>Create a document library for your registrants</StepDescription>
+                </StepContent>
+              </Step>
+
+
+          </StepGroup>
+
          {activeStep === 'Design' && 
             <Grid  stackable style={{ marginTop: '20px', padding: '40px' }}>
                 <Grid.Row>
@@ -398,6 +461,45 @@ export default observer(function CreateUpdateRegistration() {
              publishing={publishing}
              setActiveStep={handeSetActiveStepToDesign}
              registrationEventId={registrationEventId}/>}
+
+            {activeStep === 'Document' && 
+                <>
+                <Header as={'h2'} textAlign='center'>
+                Optional Document Library Creation
+                   <HeaderSubHeader>
+                   Create content and upload documents for registered participants to use during the event
+                   </HeaderSubHeader>
+                </Header>
+                <Grid  stackable style={{ marginTop: '20px', padding: '40px' }}>
+                    <Grid.Row>
+                      <Grid.Column width={8}>
+                      <Header as='h2' textAlign="center">
+                        <Icon name='info' />
+                            <Header.Content>
+                                Document Library Instructions
+                                <Header.Subheader>Create a description and instructions for your document library.
+                                </Header.Subheader> 
+                             </Header.Content>
+                        </Header>
+                        <CreateUpdateRegistrationInfo content={documentLibraryContent} setContent={handleSetDocumentLibraryContent} setFormDirty={handleSetFormDirty}/>
+                        {formisDirty && !savingFromStepClick && 
+                        <Button floated='right' color='blue' basic size='huge' loading={saving} onClick={saveForm} style={{marginTop: '10px'}}> Save Pending Changes</Button>
+                        }
+                        </Grid.Column>
+                        <Grid.Column width={8}>
+                        <Header as='h2' textAlign="center">
+                        <Icon name='folder open outline' />
+                            <Header.Content>
+                                Document Library
+                                <Header.Subheader>Upload documents into folders and subfolders
+                                </Header.Subheader> 
+                             </Header.Content>
+                        </Header>
+                       </Grid.Column>
+                    </Grid.Row>
+                </Grid>
+                </>
+            }
         </>
     );
 });

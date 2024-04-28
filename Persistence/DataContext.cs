@@ -14,7 +14,8 @@ namespace Persistence
         public DbSet<RegistrationEvent> RegistrationEvents { get; set; }
         public DbSet<CustomQuestion> CustomQuestions { get; set; }
         public DbSet<QuestionOption> QuestionOptions { get; set; }
-        public DbSet<RegistrationEventWebsite> RegistrationEventsWebsites { get; set; } 
+        public DbSet<RegistrationEventWebsite> RegistrationEventsWebsites { get; set; }
+        public DbSet<DocumentUploadWebsite> DocumentUploadWebsites { get; set; }
         public DbSet<RegistrationLink> RegistrationLinks { get; set; }
         public DbSet<Answer> Answers { get; set; }
         public DbSet<RegistrationEventOwner> RegistrationEventOwners { get; set; }

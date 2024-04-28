@@ -45,6 +45,12 @@ const RegistrationEventWebsites = {
     createUpdate : (registrationEventWebsite: RegistrationEventWebsite) => requests.post<void>('/RegistrationEventWebsites', registrationEventWebsite)
 }
 
+const DocumentUploadWebsites = {
+    details: (registrationEventId: string) => requests.get<RegistrationEventWebsite>(`/DocumentUploadWebsites/${registrationEventId}`),
+    createUpdate : (documentUploadWebsite: RegistrationEventWebsite) => requests.post<void>('/DocumentUploadWebsites', documentUploadWebsite)
+}
+ 
+
 const CustomQuestions = {
     details: (registrationEventId: string) => requests.get<CustomQuestion[]>(`/CustomQuestions/${registrationEventId}`),
     createUpdate : (registrationEventId: string, customQuestions: CustomQuestion[]) => requests.post<void>(`/CustomQuestions/${registrationEventId}`, customQuestions)
@@ -109,6 +115,7 @@ const agent = {
     Account,
     RegistrationEvents,
     RegistrationEventWebsites,
+    DocumentUploadWebsites,
     CustomQuestions,
     EmailLinks,
     Registrations,
