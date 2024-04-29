@@ -11,6 +11,7 @@ import { registrationDTO } from '../models/registrationDTO';
 import { RegistrationWithHTMLContent } from '../models/registrationWithHTMLContent';
 import { RegistrationEventOwner } from '../models/registrationEventOwner';
 import { AnswerAttachment } from '../models/answerAttachment';
+import { RegistrationEventDocumentLibrary } from '../models/registrationEventDocumentLibrary';
 
 axios.defaults.baseURL = import.meta.env.VITE_API_URL;
 
@@ -48,6 +49,11 @@ const RegistrationEventWebsites = {
 const DocumentUploadWebsites = {
     details: (registrationEventId: string) => requests.get<RegistrationEventWebsite>(`/DocumentUploadWebsites/${registrationEventId}`),
     createUpdate : (documentUploadWebsite: RegistrationEventWebsite) => requests.post<void>('/DocumentUploadWebsites', documentUploadWebsite)
+}
+
+const RegistrationEventDocumentLibraries = {
+    details: (registrationEventId: string) => requests.get<RegistrationEventDocumentLibrary>(`/RegistrationEventDocumentLibraries/${registrationEventId}`),
+    createUpdate : (registrationEventId: string, treeData: string) => requests.post<void>('/RegistrationEventDocumentLibraries', {registrationEventId, treeData }) 
 }
  
 
@@ -121,7 +127,8 @@ const agent = {
     Registrations,
     RegistrationEventOwners,
     AnswerAttachments,
-    Uploads
+    Uploads,
+    RegistrationEventDocumentLibraries
 }
 
 export default agent;

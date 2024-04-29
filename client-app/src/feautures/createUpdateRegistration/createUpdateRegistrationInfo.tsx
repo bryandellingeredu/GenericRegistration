@@ -3,7 +3,9 @@ import { observer } from "mobx-react-lite";
 import { Editor } from "react-draft-wysiwyg";
 import { convertToRaw, EditorState, convertFromRaw, Modifier  } from "draft-js";
 import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
-import agent from '../../app/api/agent';
+
+
+
 
 const apiUrl = import.meta.env.VITE_API_URL;
 interface Props{

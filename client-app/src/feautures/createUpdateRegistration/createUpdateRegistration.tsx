@@ -20,12 +20,20 @@ import CreateUpdateRegistrationOwners from './createUpdateRegistrationOwners';
 import CreateUpdateRegistrationSettings from './createUpdateRegistrationSettings';
 import { Registration } from '../../app/models/registration';
 import HeaderSubHeader from 'semantic-ui-react/dist/commonjs/elements/Header/HeaderSubheader';
+import Tree from '../documentLibrary/tree';
+import { Node } from '../../app/models/Node';
+import { useStore } from "../../app/stores/store";
+
+
 
 export default observer(function CreateUpdateRegistration() {
+    const { documentLibraryStore } = useStore();
+    const {getTreeData, TreeDataRegistry} = documentLibraryStore;
     const navigate = useNavigate();
     const { id } = useParams();
     const { step } = useParams();
     const [content, setContent] = useState('');
+    const [treeData, setTreeData] = useState<Node[]>([]);
     const [documentLibraryContent, setDocumentLibraryContent] = useState('');
     const [saving, setSaving] = useState(false);
     const [publishing, setPublishing] = useState(false);
@@ -39,6 +47,12 @@ export default observer(function CreateUpdateRegistration() {
     const handeSetActiveStepToDesign = () => {
       setActiveStep('Design');
     }
+    
+    const handleSetActiveStepToDocument = () => {
+      setActiveStep('Document');
+      setLoadTreeData(true);
+    }
+    
     const [registrationEvent, setRegistrationEvent] = useState<RegistrationEvent>(
         {
           id: '',
@@ -60,6 +74,7 @@ export default observer(function CreateUpdateRegistration() {
     const [customQuestions, setCustomQuestions] = useState<CustomQuestion[]>([]);
     const [registrationEventOwners, setRegistrationEventOwners] = useState<RegistrationEventOwner[]>([]);
     const [loading, setLoading] = useState(false);
+    const [loadTreeData, setLoadTreeData] = useState(false);
 
     const handleSetRegistrationEvent = (event: RegistrationEvent) =>{
         setRegistrationEvent(event);
@@ -85,6 +100,15 @@ export default observer(function CreateUpdateRegistration() {
       setActiveStep('Design');
     }
 
+    useEffect(() => {
+      debugger;
+      if(loadTreeData){
+        const data = documentLibraryStore.getTreeData(registrationEventId);
+        if (data) {
+          setTreeData(data);
+        }
+      } 
+    }, [loadTreeData, documentLibraryStore.treeData, registrationEventId, documentLibraryStore.TreeDataRegistry.get(registrationEventId)]);
 
     useEffect(() => {
         if(id) getRegistrationEvent();     
@@ -144,7 +168,7 @@ export default observer(function CreateUpdateRegistration() {
           if(!id){
             navigate(`/editregistration/${registrationEventId}/Review`)
           }  else {
-            setActiveStep('Document');
+            handleSetActiveStepToDocument();
           }
       } catch (error: any) {
         console.log(error);
@@ -158,7 +182,7 @@ export default observer(function CreateUpdateRegistration() {
       }
 
         }else{
-          setActiveStep('Document');
+          handleSetActiveStepToDocument();
         }
   
       }
@@ -488,13 +512,14 @@ export default observer(function CreateUpdateRegistration() {
                         </Grid.Column>
                         <Grid.Column width={8}>
                         <Header as='h2' textAlign="center">
-                        <Icon name='folder open outline' />
+                        <Icon name='book' />
                             <Header.Content>
                                 Document Library
                                 <Header.Subheader>Upload documents into folders and subfolders
                                 </Header.Subheader> 
                              </Header.Content>
                         </Header>
+                        <Tree treeData = {treeData} registrationEventId = {registrationEventId} />
                        </Grid.Column>
                     </Grid.Row>
                 </Grid>

@@ -5,6 +5,7 @@ import CommonStore from "./commonStore";
 import ModalStore from "./modalStore";
 import ResponsiveStore from "./responsiveStore";
 import AttachmentStore from "./attachmentStore";
+import DocumentLibraryStore from "./documentLibraryStore";
 
 interface Store {
     registrationStore: RegistrationStore
@@ -13,6 +14,7 @@ interface Store {
     modalStore: ModalStore
     responsiveStore: ResponsiveStore
     attachmentStore: AttachmentStore
+    documentLibraryStore: DocumentLibraryStore
 }
 
 export const store: Store = {
@@ -21,7 +23,8 @@ export const store: Store = {
     commonStore: new CommonStore(),
     modalStore: new ModalStore(),
     responsiveStore: new ResponsiveStore(),
-    attachmentStore: new AttachmentStore()
+    attachmentStore: new AttachmentStore(),
+    documentLibraryStore: new DocumentLibraryStore()
 }
 
 export const StoreContext = createContext(store)

@@ -22,6 +22,8 @@ namespace Persistence
         public DbSet<Attachment> Attachments  {get; set;}
         public DbSet<AnswerAttachment> AnswerAttachments {get; set;}
 
+        public DbSet<RegistrationEventDocumentLibrary> RegistrationEventDocumentLibraries { get; set;} 
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder); // Ensure Identity configurations are applied
