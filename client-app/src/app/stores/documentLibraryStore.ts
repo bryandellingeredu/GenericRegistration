@@ -167,20 +167,20 @@ export default class DocumentLibraryStore {
     deleteNode = (registrationEventId: string, targetKey: string) => {
       const treeData = this.getTreeData(registrationEventId);
       if (treeData) {
-          const deleteFolderNode = (nodes: Node[]): boolean => {
+          const deleteTheNode = (nodes: Node[]): boolean => {
               for (let i = 0; i < nodes.length; i++) {
                   if (nodes[i].key === targetKey) {
                       nodes.splice(i, 1);
                       return true;
                   }
-                  if (nodes[i].children && deleteFolderNode(nodes[i].children!)) {
+                  if (nodes[i].children && deleteTheNode(nodes[i].children!)) {
                       return true;
                   }
               }
               return false; 
           };
 
-          if (deleteFolderNode(treeData)) {
+          if (deleteTheNode(treeData)) {
               this.TreeDataRegistry.set(registrationEventId, treeData);
               if(!treeData || treeData.length < 1){
              
@@ -190,4 +190,41 @@ export default class DocumentLibraryStore {
           }
       }
   }
+
+  moveNode = (registrationEventId: string, targetKey: string, direction: 'up' | 'down') => {
+    const treeData = this.getTreeData(registrationEventId);
+    if (!treeData) return;
+
+    const moveNodeInArray = (nodes: Node[], key: string, dir: 'up' | 'down'): boolean => {
+        for (let i = 0; i < nodes.length; i++) {
+            if (nodes[i].key === key) {
+                if (dir === 'up' && i > 0) {
+                    // Swap the current node with the previous one
+                    [nodes[i - 1], nodes[i]] = [nodes[i], nodes[i - 1]];
+                    return true;
+                } else if (dir === 'down' && i < nodes.length - 1) {
+                    // Swap the current node with the next one
+                    [nodes[i + 1], nodes[i]] = [nodes[i], nodes[i + 1]];
+                    return true;
+                }
+                return false; // Node found but no move made (out of bounds)
+            }
+            // Recursively look for the node in children
+            if (nodes[i].children && moveNodeInArray(nodes[i].children!, key, dir)) {
+                return true;
+            }
+        }
+        return false; // Node not found in this branch
+    };
+
+    // Execute the move operation
+    const moved = moveNodeInArray(treeData, targetKey, direction);
+    if (moved) {
+        runInAction(() => {
+            this.TreeDataRegistry.set(registrationEventId, treeData);
+            this.saveToDB(registrationEventId, treeData);
+        });
+    }
+}
+
 }

@@ -6,7 +6,10 @@ namespace API.Controllers
     public class AnswerAttachmentsController : BaseApiController
     {
         [HttpGet("{id}")]
-        public async Task<IActionResult> Details(Guid id) => HandleResult(await Mediator.Send(new List.Query { RegistrationId = id }));
+        public async Task<IActionResult> List(Guid id) => HandleResult(await Mediator.Send(new List.Query { RegistrationId = id }));
+
+        [HttpGet("Details/{id}")]
+        public async Task<IActionResult> Details(Guid id) => HandleResult(await Mediator.Send(new Details.Query { Id = id }));
 
         [HttpGet("GetByRegistrationEvent/{id}")]
         public async Task<IActionResult> GetByRegistrationEvent(Guid id) => HandleResult(await Mediator.Send(new ListByRegistrationEvent.Query { RegistrationEventId = id }));

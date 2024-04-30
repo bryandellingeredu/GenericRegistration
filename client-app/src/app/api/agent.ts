@@ -99,7 +99,8 @@ const RegistrationEventOwners = {
 const AnswerAttachments = {
     list: (registrationId : string) => requests.get<AnswerAttachment[]>(`/AnswerAttachments/${registrationId}`),
     listByEventRegistration: (eventRegistrationId: string)  => requests.get<AnswerAttachment[]>(`/AnswerAttachments/GetByRegistrationEvent/${eventRegistrationId}`),
-    delete: (answerAttachmentId: string) => requests.del<void>(`/AnswerAttachments/${answerAttachmentId}`)
+    delete: (answerAttachmentId: string) => requests.del<void>(`/AnswerAttachments/${answerAttachmentId}`),
+    details: (id: string) => requests.get<AnswerAttachment>(`/AnswerAttachments/Details/${id}`)
 }
 
 const Uploads = {
