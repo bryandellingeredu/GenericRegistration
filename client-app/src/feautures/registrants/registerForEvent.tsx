@@ -55,7 +55,8 @@ export default observer(function RegisterForEvent() {
           autoApprove: true,
           autoEmail: true,
           registrationIsOpen: true,
-          certified: true
+          certified: true,
+          documentLibrary: false
         }  
     );
     const [registration, setRegistration] = useState<Registration>({

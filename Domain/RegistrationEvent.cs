@@ -27,6 +27,8 @@ namespace Domain
         public bool AutoApprove { get; set;}   
         public bool AutoEmail { get; set;}   
 
+        public bool DocumentLibrary {get; set;}
+
         public bool RegistrationIsOpen {get; set;}  
 
         public DateTime CreatedAt { get; set; }

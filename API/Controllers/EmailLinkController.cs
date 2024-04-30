@@ -12,6 +12,11 @@ namespace API.Controllers
             HandleResult(await Mediator.Send(new Create.Command { EmailLinkDTO = emailLinkDTO }));
 
         [AllowAnonymous]
+        [HttpPost("ForDocumentLibrary")]
+        public async Task<IActionResult> EmailLinkForDocumentLibrary([FromBody] EmailLinkDTO emailLinkDTO) =>
+    HandleResult(await Mediator.Send(new CreateForDocumentLibrary.Command { EmailLinkDTO = emailLinkDTO }));
+
+        [AllowAnonymous]
         [HttpPost("validate")]
         public async Task<IActionResult> Validate([FromBody] ValidateDTO validateDTO) =>
             HandleResult(await Mediator.Send(new Validate.Command { ValidateDTO = validateDTO }));

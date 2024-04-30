@@ -12,6 +12,7 @@ export interface RegistrationEvent{
     public: boolean
     autoApprove: boolean
     autoEmail: boolean
+    documentLibrary: boolean
     certified: boolean
     registrationIsOpen: boolean
     registrations?: Registration[]

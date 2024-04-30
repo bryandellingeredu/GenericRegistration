@@ -14,6 +14,9 @@ import ThankYouForRegisteringFromLink from "../../feautures/registrants/thankYou
 import DeRegisterForEvent from "../../feautures/registrants/deRegisterForEvent";
 import DeRegisterForEventFromLink from "../../feautures/registrants/deRegisterForEventFromLink";
 import AdministerRegistrants from "../../feautures/administerRegistrants/administerRegistrants";
+import DocumentLibraryForEvent from "../../feautures/registrants/documentLibraryForEvent";
+import RegisterForDocumentLibraryFromLink from "../../feautures/registrants/registerForDocumentLibraryFromLink";
+import DocumentLibraryFromLink from "../../feautures/registrants/documentLibraryFromLink";
 
 
 export const routes: RouteObject[] = [
@@ -30,8 +33,11 @@ export const routes: RouteObject[] = [
             { path: 'editregistration/:id/:step', element: <CreateUpdateRegistration /> },
             { path: 'viewallevents', element: <ViewAllEvents />},
             { path: 'registerforevent/:id', element: <RegisterForEvent /> },
+            { path: 'documentlibraryforevent/:id', element: <DocumentLibraryForEvent /> },
             { path: 'sendemaillink/:id', element: <SendEmailLink /> },
             { path: 'registerfromlink', element: <RegisterFromLink /> },
+            { path: 'documentlibraryfromlink', element: <DocumentLibraryFromLink /> },
+            { path: 'sendemaillinkfordocumentlibrary', element: <RegisterForDocumentLibraryFromLink/>},
             { path: 'thankyouforregistering/:id', element: <ThankYouForRegistering /> },
             { path: 'thankyouforregisteringfromlink/:encryptedKey', element: <ThankYouForRegisteringFromLink /> },
             { path: 'deregisterforevent/:id', element: <DeRegisterForEvent /> },

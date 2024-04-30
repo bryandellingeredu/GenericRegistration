@@ -60,6 +60,10 @@ export default observer ( function LoginUser() {
             const guid = redirectToPage.split('/').pop();
             if (guid) navigate(`/sendemaillink/${guid}`);
           }
+          if(redirectToPage && redirectToPage.toLocaleLowerCase().includes('documentlibraryforevent')){
+            const guid = redirectToPage.split('/').pop();
+            if (guid) navigate(`/sendemaillinkfordocumentlibrary/${guid}`);
+          }
         }
 
         return (
@@ -81,7 +85,7 @@ export default observer ( function LoginUser() {
  { !isLoggingIn &&  !isMobile &&         
 <Segment color='black'  >
     <Grid 
-    columns={(redirectToPage && redirectToPage.toLocaleLowerCase().includes('registerforevent')) 
+    columns={(redirectToPage && (redirectToPage.toLocaleLowerCase().includes('registerforevent') || redirectToPage.toLocaleLowerCase().includes('documentlibraryforevent')))
       ? loginType ? 2 : 3
       : loginType ? 1 : 2 } stackable textAlign='center'>
       {!redirectToPage && !loginType && <Divider vertical>Or</Divider>}
@@ -105,7 +109,7 @@ export default observer ( function LoginUser() {
             <Button basic onClick={handleLoginCAC}>Sign In</Button>
         </Grid.Column>
         }
-       {redirectToPage && redirectToPage.toLocaleLowerCase().includes('registerforevent') && !loginType &&
+       {redirectToPage && (redirectToPage.toLocaleLowerCase().includes('registerforevent') || redirectToPage.toLocaleLowerCase().includes('documentlibraryforevent')) && !loginType &&
           <Grid.Column>
           <Header icon>
             <Icon name='envelope' />
@@ -122,7 +126,7 @@ export default observer ( function LoginUser() {
 
 { !isLoggingIn &&  isMobile && 
  <Segment color='black'  >
-    <Grid columns={(redirectToPage && redirectToPage.toLocaleLowerCase().includes('registerforevent') && !loginType) ? 2 : 1 } stackable textAlign='center'>
+    <Grid columns={(redirectToPage && (redirectToPage.toLocaleLowerCase().includes('registerforevent') || redirectToPage.toLocaleLowerCase().includes('documentlibraryforevent')) && !loginType) ? 2 : 1 } stackable textAlign='center'>
 
 
    <Grid.Row verticalAlign='middle'>
@@ -135,7 +139,7 @@ export default observer ( function LoginUser() {
       <Login  loginCompleted={loginCompleted} loginInitiated={loginInitiated} logoutCompleted={logoutComplete}/>
      </Grid.Column>
     }
-     {redirectToPage && redirectToPage.toLocaleLowerCase().includes('registerforevent') && !loginType &&
+     {redirectToPage && (redirectToPage.toLocaleLowerCase().includes('registerforevent') || redirectToPage.toLocaleLowerCase().includes('documentlibraryforevent')) && !loginType &&
           <Grid.Column>
           <Header icon>
             <Icon name='envelope' />

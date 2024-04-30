@@ -18,9 +18,10 @@ const apiUrl = import.meta.env.VITE_API_URL;
 interface Props{ 
     node: Node,
     registrationEventId: string
+    isAdmin: boolean
 }
 
-export default observer(function TreeNode({node, registrationEventId} : Props) {
+export default observer(function TreeNode({node, registrationEventId, isAdmin} : Props) {
     const {documentLibraryStore, modalStore, attachmentStore, commonStore} = useStore();
       const {token} = commonStore;
     const {openModal, closeModal} = modalStore;
@@ -162,7 +163,7 @@ export default observer(function TreeNode({node, registrationEventId} : Props) {
                     ) : (
             <span onClick={handleClick}>{label }</span>
         )}
-        {children && 
+        {children && isAdmin &&
         <ButtonGroup size='tiny' style={{marginLeft: '10px'}}>
         <Button basic color='blue' animated='vertical' onClick={handleClick}>
         <ButtonContent hidden>{showChildren ? 'Close Folder' : 'Open Folder'}</ButtonContent>
@@ -218,7 +219,7 @@ export default observer(function TreeNode({node, registrationEventId} : Props) {
         </Button>
         </ButtonGroup>
         }
-        {!children &&
+        {!children && isAdmin && 
         <ButtonGroup size='tiny' style={{marginLeft: '10px'}}>
         <Button basic color='blue' animated='vertical' onClick={downloadAttachment} loading={downloading}>
             <ButtonContent hidden>download</ButtonContent>
@@ -252,6 +253,16 @@ export default observer(function TreeNode({node, registrationEventId} : Props) {
         </Button>
         </ButtonGroup>
         }
+        {!children && !isAdmin && 
+        <ButtonGroup size='tiny' style={{marginLeft: '10px'}}>
+           <Button basic color='blue' animated='vertical' onClick={downloadAttachment} loading={downloading}>
+            <ButtonContent hidden><span style={{fontSize: '0.8em'}}>download</span></ButtonContent>
+            <ButtonContent visible>
+                <FontAwesomeIcon icon={faDownload}   />
+            </ButtonContent>
+        </Button>
+        </ButtonGroup>
+        }
         </HeaderContent>
       </Header>
 
@@ -259,7 +270,8 @@ export default observer(function TreeNode({node, registrationEventId} : Props) {
         {showChildren && children && 
          <Tree
           treeData={children} 
-          registrationEventId={registrationEventId}  
+          registrationEventId={registrationEventId}
+          isAdmin={isAdmin}  
          />}
       </ul>
         </>

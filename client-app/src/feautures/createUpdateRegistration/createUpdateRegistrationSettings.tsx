@@ -34,6 +34,12 @@ export default observer (function CreateUpdateRegistrationSettings(
         setSaveForm(true);
       };
 
+      const handleDocumentLibraryChange = () => {
+        setRegistrationEvent({...registrationEvent, documentLibrary :!registrationEvent.documentLibrary})
+        setFormDirty();
+        setSaveForm(true);
+      }
+
       const handleRegistrationIsOpenChange = () => {
         setRegistrationEvent({...registrationEvent, registrationIsOpen :!registrationEvent.registrationIsOpen})
         setFormDirty();
@@ -148,6 +154,32 @@ export default observer (function CreateUpdateRegistrationSettings(
           <Grid.Column width={3}>
             <Popup
               content="Closing the registration will stop any new users from registering for your event."
+              trigger={<Button color='teal' basic icon='question' />}
+              on='click'
+              position="top right"
+            />
+          </Grid.Column>
+        </Grid.Row>
+        <Divider/>
+        <Grid.Row columns={3}>
+          <Grid.Column width={8}>
+            <Form.Field>
+              <label>Create Document Library</label>
+            </Form.Field>
+          </Grid.Column>
+          <Grid.Column width={5}>
+            <Form.Field>
+              <Radio
+                toggle
+                label={registrationEvent.documentLibrary ? 'On' : 'Off'}
+                checked={registrationEvent.documentLibrary}
+                onChange={handleDocumentLibraryChange}
+              />
+            </Form.Field>
+          </Grid.Column>
+          <Grid.Column width={3}>
+            <Popup
+              content="Create a Document Library where you can upload files that registrants can access for your event."
               trigger={<Button color='teal' basic icon='question' />}
               on='click'
               position="top right"

@@ -31,7 +31,8 @@ export default observer(function ThankYouForRegistering() {
         autoApprove: true,
         autoEmail: true,
         registrationIsOpen: true,
-        certified: true
+        certified: true,
+        documentLibrary: false
       }  
   );
 

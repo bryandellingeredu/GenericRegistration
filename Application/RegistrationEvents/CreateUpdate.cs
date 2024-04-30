@@ -39,6 +39,7 @@ namespace Application.RegistrationEvents
                     existingRegistrationEvent.Public = request.RegistrationEvent.Public;
                     existingRegistrationEvent.AutoApprove = request.RegistrationEvent.AutoApprove;
                     existingRegistrationEvent.AutoEmail = request.RegistrationEvent.AutoEmail;
+                    existingRegistrationEvent.DocumentLibrary = request.RegistrationEvent.DocumentLibrary;  
                     existingRegistrationEvent.RegistrationIsOpen = request.RegistrationEvent.RegistrationIsOpen;
                     existingRegistrationEvent.Certified = request.RegistrationEvent.Certified;
                     existingRegistrationEvent.StartDate = request.RegistrationEvent.StartDate;

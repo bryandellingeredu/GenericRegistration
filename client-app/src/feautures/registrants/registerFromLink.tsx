@@ -60,7 +60,8 @@ function formatDate(date : Date) {
           autoApprove: true,
           autoEmail: true,
           registrationIsOpen: true,
-          certified: true
+          certified: true,
+          documentLibrary: false
         }  
     );
     const [registration, setRegistration] = useState<Registration>({

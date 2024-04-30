@@ -32,6 +32,7 @@ export default observer(function DeRegisterForEvent() {
           autoEmail: true,
           registrationIsOpen: true,
           certified: true,
+          documentLibrary: false
         }  
     );
     const [registration, setRegistration] = useState<Registration>({

@@ -72,6 +72,7 @@ const Account = {
 
 const EmailLinks = {
     sendLink: (emailLink: EmailLinkDTO) => requests.post<void>('/EmailLink', emailLink),
+    sendLinkForDocumentLibrary: (emailLink: EmailLinkDTO) => requests.post<void>('/EmailLink/ForDocumentLibrary', emailLink),
     validate: (encryptedKey: string) => requests.post<void>('/EmailLink/validate', {encryptedKey}),
     delete: (encryptedKey: string) => requests.post<void>('/EmailLink/delete', {encryptedKey}),
     getRegistrationEvent: (encryptedKey: string) => requests.post<RegistrationEvent>('/EmailLink/getRegistrationEvent', {encryptedKey}),

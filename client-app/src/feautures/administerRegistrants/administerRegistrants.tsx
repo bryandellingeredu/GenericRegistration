@@ -66,6 +66,7 @@ export default observer(function AdministerRegistrants() {
       certified: true,
       autoEmail: true,
       registrationIsOpen: true,
+      documentLibrary: false
     }  
 );
 

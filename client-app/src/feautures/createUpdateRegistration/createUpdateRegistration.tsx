@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { observer } from "mobx-react-lite";
 import ManageRegistrationNavbar from "../../app/layout/ManageRegistrationNavbar";
 import { useParams } from 'react-router-dom';
-import { Button, Grid, Header, Icon, Loader, Step, StepContent, StepDescription, StepGroup, StepTitle } from 'semantic-ui-react';
+import { Button, ButtonGroup, Grid, Header, Icon, Loader, Step, StepContent, StepDescription, StepGroup, StepTitle } from 'semantic-ui-react';
 import { RegistrationEvent } from '../../app/models/registrationEvent';
 import { v4 as uuidv4 } from 'uuid';
 import agent from '../../app/api/agent';
@@ -25,7 +25,7 @@ import { Node } from '../../app/models/Node';
 import { useStore } from "../../app/stores/store";
 import { reaction } from 'mobx';
 
-
+const baseUrl = import.meta.env.VITE_BASE_URL;
 
 export default observer(function CreateUpdateRegistration() {
     const { documentLibraryStore } = useStore();
@@ -65,6 +65,7 @@ export default observer(function CreateUpdateRegistration() {
           published: false,
           autoApprove: true,
           autoEmail: true,
+          documentLibrary: false,
           registrationIsOpen: true,
           public: true,
           registrations: [],
@@ -350,6 +351,16 @@ export default observer(function CreateUpdateRegistration() {
         }
       }
 
+      const copyLink = () => {
+        const websiteUrl = `${baseUrl}/documentlibraryforevent/${registrationEventId}`;
+        navigator.clipboard.writeText(websiteUrl).then(() => {
+          // Optionally, show a notification or message indicating the link was copied
+          toast.success("Link copied to clipboard!");
+        }).catch(err => {
+          toast.error('Could not copy link: ', err);
+        });
+      };
+
 
       if (loading) return <LoadingComponent content="Loading Data..."/>
     return (
@@ -374,7 +385,7 @@ export default observer(function CreateUpdateRegistration() {
                      <StepDescription>Review Your Site and Publish</StepDescription>
                   </StepContent>
              </Step>
-
+             {registrationEvent.documentLibrary && 
              <Step onClick={handleDocumentLibraryClick} active={activeStep === 'Document'}
              disabled = {savingFromStepClick || !registrationEvent.title || !registrationEvent.title.trim() || !registrationEvent.location || !registrationEvent.location.trim() || !registrationEvent.startDate || !registrationEvent.endDate || !registrationEvent.certified  }>
                  {savingFromStepClick && <Loader active inline /> }
@@ -384,6 +395,7 @@ export default observer(function CreateUpdateRegistration() {
                    <StepDescription>Create a document library for your registrants</StepDescription>
                 </StepContent>
               </Step>
+             }
 
 
           </StepGroup>
@@ -530,7 +542,10 @@ export default observer(function CreateUpdateRegistration() {
                                 </Header.Subheader> 
                              </Header.Content>
                         </Header>
-                        <Tree treeData = {treeData} registrationEventId = {registrationEventId} />
+                        <Tree treeData = {treeData} registrationEventId = {registrationEventId} isAdmin = {false} />
+                        <ButtonGroup size='huge' floated='right' style={{marginRight: '40px'}} >
+                          <Button  primary content='Copy Docment Library Link to Clipboard' floated='right' onClick={copyLink} />
+                        </ButtonGroup>
                        </Grid.Column>
                     </Grid.Row>
                 </Grid>
