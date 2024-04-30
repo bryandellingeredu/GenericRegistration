@@ -1,4 +1,4 @@
-import { makeAutoObservable, reaction } from "mobx";
+import { makeAutoObservable, reaction, runInAction } from "mobx";
 import { Node } from "../models/Node";
 import { v4 as uuidv4 } from 'uuid';
 import agent from "../api/agent";
@@ -9,43 +9,8 @@ const defaultTreeData  = [
   {
     key: uuidv4(),
     label: "Documents",
-    children: [
-      {
-        key: uuidv4(),
-        label: "Document 1-1",
-        children: [
-          {
-            key: uuidv4(),
-            label: "Document-0-1.doc",
-          },
-          {
-            key: uuidv4(),
-            label: "Document-0-2.doc",
-          },
-        ],
-      },
-    ],
-  },
-  {
-    key: uuidv4(),
-    label: "Desktop",
-    children: [
-      {
-        key: uuidv4(),
-        label: "document1.doc",
-      },
-      {
-        key: uuidv4(),
-        label: "documennt-2.doc",
-      },
-    ],
-  },
-  {
-    key: uuidv4(),
-    label: "Downloads",
-    children: [],
-  },
-];
+    children: []
+  }];
 
 export default class DocumentLibraryStore {
     TreeDataRegistry = new Map<string, Node[]>();
@@ -83,22 +48,36 @@ export default class DocumentLibraryStore {
         this.saveToDB(registrationEventId, treeData);
       }
 
-      getTreeData = (id: string): Node[] | undefined => {
+      getTreeData = (id: string) => {
         let treeData = this.TreeDataRegistry.get(id);
-        if(treeData && treeData.length > 0){
-          return treeData;
-        }else{
-         agent.RegistrationEventDocumentLibraries.details(id).then((response) =>{
-          if (response && response.treeData){
-            this.addTreeData(id,JSON.parse(response.treeData));
-            return(JSON.parse(response.treeData));
-          }else{
-            this.addTreeData(id,defaultTreeData);
-            return treeData;
-          }
-         });
+        if (treeData) {
+            return treeData;  // Immediately return existing data if available
         }
-       }
+    
+        // Trigger asynchronous operation to fetch and update data if not found
+        this.fetchAndStoreTreeData(id);
+    }
+
+    fetchAndStoreTreeData = async (id: string) => {
+      try {
+          const response = await agent.RegistrationEventDocumentLibraries.details(id);
+          if (response && response.treeData) {
+              const parsedData = JSON.parse(response.treeData);
+              runInAction(() => {
+                  this.addTreeData(id, parsedData && parsedData.length > 0 ? parsedData : defaultTreeData);
+              });
+          } else {
+              runInAction(() => {
+                  this.addTreeData(id, defaultTreeData);
+              });
+          }
+      } catch (error) {
+          console.error("Failed to fetch tree data:", error);
+          toast.error('Error fetching tree data');
+      }
+  }
+
+
 
        edit = (registrationEventId: string, key: string, newLabel: string) => {
         const treeData = this.getTreeData(registrationEventId);
@@ -155,6 +134,36 @@ export default class DocumentLibraryStore {
         }
     }
 
+    addFile = (registrationEventId: string, parentKey: string, answerAttachmentId: string, fileName: string) => {
+      const treeData = this.getTreeData(registrationEventId);
+      if (treeData) {
+          const addNewFile = (nodes: Node[]): boolean => {
+              for (let i = 0; i < nodes.length; i++) {
+                  if (nodes[i].key === parentKey) {
+                      const newFile: Node = {
+                          key: answerAttachmentId,  
+                          label: fileName,
+                      };
+                      if (!nodes[i].children) {
+                        nodes[i].children = [];  // Initialize children if undefined
+                    }
+                      nodes[i].children!.push(newFile);
+                      return true;
+                  }
+                  if (nodes[i].children && addNewFile(nodes[i].children!)) {
+                      return true;
+                  }
+              }
+              return false;
+          };
+
+          if (addNewFile(treeData)) {
+              this.TreeDataRegistry.set(registrationEventId, treeData);
+              this.saveToDB(registrationEventId, treeData);
+          }
+      }
+  }
+
     deleteNode = (registrationEventId: string, targetKey: string) => {
       const treeData = this.getTreeData(registrationEventId);
       if (treeData) {
@@ -174,13 +183,8 @@ export default class DocumentLibraryStore {
           if (deleteFolderNode(treeData)) {
               this.TreeDataRegistry.set(registrationEventId, treeData);
               if(!treeData || treeData.length < 1){
-                const emptyTreeData  = [
-                  {
-                    key: uuidv4(),
-                    label: "Documents",
-                    children: []
-                  }];
-                  this.TreeDataRegistry.set(registrationEventId, emptyTreeData);
+             
+                  this.TreeDataRegistry.set(registrationEventId, defaultTreeData);
               }  
               this.saveToDB(registrationEventId, treeData); 
           }

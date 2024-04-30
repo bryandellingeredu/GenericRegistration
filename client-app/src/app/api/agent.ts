@@ -112,6 +112,16 @@ const Uploads = {
         return axios.post('upload/addAnswerAttachment', formData, {
             headers: {'Content-Type': 'multipart/form-data'}
           })
+    },
+
+    uploadDocumentLibraryAttachment: (file: any, answerAttachmentId: string, registrationId: string ) => {
+        let formData = new FormData();
+        formData.append('File', file);
+        formData.append('answerAttachmentId', answerAttachmentId);
+        formData.append('registrationId', registrationId);
+        return axios.post('upload/addDocumentLibraryAttachment', formData, {
+            headers: {'Content-Type': 'multipart/form-data'}
+          })
     }
     
 }

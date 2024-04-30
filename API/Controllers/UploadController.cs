@@ -72,6 +72,19 @@ namespace API.Controllers
         }
 
         [AllowAnonymous]
+        [HttpPost("addDocumentLibraryAttachment")]
+        public async Task<IActionResult> AddDocumentLibraryAttachment(
+                  [FromForm] string answerAttachmentId,
+                  [FromForm] string registrationId,
+                  [FromForm] AddDocumentLibraryAttachment.Command command)
+        {
+            command.AnswerAttachmentId = Guid.Parse(answerAttachmentId);
+            command.RegistrationId = Guid.Parse(registrationId);
+            return HandleResult(await Mediator.Send(command));
+        }
+            
+
+        [AllowAnonymous]
         [HttpPost("uploadImage")]
         public async Task<IActionResult> UploadImage([FromForm] IFormFile imageFile)
 

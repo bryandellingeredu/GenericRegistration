@@ -7,6 +7,9 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEdit, faFileCirclePlus, faFolderClosed, faFolderMinus, faFolderOpen, faFolderPlus } from '@fortawesome/free-solid-svg-icons';
 import { useStore } from '../../app/stores/store';
 import Confirmation from '../../app/common/modals/Confirmation';
+import DocumentLibraryUploadModal from '../documentUpload/documentLibraryUploadModal';
+import { v4 as uuidv4 } from 'uuid';
+import { toast } from 'react-toastify';
 
 
 interface Props{ 
@@ -15,9 +18,10 @@ interface Props{
 }
 
 export default observer(function TreeNode({node, registrationEventId} : Props) {
-    const {documentLibraryStore, modalStore} = useStore();
+    const {documentLibraryStore, modalStore, attachmentStore} = useStore();
     const {openModal, closeModal} = modalStore;
-    const {edit, addFolder, deleteNode} = documentLibraryStore;
+    const {edit, addFolder, deleteNode, addFile} = documentLibraryStore;
+    const {uploadDocumentLibraryDocument, setUploadingOn, setUploadingOff}  = attachmentStore
     const { children, label, key } = node;
     const [showChildren, setShowChildren] = useState(true);
     const [isEditing, setIsEditing] = useState(false);
@@ -55,6 +59,28 @@ export default observer(function TreeNode({node, registrationEventId} : Props) {
             onYesClick={handleYesClick }/>) 
     }
 
+    async function handleUpload(files: File[], registrationEventId: string, ) {
+        setUploadingOn();
+        
+        await Promise.all(files.map(file => {
+            const answerAttachmentId = uuidv4();
+            const fileName = file.name;
+    
+       
+            addFile(registrationEventId, node.key, answerAttachmentId, fileName);
+    
+      
+            return uploadDocumentLibraryDocument(file, answerAttachmentId, registrationEventId)
+                .catch(error => {
+                    console.error(`Error uploading file: ${fileName}`, error);
+                    toast.error(`Error uploading file ${fileName}`);
+                });
+        }));
+    
+        setUploadingOff(); 
+        closeModal(); 
+    }
+
     return(
         <>
     
@@ -83,25 +109,35 @@ export default observer(function TreeNode({node, registrationEventId} : Props) {
         </ButtonContent>
         </Button>
         <Button basic color='blue' animated='vertical' onClick={handleEdit}>
-        <ButtonContent hidden>rename</ButtonContent>
+        <ButtonContent hidden>rename folder</ButtonContent>
         <ButtonContent visible>
         <FontAwesomeIcon icon={faEdit} size='2x' />
         </ButtonContent>
         </Button>
-        <Button basic color='blue' animated='vertical' onClick={handleAddFolder}>
-        <ButtonContent hidden>New Folder</ButtonContent>
-        <ButtonContent visible>
-        <FontAwesomeIcon icon={faFolderPlus} size='2x' />
-        </ButtonContent>
-        </Button>
-        <Button basic color='blue' animated='vertical'>
-        <ButtonContent hidden>New File</ButtonContent>
+        <Button basic color='blue' animated='vertical' 
+         onClick={() =>
+            openModal(
+              <DocumentLibraryUploadModal
+              registrationEventId={registrationEventId}
+              uploadDocuments={handleUpload}
+              />
+            )
+          }
+        >
+        <ButtonContent hidden>upload files</ButtonContent>
         <ButtonContent visible>
         <FontAwesomeIcon icon={faFileCirclePlus} size='2x' />
         </ButtonContent>
         </Button>
+        <Button basic color='blue' animated='vertical' onClick={handleAddFolder}>
+        <ButtonContent hidden>new folder</ButtonContent>
+        <ButtonContent visible>
+        <FontAwesomeIcon icon={faFolderPlus} size='2x' />
+        </ButtonContent>
+        </Button>
+
         <Button basic color='red' animated='vertical' onClick={handleDeleteFolderClick}>
-        <ButtonContent hidden>Delete Folder</ButtonContent>
+        <ButtonContent hidden>delete folder</ButtonContent>
         <ButtonContent visible>
         <FontAwesomeIcon icon={faFolderMinus} size='2x' />
         </ButtonContent>

@@ -1,14 +1,18 @@
 import  {useCallback} from 'react'
 import {useDropzone} from 'react-dropzone'
 import { toast } from 'react-toastify';
-import {Header, Icon} from 'semantic-ui-react';
+import { Dimmer, Header, Icon, Loader, Segment } from 'semantic-ui-react';
+import { useStore } from '../../app/stores/store';
 
 interface Props{
     setFiles: (files: any) => void;
     error: boolean
 }
 
-export default function DocumentUploadWidgetDropzone({setFiles, error}: Props) {
+export default function DocumentLibraryUploadWidgetDropzone({setFiles, error}: Props) {
+
+    const {attachmentStore} = useStore();
+    const {uploading} = attachmentStore
    
     const dzStyles = {
         border: 'dashed 3px #eee',
@@ -24,32 +28,27 @@ export default function DocumentUploadWidgetDropzone({setFiles, error}: Props) {
     }
 
     const onDrop = useCallback((acceptedFiles: any) => {
-        if (acceptedFiles.length > 1) {
-            toast.error('You may only upload one attachment at a time.', {
-                position: "top-center",
-                autoClose: 10000,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-                progress: undefined,
-                theme: "colored",
-                });
-        } else {
         setFiles(acceptedFiles.map((file: any) => Object.assign(file, {
             preview: URL.createObjectURL(file)
         })))
-    }
     }, [setFiles])
 
 
   const {getRootProps, getInputProps, isDragActive} = useDropzone({onDrop})
 
   return (
+    <>
+    {uploading && 
+    <Dimmer active>
+      <Loader>Uploading Files</Loader>
+    </Dimmer>
+   }
+
     <div {...getRootProps()} style={isDragActive ? {...dzStyles, ...dzActive} : dzStyles}>
             <input {...getInputProps()} />
             <Icon name='hand point down' size='huge' color={error ? 'red' : 'black'} />
-            <Header content='Drag And Drop, Or Click To Browse' color={error ? 'red' : 'black'} />
-    </div>
+            <Header content='Drag And Drop Multiple Files at Once, Or Click To Browse' color={error ? 'red' : 'black'} />
+        </div>
+        </>
   )
 }   

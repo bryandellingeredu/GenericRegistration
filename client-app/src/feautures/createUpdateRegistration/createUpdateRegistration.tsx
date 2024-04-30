@@ -23,6 +23,7 @@ import HeaderSubHeader from 'semantic-ui-react/dist/commonjs/elements/Header/Hea
 import Tree from '../documentLibrary/tree';
 import { Node } from '../../app/models/Node';
 import { useStore } from "../../app/stores/store";
+import { reaction } from 'mobx';
 
 
 
@@ -101,14 +102,24 @@ export default observer(function CreateUpdateRegistration() {
     }
 
     useEffect(() => {
-      debugger;
-      if(loadTreeData){
-        const data = documentLibraryStore.getTreeData(registrationEventId);
-        if (data) {
-          setTreeData(data);
+      if (loadTreeData) {
+          documentLibraryStore.fetchAndStoreTreeData(registrationEventId);
+      }
+  }, [loadTreeData, registrationEventId, documentLibraryStore]);
+
+  useEffect(() => {
+    const disposer = reaction(
+        () => documentLibraryStore.TreeDataRegistry.get(registrationEventId),
+        (data) => {
+            if (data) {
+                setTreeData(data);
+            }
         }
-      } 
-    }, [loadTreeData, documentLibraryStore.treeData, registrationEventId, documentLibraryStore.TreeDataRegistry.get(registrationEventId)]);
+    );
+
+    // Cleanup the reaction when the component unmounts
+    return () => disposer();
+}, [registrationEventId, documentLibraryStore]);
 
     useEffect(() => {
         if(id) getRegistrationEvent();     
