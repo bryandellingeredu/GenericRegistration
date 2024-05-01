@@ -188,6 +188,7 @@ namespace Application.Registrations
                 RegistrationEvent registrationEvent = await _context.RegistrationEvents.FindAsync(registration.RegistrationEventId);
                 var registrationLinkUrl = $"{settings.BaseUrl}?redirecttopage=registerforevent/{registration.RegistrationEventId}&logintype={loginType}";
                 var cancelRegistrationUrl = $"{settings.BaseUrl}?redirecttopage=deregisterforevent/{registration.Id}&logintype={loginType}";
+                var documentLibraryLinkUrl = $"{settings.BaseUrl}?redirecttopage=documentlibraryforevent/{registration.RegistrationEventId}&logintype={loginType}";
                 string title = $"Thank You for {(status == "New" ? "registering" : "updating your registration")} for {registrationEvent.Title}";
                 string body = $"<p>Thank You for {(status == "New" ? "registering" : "updating your registration")} for {registrationEvent.Title}</p>";
                 body = body + $"<p>  <strong>Location:</strong> {registrationEvent.Location}</p>";
@@ -198,6 +199,10 @@ namespace Application.Registrations
                 if (!registrationEvent.AutoApprove && !registration.Registered)
                 {
                     body = body + "<p>Your Registration is under review, you will receive an email when you have been approved for this event.</p><p></p>";
+                }
+                if (registrationEvent.DocumentLibrary && (registrationEvent.AutoApprove || registration.Registered))
+                {
+                    body = body + $"<p>Please visit the <a href={documentLibraryLinkUrl}> Document Library </a> before the event to review documents related to the event.</p>";
                 }
                 body = body + registration.Hcontent;
                 var icalContent = CreateICalContent(registrationEvent);

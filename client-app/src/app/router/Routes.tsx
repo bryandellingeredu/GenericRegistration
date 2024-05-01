@@ -17,6 +17,7 @@ import AdministerRegistrants from "../../feautures/administerRegistrants/adminis
 import DocumentLibraryForEvent from "../../feautures/registrants/documentLibraryForEvent";
 import RegisterForDocumentLibraryFromLink from "../../feautures/registrants/registerForDocumentLibraryFromLink";
 import DocumentLibraryFromLink from "../../feautures/registrants/documentLibraryFromLink";
+import SendEmailLinkForDocumentLibrary from "../../feautures/home/SendEmailLinkForDocumentLibrary";
 
 
 export const routes: RouteObject[] = [
@@ -35,9 +36,9 @@ export const routes: RouteObject[] = [
             { path: 'registerforevent/:id', element: <RegisterForEvent /> },
             { path: 'documentlibraryforevent/:id', element: <DocumentLibraryForEvent /> },
             { path: 'sendemaillink/:id', element: <SendEmailLink /> },
+            { path: 'sendemaillinkfordocumentlibrary/:id', element: <SendEmailLinkForDocumentLibrary/>},
             { path: 'registerfromlink', element: <RegisterFromLink /> },
             { path: 'documentlibraryfromlink', element: <DocumentLibraryFromLink /> },
-            { path: 'sendemaillinkfordocumentlibrary', element: <RegisterForDocumentLibraryFromLink/>},
             { path: 'thankyouforregistering/:id', element: <ThankYouForRegistering /> },
             { path: 'thankyouforregisteringfromlink/:encryptedKey', element: <ThankYouForRegisteringFromLink /> },
             { path: 'deregisterforevent/:id', element: <DeRegisterForEvent /> },

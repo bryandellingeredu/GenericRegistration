@@ -27,9 +27,8 @@ function formatDate(date : Date) {
 
 export default observer (function DocumentLibraryForEvent() {
 
-    const { userStore, responsiveStore, attachmentStore, commonStore, documentLibraryStore } = useStore();
+    const { userStore, responsiveStore,  documentLibraryStore } = useStore();
 
-    const {token} = commonStore;
     const {isMobile} = responsiveStore
     const { user, logout } = userStore;
     const { id } = useParams();
@@ -213,6 +212,7 @@ export default observer (function DocumentLibraryForEvent() {
         </Message>
         </Container>
     }
+    {user && 
       <Grid  stackable style={{padding: '40px' }}>
         <Grid.Row>
         <Grid.Column width={8}>
@@ -248,6 +248,7 @@ export default observer (function DocumentLibraryForEvent() {
         </Grid.Column>
         </Grid.Row>
       </Grid>
+     }
         </>
     );
 });

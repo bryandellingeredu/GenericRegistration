@@ -80,6 +80,7 @@ const EmailLinks = {
     getRegistration: (encryptedKey: string) => requests.post<Registration>('/EmailLink/getRegistration', {encryptedKey}),
     createUpdateRegistration: (data: registrationDTO) => requests.post<void>('/EmailLink/createUpdateRegistration', data),
     getAnswerAttachments: (encryptedKey: string) => requests.post<AnswerAttachment[]>('/EmailLink/getAnswerAttachments', {encryptedKey}),
+    getAnswerAttachment: (encryptedKey: string, id: string) => requests.post<AnswerAttachment>(`/EmailLink/getAnswerAttachment/${id}`, {encryptedKey}),
     deleteAnswerAttachment: (encryptedKey: string, answerAttachmentId: string) => requests.post<void>(`/EmailLink/deleteAnswerAttachment/${answerAttachmentId}`, {encryptedKey}),
 }
 

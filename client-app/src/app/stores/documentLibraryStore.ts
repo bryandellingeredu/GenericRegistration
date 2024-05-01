@@ -1,9 +1,9 @@
-import { makeAutoObservable, reaction, runInAction } from "mobx";
+import { makeAutoObservable,runInAction } from "mobx";
 import { Node } from "../models/Node";
 import { v4 as uuidv4 } from 'uuid';
 import agent from "../api/agent";
 import { toast } from "react-toastify";
-import { RegistrationEvent } from "../models/registrationEvent";
+import { store } from "./store";
 
 const defaultTreeData  = [
   {
@@ -15,6 +15,7 @@ const defaultTreeData  = [
 export default class DocumentLibraryStore {
     TreeDataRegistry = new Map<string, Node[]>();
 
+
     get treeData() {
       return Array.from(this.TreeDataRegistry.values());
     }
@@ -23,10 +24,10 @@ export default class DocumentLibraryStore {
         makeAutoObservable(this);
       }
 
+
       saveToDB = async(registrationEventId: string, treeData: Node[]) =>{
-        debugger;
+       if(store.userStore.user){
         try{
-            debugger;
             await agent.RegistrationEventDocumentLibraries.createUpdate(registrationEventId, JSON.stringify(treeData))
         } catch (error) {
           toast.error('Error Saving to Database', {
@@ -41,6 +42,7 @@ export default class DocumentLibraryStore {
           });
           console.log(error);
         }
+       }
       }
 
       addTreeData = (registrationEventId: string, treeData: Node[]) => {

@@ -42,6 +42,11 @@ namespace API.Controllers
          HandleResult(await Mediator.Send(new GetAnswerAttachments.Command { ValidateDTO = validateDTO }));
 
         [AllowAnonymous]
+        [HttpPost("getAnswerAttachment/{id}")]
+        public async Task<IActionResult> GetAnswerAttachment(Guid id, [FromBody] ValidateDTO validateDTO) =>
+            HandleResult(await Mediator.Send(new GetAnswerAttachment.Command { AnswerAttachmentId = id, ValidateDTO = validateDTO }));
+
+        [AllowAnonymous]
         [HttpPost("createUpdateRegistration")]
         public async Task<IActionResult> CreateUpdateRegistration([FromBody] RegistrationDTO registrationDTO) =>
         HandleResult(await Mediator.Send(new CreateUpdateRegistration.Command { RegistrationDTO = registrationDTO }));

@@ -198,6 +198,7 @@ namespace Application.EmailLink
                 var urlEncodedEncryptedKey = Uri.EscapeDataString(encryptedKey);
                 var registrationLinkUrl = $"{settings.BaseUrl}/registerfromlink?key={urlEncodedEncryptedKey}";
                 var cancelRegistrationUrl = $"{settings.BaseUrl}/deregisterforeventfromlink/{urlEncodedEncryptedKey}";
+                var documentLibraryLinkUrl = $"{settings.BaseUrl}/documentlibraryfromlink?key={urlEncodedEncryptedKey}";
                 string title = $"Thank you for {(status == "New" ? "registering" : "updating your registration")} for {registrationEvent.Title}";
                 string body = $"<p>Thank You for Registering for {registrationEvent.Title}</p>";
                 body = body + $"<p>  <strong>Location:</strong> {registrationEvent.Location}</p>";
@@ -208,6 +209,9 @@ namespace Application.EmailLink
                 if (!registrationEvent.AutoApprove && !registration.Registered)
                 {
                     body = body + "<p>Your Registration is under review, you will receive an email when you have been approved for this event.</p><p></p>";
+                }
+                if(registrationEvent.DocumentLibrary && (registrationEvent.AutoApprove || registration.Registered)){
+                    body = body + $"<p>Please visit the <a href={documentLibraryLinkUrl}> Document Library </a> before the event to review documents related to the event.</p>";
                 }
                 body = body + registration.Hcontent;
                 var icalContent = CreateICalContent(registrationEvent);

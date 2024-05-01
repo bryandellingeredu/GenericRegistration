@@ -98,8 +98,14 @@ namespace Application.Registrations
                     var encryptedKey = Convert.ToBase64String(encryptedKeyBytes);
                     var urlEncodedEncryptedKey = Uri.EscapeDataString(encryptedKey);
                     var registrationLinkUrl = $"{settings.BaseUrl}/registerfromlink?key={urlEncodedEncryptedKey}";
+                    var documentLibraryLinkUrl = $"{settings.BaseUrl}/documentlibraryfromlink?key={urlEncodedEncryptedKey}";
 
                     body = body + $"<p></p><p> To view, or make changes to your registration go to <a href=\"{registrationLinkUrl}\"> {registrationEvent.Title}</a> </p>";
+
+                    if (registrationEvent.DocumentLibrary)
+                    {
+                        body = body + $"<p>Please visit the <a href={documentLibraryLinkUrl}> Document Library </a> before the event to review documents related to the event.</p>";
+                    }
 
                     var icalContent = CreateICalContent(registrationEvent);
                     var icalFileName = "event_invite.ics";
@@ -112,8 +118,13 @@ namespace Application.Registrations
                     string loginType = registration.UserEmail.ToLower().Trim().EndsWith("armywarcollege.edu") ? "EDU" : "CAC";
                     var registrationLinkUrl = $"{settings.BaseUrl}?redirecttopage=registerforevent/{registration.RegistrationEventId}&logintype={loginType}";
                     var cancelRegistrationUrl = $"{settings.BaseUrl}?redirecttopage=deregisterforevent/{registration.Id}&logintype={loginType}";
+                    var documentLibraryLinkUrl = $"{settings.BaseUrl}?redirecttopage=documentlibraryforevent/{registration.RegistrationEventId}&logintype={loginType}";
                     body = body + $"<p></p><p> To view, or make changes to your registration go to <a href={registrationLinkUrl}> Update Your Registration </a></p>";
                     body = body + $"<p> If you are no longer able to attend you may <a href={cancelRegistrationUrl}> Cancel Your Registration </a></p> ";
+                    if (registrationEvent.DocumentLibrary)
+                    {
+                        body = body + $"<p>Please visit the <a href={documentLibraryLinkUrl}> Document Library </a> before the event to review documents related to the event.</p>";
+                    }
                     var icalContent = CreateICalContent(registrationEvent);
                     var icalFileName = "event_invite.ics";
                     await GraphHelper.SendEmail(new[] { registration.Email }, title, body, icalContent, icalFileName);

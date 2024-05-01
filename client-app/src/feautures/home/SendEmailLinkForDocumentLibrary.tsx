@@ -29,8 +29,8 @@ export default observer ( function SendEmailLinkForDocumentLibrary() {
         try{
           setSaving(true);
           const emailLinkDTO : EmailLinkDTO = {registrationEventId: id!, email: email}
-          await agent.EmailLinks.sendLink(emailLinkDTO);
-          toast.success("an registration link was sent to your email");
+          await agent.EmailLinks.sendLinkForDocumentLibrary(emailLinkDTO);
+          toast.success("a link to the document library was sent to your email");
           setEmailSent(true);
         } catch (error: any) {
           console.log(error);
@@ -76,8 +76,8 @@ export default observer ( function SendEmailLinkForDocumentLibrary() {
                   <Form size={isMobile ? 'tiny' : 'huge'} onSubmit={handleSubmit} >
                   <Divider horizontal >
                         <Header as='h4' color='teal'>
-                        <Icon name='paperclip' />
-                            Email Me a Registration Link
+                        <Icon name='book' />
+                            Email Me a Link to the Document Library
                         </Header>
                     </Divider>
                     <FormField required={true} error={formIsDirty && !isEmailValid}>
@@ -117,9 +117,9 @@ export default observer ( function SendEmailLinkForDocumentLibrary() {
                 <Segment color='teal'>
                   <Header as='h2' icon textAlign="center">
                   <Icon name='paper plane outline' />
-                    Registration Link Sent
+                    A Link to the Document Library Was Sent
                     <HeaderSubheader>
-                      A link to complete your registration has been sent to your email. Please check your inbox (and the spam folder, just in case) to continue with your event registration.
+                      A link to access the document library  has been sent to your email. Please check your inbox (and the spam folder, just in case) to access the document library.
                     </HeaderSubheader>
                   </Header>
                   <HeaderSubheader style={{ marginTop: '20px', textAlign: 'center' }}>

@@ -19,9 +19,10 @@ interface Props{
     node: Node,
     registrationEventId: string
     isAdmin: boolean
+    encryptedKey? : string
 }
 
-export default observer(function TreeNode({node, registrationEventId, isAdmin} : Props) {
+export default observer(function TreeNode({node, registrationEventId, isAdmin, encryptedKey} : Props) {
     const {documentLibraryStore, modalStore, attachmentStore, commonStore} = useStore();
       const {token} = commonStore;
     const {openModal, closeModal} = modalStore;
@@ -111,9 +112,35 @@ export default observer(function TreeNode({node, registrationEventId, isAdmin} :
 
     const downloadAttachment = async () => {
         setDownloading(true)
-          try {
-            const answerAttachment : AnswerAttachment = await agent.AnswerAttachments.details(node.key)
-
+        try {
+          if(encryptedKey){
+            const decodedKey = decodeURIComponent(encryptedKey!);
+          //  const answerAttachmentData : AnswerAttachment[] = await agent.EmailLinks.getAnswerAttachments(decodedKey);
+            const answerAttachment : AnswerAttachment =  await agent.EmailLinks.getAnswerAttachment(decodedKey, node.key);
+            const body = JSON.stringify({
+                id: answerAttachment!.id,
+                encryptedKey: decodedKey
+              });
+              const requestOptions = {
+                method: "POST",
+                headers: { 'Content-Type': 'application/json' }, 
+                body: body 
+              };
+              const attachmentData = await fetch(`${apiUrl}/upload/download`, requestOptions);
+              if (!attachmentData.ok) {
+                throw new Error('Network response was not ok.');
+              }
+              const data = await attachmentData!.arrayBuffer();
+              const file = new Blob([data], { type: answerAttachment.fileType });
+              const fileUrl = window.URL.createObjectURL(file);
+              const a = document.createElement("a");
+              a.href = fileUrl;
+              a.download = node.label;
+              document.body.appendChild(a);
+              a.click();
+              window.URL.revokeObjectURL(fileUrl);
+          }else{
+            const answerAttachment : AnswerAttachment = await agent.AnswerAttachments.details(node.key);
             const headers = new Headers();
             headers.append("Authorization", `Bearer ${token}`);
       
@@ -121,22 +148,25 @@ export default observer(function TreeNode({node, registrationEventId, isAdmin} :
               method: "GET",
               headers: headers,
             };
-            
+
             const attachmentData = await fetch(`${apiUrl}/upload/${answerAttachment.id}`, requestOptions);
-            
+
             if (!attachmentData.ok) {
-              throw new Error('Network response was not ok.');
-            }
-      
-            const data = await attachmentData.arrayBuffer();
-            const file = new Blob([data], { type: answerAttachment.fileType });
-            const fileUrl = window.URL.createObjectURL(file);
-            const a = document.createElement("a");
-            a.href = fileUrl;
-            a.download = node.label;
-            document.body.appendChild(a);
-            a.click();
-            window.URL.revokeObjectURL(fileUrl);
+                throw new Error('Network response was not ok.');
+              }
+
+              const data = await attachmentData!.arrayBuffer();
+              const file = new Blob([data], { type: answerAttachment.fileType });
+              const fileUrl = window.URL.createObjectURL(file);
+              const a = document.createElement("a");
+              a.href = fileUrl;
+              a.download = node.label;
+              document.body.appendChild(a);
+              a.click();
+              window.URL.revokeObjectURL(fileUrl);
+
+          }
+        
           } catch (err) {
             console.error(err);
           }finally{
@@ -271,7 +301,8 @@ export default observer(function TreeNode({node, registrationEventId, isAdmin} :
          <Tree
           treeData={children} 
           registrationEventId={registrationEventId}
-          isAdmin={isAdmin}  
+          isAdmin={isAdmin} 
+          encryptedKey={encryptedKey} 
          />}
       </ul>
         </>
