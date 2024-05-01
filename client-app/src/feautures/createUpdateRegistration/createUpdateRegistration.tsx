@@ -542,7 +542,7 @@ export default observer(function CreateUpdateRegistration() {
                                 </Header.Subheader> 
                              </Header.Content>
                         </Header>
-                        <Tree treeData = {treeData} registrationEventId = {registrationEventId} isAdmin = {false} />
+                        <Tree treeData = {treeData} registrationEventId = {registrationEventId} isAdmin = {true} />
                         <ButtonGroup size='huge' floated='right' style={{marginRight: '40px'}} >
                           <Button  primary content='Copy Docment Library Link to Clipboard' floated='right' onClick={copyLink} />
                         </ButtonGroup>
