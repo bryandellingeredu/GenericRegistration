@@ -298,6 +298,7 @@ export default observer(function CreateUpdateRegistration() {
             await agent.RegistrationEvents.createUpdate(data);
             await agent.RegistrationEventWebsites.createUpdate({registrationEventId, content});
             await agent.DocumentUploadWebsites.createUpdate({registrationEventId, content: documentLibraryContent});
+            await agent.DocumentUploadWebsites.createUpdate({registrationEventId, content: documentLibraryContent});
             if(!registeredUsersIndicator) await agent.CustomQuestions.createUpdate(registrationEventId, customQuestions);
             await agent.RegistrationEventOwners.createUpdate(registrationEventId, registrationEventOwners); 
             setFormisDirty(false);
@@ -333,6 +334,7 @@ export default observer(function CreateUpdateRegistration() {
           try {
             await agent.RegistrationEvents.createUpdate(data);
             await agent.RegistrationEventWebsites.createUpdate({registrationEventId, content});
+            await agent.DocumentUploadWebsites.createUpdate({registrationEventId, content: documentLibraryContent});
             if(!registeredUsersIndicator) await agent.CustomQuestions.createUpdate(registrationEventId, customQuestions);
             await agent.RegistrationEventOwners.createUpdate(registrationEventId, registrationEventOwners);
             toast.success("Save was successful!"); 
