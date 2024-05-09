@@ -41,6 +41,8 @@ namespace Application.RegistrationEvents
                     existingRegistrationEvent.AutoEmail = request.RegistrationEvent.AutoEmail;
                     existingRegistrationEvent.DocumentLibrary = request.RegistrationEvent.DocumentLibrary;  
                     existingRegistrationEvent.RegistrationIsOpen = request.RegistrationEvent.RegistrationIsOpen;
+                    existingRegistrationEvent.MaxRegistrantInd = request.RegistrationEvent.MaxRegistrantInd;    
+                    existingRegistrationEvent.MaxRegistrantNumber = request.RegistrationEvent.MaxRegistrantNumber; 
                     existingRegistrationEvent.Certified = request.RegistrationEvent.Certified;
                     existingRegistrationEvent.StartDate = request.RegistrationEvent.StartDate;
                     existingRegistrationEvent.EndDate = request.RegistrationEvent.EndDate;

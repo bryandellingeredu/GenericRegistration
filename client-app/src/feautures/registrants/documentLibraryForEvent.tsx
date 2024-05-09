@@ -53,6 +53,8 @@ export default observer (function DocumentLibraryForEvent() {
           autoApprove: true,
           autoEmail: true,
           registrationIsOpen: true,
+          maxRegistrantInd: false,
+          maxRegistrantNumber: '',
           certified: true,
           documentLibrary: false
         }  

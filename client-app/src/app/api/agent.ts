@@ -78,6 +78,7 @@ const EmailLinks = {
     getRegistrationEvent: (encryptedKey: string) => requests.post<RegistrationEvent>('/EmailLink/getRegistrationEvent', {encryptedKey}),
     getRegistrationLink: (encryptedKey: string) => requests.post<RegistrationLink>('/EmailLink/getRegistrationLink', {encryptedKey}),
     getRegistration: (encryptedKey: string) => requests.post<Registration>('/EmailLink/getRegistration', {encryptedKey}),
+    getRegistrationList: (encryptedKey: string, registrationEventId: string) => requests.post<Registration[]>(`/EmailLink/getRegistrations/${registrationEventId}`, {encryptedKey}),
     createUpdateRegistration: (data: registrationDTO) => requests.post<void>('/EmailLink/createUpdateRegistration', data),
     getAnswerAttachments: (encryptedKey: string) => requests.post<AnswerAttachment[]>('/EmailLink/getAnswerAttachments', {encryptedKey}),
     getAnswerAttachment: (encryptedKey: string, id: string) => requests.post<AnswerAttachment>(`/EmailLink/getAnswerAttachment/${id}`, {encryptedKey}),
@@ -91,6 +92,7 @@ const Registrations = {
     details: (id: string) => requests.get<Registration>(`/Registration/${id}`),
     changeRegistered: (id: string, registered: boolean) => requests.put<void>(`/Registration/changeRegistered/${id}`, {registered}),
     list: (id: string) => requests.post<Registration[]>(`/Registration/GetByRegistrationId/${id}`, {}),
+    countRegisteredUsers: (registrationEventId: string) => requests.post<number>(`/Registration/CountRegisteredUsers/${registrationEventId}`, {}),
 }
 
 const RegistrationEventOwners = {

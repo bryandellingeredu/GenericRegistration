@@ -42,6 +42,7 @@ export default observer(function RegisterForEvent() {
   const {uploadAnswerDocument, uploading}  = attachmentStore
     const { id } = useParams();
     const [content, setContent] = useState('');
+    const [numberOfApprovedRegistrants, setNumberOfApprovedRegistrants] = useState(0);
     const [registrationEvent, setRegistrationEvent] = useState<RegistrationEvent>(
         {
           id: '',
@@ -55,6 +56,8 @@ export default observer(function RegisterForEvent() {
           autoApprove: true,
           autoEmail: true,
           registrationIsOpen: true,
+          maxRegistrantInd: false,
+          maxRegistrantNumber: '',
           certified: true,
           documentLibrary: false
         }  
@@ -139,6 +142,11 @@ export default observer(function RegisterForEvent() {
         try{
             const registrationEvent : RegistrationEvent = await agent.RegistrationEvents.details(id!);
             setRegistrationEvent(registrationEvent);
+            if(registrationEvent && registrationEvent.maxRegistrantInd && registrationEvent.maxRegistrantNumber){
+              debugger;
+              const approvedRegistrants = await agent.Registrations.countRegisteredUsers(id!)
+                  setNumberOfApprovedRegistrants(approvedRegistrants);
+            }
             const registrationEventWebsite : RegistrationEventWebsite | null = await agent.RegistrationEventWebsites.details(id!);
             if(registrationEventWebsite && registrationEventWebsite) setContent(registrationEventWebsite.content)
             const customQuestionData : CustomQuestion[] = await agent.CustomQuestions.details(id!);
@@ -239,6 +247,15 @@ export default observer(function RegisterForEvent() {
     const emailRegex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@(([^<>()[\]\\.,;:\s@"]+\.)+[^<>()[\]\\.,;:\s@"]{2,})$/i;
     return emailRegex.test(email);
   };
+
+  const registrationIsOpen = () => {
+    if (!registrationEvent.registrationIsOpen) return false;
+    if (registrationEvent.maxRegistrantInd && registrationEvent.maxRegistrantNumber){
+       const maxRegistrantNumberAsNumber = parseInt(registrationEvent.maxRegistrantNumber);
+       if( numberOfApprovedRegistrants >= maxRegistrantNumberAsNumber) return false;
+    }
+    return true;
+  }
 
 
     const findAnswerAttachmentByQuestionId = (questionId: string): AnswerAttachment | null => {
@@ -346,7 +363,7 @@ export default observer(function RegisterForEvent() {
       }
 
     </Menu>
-    {!registrationEvent.registrationIsOpen && !registration.registered &&
+    {!registrationIsOpen() && !registration.registered && 
     <Header as={'h1'} content='Registration is Closed For This Event' textAlign="center"/>
      }
     <Grid  stackable style={{padding: '40px' }}>
@@ -383,21 +400,21 @@ export default observer(function RegisterForEvent() {
        {user && <Grid.Column width={8}>
           <Form onSubmit={handleSubmit}>
           <FormField required error={formisDirty && (!registration.firstName || !registration.firstName.trim()) } 
-               disabled={!registrationEvent.registrationIsOpen && !registration.registered }>
+               disabled={!registrationIsOpen() && !registration.registered }>
              <label>First Name</label>
             <Input value={registration.firstName}
             name="firstName"
             onChange={handleInputChange}/>
         </FormField>
         <FormField required error={formisDirty && (!registration.lastName || !registration.lastName.trim()) }
-             disabled={!registrationEvent.registrationIsOpen && !registration.registered } >
+             disabled={!registrationIsOpen() && !registration.registered } >
              <label>Last Name</label>
             <Input value={registration.lastName}
             name="lastName"
             onChange={handleInputChange}/>
         </FormField>
         <FormField required error={formisDirty && (!registration.email || !registration.email.trim() || !isValidEmail(registration.email) ) }
-             disabled={!registrationEvent.registrationIsOpen && !registration.registered }
+             disabled={!registrationIsOpen() && !registration.registered }
          >
              <label>Email</label>
             <Input value={registration.email}
@@ -406,7 +423,7 @@ export default observer(function RegisterForEvent() {
         </FormField>
         {customQuestions.sort((a, b) => a.index - b.index).map((question) => (
           <FormField key={question.id} required={question.required}
-          disabled={!registrationEvent.registrationIsOpen && !registration.registered }
+          disabled={!registrationIsOpen() && !registration.registered }
           error={
                   formisDirty &&
                   question.required &&
@@ -432,7 +449,7 @@ export default observer(function RegisterForEvent() {
             {question.questionType === QuestionType.Attachment &&  !findAnswerAttachmentByQuestionId(question.id) && !uploading &&
                    <>
                    <Divider color="black" />
-                   {(registrationEvent.registrationIsOpen || registration.registered ) &&  
+                   {(registrationIsOpen() || registration.registered ) &&  
                        <DocumentUploadWidget
                         uploadDocument={handleDocumentUpload}
                         loading={uploading}
@@ -462,12 +479,12 @@ export default observer(function RegisterForEvent() {
               }
             {question.questionType === QuestionType.TextInput &&
                <Input value={registration.answers?.find(x => x.customQuestionId === question.id)?.answerText} 
-               disabled={!registrationEvent.registrationIsOpen && !registration.registered }
+               disabled={!registrationIsOpen() && !registration.registered }
                 name={question.id}
                 onChange={handleCustomInputChange }/>}
             {question.questionType === QuestionType.Choice &&
              <Select
-             disabled={!registrationEvent.registrationIsOpen && !registration.registered }
+             disabled={!registrationIsOpen() && !registration.registered }
              name={question.id}
              value={registration.answers?.find(x => x.customQuestionId === question.id)?.answerText || ''}
              search
@@ -491,7 +508,7 @@ export default observer(function RegisterForEvent() {
             <Button type='button' size={isMobile ? 'tiny' : 'huge'} color='red' floated="right" content='Cancel Registration' onClick={() => navigate(`/deregisterforevent/${registration.id}`)}  />
             }
             <Button type='submit' size={isMobile ? 'tiny' : 'huge'} primary floated="right" content={registration.registered ? 'Update Registration': 'Register'} loading={saving}
-            disabled={!registrationEvent.registrationIsOpen && !registration.registered }
+            disabled={!registrationIsOpen() && !registration.registered }
              />
         </Form>
         </Grid.Column> }
@@ -508,17 +525,17 @@ export default observer(function RegisterForEvent() {
               </Message.Header>}
               <Message.Content>
                 <h4>
-                {registrationEvent.registrationIsOpen ? 'In order to register for this event you will need to sign in' : 'Registration is Closed for this Event' }
+                {registrationIsOpen() ? 'In order to register for this event you will need to sign in' : 'Registration is Closed for this Event' }
                 </h4>
               </Message.Content>
-              {registrationEvent.registrationIsOpen && 
+              {registrationIsOpen() && 
               <MessageList>
                 <MessageItem>You can sign in with an Edu Account</MessageItem>
                 <MessageItem>You can sign in with a CAC</MessageItem>
                 <MessageItem>You can sign in by having a confirmation link emailed to you</MessageItem>
             </MessageList>
              }
-                 {registrationEvent.registrationIsOpen && 
+                 {registrationIsOpen() && 
             <Message.Content>
               <Button size="huge" primary content='Sign In' style={{marginTop: '40px'}} onClick={handleSignIn}/>
             </Message.Content>

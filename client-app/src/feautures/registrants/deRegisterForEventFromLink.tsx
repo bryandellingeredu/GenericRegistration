@@ -34,6 +34,8 @@ export default observer(function DeRegisterForEventFromLink() {
           autoApprove: true,
           autoEmail: true,
           registrationIsOpen: true,
+          maxRegistrantInd: false,
+          maxRegistrantNumber: '',
           certified: true,
           documentLibrary: false
         }

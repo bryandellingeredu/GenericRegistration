@@ -29,7 +29,9 @@ namespace Domain
 
         public bool DocumentLibrary {get; set;}
 
-        public bool RegistrationIsOpen {get; set;}  
+        public bool RegistrationIsOpen {get; set;} 
+        public bool  MaxRegistrantInd {get; set;}
+        public string MaxRegistrantNumber {get; set;}
 
         public DateTime CreatedAt { get; set; }
         public string CreatedBy { get; set; }

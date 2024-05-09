@@ -60,6 +60,8 @@ function formatDate(date : Date) {
           autoApprove: true,
           autoEmail: true,
           registrationIsOpen: true,
+          maxRegistrantInd: false,
+          maxRegistrantNumber: '',
           certified: true,
           documentLibrary: false
         }  
@@ -78,6 +80,7 @@ function formatDate(date : Date) {
     const [answerAttachments, setAnswerAttachments] = useState<AnswerAttachment[]>([]);
     const [customQuestions, setCustomQuestions] = useState<CustomQuestion[]>([]);
     const [email, setEmail] = useState('');
+    const [numberOfApprovedRegistrants, setNumberOfApprovedRegistrants] = useState(0);
 
     useEffect(() => {
         getData();
@@ -118,6 +121,13 @@ function formatDate(date : Date) {
             setLoading(true);
             const registrationEvent : RegistrationEvent = await agent.EmailLinks.getRegistrationEvent(decodedKey);
             setRegistrationEvent(registrationEvent)
+            if(registrationEvent && registrationEvent.maxRegistrantInd && registrationEvent.maxRegistrantNumber){
+              const registrations = await agent.EmailLinks.getRegistrationList(decodedKey, registrationEvent.id)
+              if(registrations && registrations.length > 0){
+              const approvedRegistrations = registrations.filter(x => x.registered)
+              if(approvedRegistrations.length > 0) setNumberOfApprovedRegistrants(approvedRegistrations.length);
+            }
+          }
             const registrationLink : RegistrationLink = await agent.EmailLinks.getRegistrationLink(decodedKey);
             setEmail(registrationLink.email);
             const registrationEventWebsite : RegistrationEventWebsite | null = await agent.RegistrationEventWebsites.details(registrationEvent.id);
@@ -303,7 +313,15 @@ function formatDate(date : Date) {
           }
         }
       };
-
+      
+      const registrationIsOpen = () => {
+        if (!registrationEvent.registrationIsOpen) return false;
+        if (registrationEvent.maxRegistrantInd && registrationEvent.maxRegistrantNumber){
+           const maxRegistrantNumberAsNumber = parseInt(registrationEvent.maxRegistrantNumber);
+           if( numberOfApprovedRegistrants >= maxRegistrantNumberAsNumber) return false;
+        }
+        return true;
+      }
 
 
     if (validating) return <LoadingComponent content="Validating Email Link..."/>
@@ -335,7 +353,7 @@ function formatDate(date : Date) {
             </Menu.Item>
            }
           </Menu>
-          {!registrationEvent.registrationIsOpen && !registration.registered &&
+          {!registrationIsOpen() && !registration.registered &&
              <Header as={'h1'} content='Registration is Closed For This Event' textAlign="center"/>
           }
            <Grid stackable style={{padding: '40px' }}>
@@ -378,19 +396,19 @@ function formatDate(date : Date) {
             onChange={handleInputChange}/>
         </FormField>
         <FormField required error={formisDirty && (!registration.lastName || !registration.lastName.trim()) }
-         disabled={!registrationEvent.registrationIsOpen && !registration.registered } >
+         disabled={!registrationIsOpen() && !registration.registered } >
              <label>Last Name</label>
             <Input value={registration.lastName}
             name="lastName"
             onChange={handleInputChange}/>
         </FormField>
-        <FormField required   disabled={!registrationEvent.registrationIsOpen && !registration.registered }>
+        <FormField required   disabled={!registrationIsOpen() && !registration.registered }>
              <label> Email</label>
             <Input value={registration.email}/>
        </FormField>
         {customQuestions.sort((a, b) => a.index - b.index).map((question) => (
           <FormField key={question.id} required={question.required}
-          disabled={!registrationEvent.registrationIsOpen && !registration.registered }
+          disabled={!registrationIsOpen() && !registration.registered }
           error={
             formisDirty &&
             question.required &&
@@ -416,7 +434,7 @@ function formatDate(date : Date) {
              {question.questionType === QuestionType.Attachment &&  !findAnswerAttachmentByQuestionId(question.id) && !uploading &&
                    <>
                    <Divider color="black" />
-                   {(registrationEvent.registrationIsOpen || registration.registered ) && 
+                   {(registrationIsOpen() || registration.registered ) && 
                        <DocumentUploadWidget
                         uploadDocument={handleDocumentUpload}
                         loading={uploading}
@@ -448,13 +466,13 @@ function formatDate(date : Date) {
 
             {question.questionType === QuestionType.TextInput &&
              <Input value={registration.answers?.find(x => x.customQuestionId === question.id)?.answerText} 
-             disabled={!registrationEvent.registrationIsOpen && !registration.registered }
+             disabled={!registrationIsOpen() && !registration.registered }
               name={question.id}
               onChange={handleCustomInputChange }/>
              }
             {question.questionType === QuestionType.Choice &&
              <Select
-             disabled={!registrationEvent.registrationIsOpen && !registration.registered }
+             disabled={!registrationIsOpen() && !registration.registered }
              name={question.id}
              value={registration.answers?.find(x => x.customQuestionId === question.id)?.answerText || ''}
              search
@@ -478,7 +496,7 @@ function formatDate(date : Date) {
             <Button type='button' size={isMobile ? 'tiny' : 'huge'} color='red' floated="right" content='Cancel Registration' onClick={() => navigate(`/deregisterforeventfromlink/${encodeURIComponent(encryptedKey!)}`)}  />
             }
             <Button type='submit' size={isMobile ? 'tiny' : 'huge'}  primary floated="right" content={registration.registered ? 'Update Registration': 'Register'} loading={saving}
-             disabled={!registrationEvent.registrationIsOpen && !registration.registered } />
+             disabled={!registrationIsOpen() && !registration.registered } />
         </Form>
               </Grid.Column>
               </Grid.Row>

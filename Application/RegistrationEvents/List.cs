@@ -43,7 +43,9 @@ namespace Application.RegistrationEvents
                     EndDate = x.EndDate,
                     Published = x.Published,
                     Registrations = x.Registrations, 
-                    RegistrationIsOpen = x.RegistrationIsOpen
+                    RegistrationIsOpen = x.RegistrationIsOpen,
+                    MaxRegistrantInd = x.MaxRegistrantInd,
+                    MaxRegistrantNumber = x.MaxRegistrantNumber
                 })
                .ToListAsync();
 

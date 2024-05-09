@@ -67,6 +67,8 @@ export default observer(function CreateUpdateRegistration() {
           autoEmail: true,
           documentLibrary: false,
           registrationIsOpen: true,
+          maxRegistrantInd: false,
+          maxRegistrantNumber: '',
           public: true,
           registrations: [],
           certified: false

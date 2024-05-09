@@ -1,6 +1,7 @@
 ﻿
 
 using Application.Registrations;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
@@ -27,7 +28,9 @@ namespace API.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> Details(Guid id) => HandleResult(await Mediator.Send(new Details.Query { Id = id }));
 
-  
+        [AllowAnonymous]
+        [HttpPost("CountRegisteredUsers/{id}")]
+        public async Task<IActionResult> CountRegisteredUsers(Guid id) => HandleResult((await Mediator.Send(new CountRegisteredUsers.Query { RegistrationEventId = id })));
 
         [HttpPut("changeRegistered/{id}")]
         public async Task<IActionResult> ChangeRegistered(Guid id, RegisteredDTO registeredDTO) =>

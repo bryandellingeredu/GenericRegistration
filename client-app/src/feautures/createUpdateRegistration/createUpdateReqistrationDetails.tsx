@@ -52,11 +52,12 @@ export default observer (function CreateUpdateRegistrationDetails(
     return(
       <Form>
       <FormField required error={!registrationEvent.certified && formSubmitted}>
-       <label>I certify I will not require any  &nbsp;
+       <label>I certify I will <span style={{color: 'red', fontWeight: 'bold', fontSize: 'large'}}>NOT</span>
+       collect any Personal Identifiable Information  &nbsp; 
+       <Button color='black' basic CUI size='tiny' content='PII' onClick={handleCertifyButtonClick} />
+       or Controlled Unclassified Information  &nbsp; 
        <Button color='black' basic CUI size='tiny' content='CUI' onClick={handleCertifyButtonClick} />
-        or &nbsp;
-        <Button color='black' basic CUI size='tiny' content='PII' onClick={handleCertifyButtonClick} />
-          when creating questions
+       such as:  Social Security #s, personal medical, personal finance, or personal family information when creating questions.
        </label>
        <Radio
                 slider

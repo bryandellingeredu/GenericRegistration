@@ -66,7 +66,9 @@ export default observer(function AdministerRegistrants() {
       certified: true,
       autoEmail: true,
       registrationIsOpen: true,
-      documentLibrary: false
+      documentLibrary: false,
+      maxRegistrantInd: false,
+      maxRegistrantNumber: ''
     }  
 );
 

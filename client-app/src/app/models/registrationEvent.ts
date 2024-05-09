@@ -15,6 +15,8 @@ export interface RegistrationEvent{
     documentLibrary: boolean
     certified: boolean
     registrationIsOpen: boolean
+    maxRegistrantInd: boolean
+    maxRegistrantNumber: string
     registrations?: Registration[]
     customQuestions?: CustomQuestion[]
 }

@@ -3,11 +3,6 @@ using Domain;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Persistence;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Application.Registrant
 {
@@ -26,15 +21,55 @@ namespace Application.Registrant
             public async Task<Result<List<RegistrationEvent>>> Handle(Query request, CancellationToken cancellationToken)
             {
                 {
-                    var result = Result<List<RegistrationEvent>>.Success(
-                        await _context.RegistrationEvents
+                    var registrationEvents =
+                        await _context.RegistrationEvents.Include(x => x.Registrations)
                          .Where(x => x.EndDate >= DateTime.Today)
                          .Where(x => x.Published)
                          .Where(x => x.Public)
                          .OrderBy(x => x.Title)
-                         .ToListAsync(cancellationToken)
-                   );
-                    return result;
+                         .ToListAsync(cancellationToken);
+
+                    List<RegistrationEvent> result = new List<RegistrationEvent>();
+                    foreach ( var registrationEvent in registrationEvents ) {
+                        bool derivedRegistrationIsOpen = registrationEvent.RegistrationIsOpen;
+
+                        if(derivedRegistrationIsOpen &&
+                           registrationEvent.MaxRegistrantInd &&
+                           !string.IsNullOrEmpty(registrationEvent.MaxRegistrantNumber)
+                           && registrationEvent.Registrations != null
+                           && registrationEvent.Registrations.Where(x => x.Registered).Any()
+                           ){
+                            var registeredCount = registrationEvent.Registrations.Count(x => x.Registered);
+                            if (registeredCount >=  int.Parse(registrationEvent.MaxRegistrantNumber)) {
+                                derivedRegistrationIsOpen = false;
+                            }
+                        }
+
+                        result.Add(new RegistrationEvent   
+                        { Id = registrationEvent.Id,
+                          Title = registrationEvent.Title,
+                          Location = registrationEvent.Location,
+                          Overview = registrationEvent.Overview,
+                          StartDate = registrationEvent.StartDate,
+                          EndDate = registrationEvent.EndDate,
+                          Published = registrationEvent.Published,
+                          Certified = registrationEvent.Certified,
+                          Public = registrationEvent.Public,
+                          AutoApprove = registrationEvent.AutoApprove,
+                          AutoEmail = registrationEvent.AutoEmail,
+                          DocumentLibrary = registrationEvent.DocumentLibrary,
+                          RegistrationIsOpen = derivedRegistrationIsOpen,
+                          MaxRegistrantInd = registrationEvent.MaxRegistrantInd,
+                          MaxRegistrantNumber = registrationEvent.MaxRegistrantNumber,
+                          CreatedAt = registrationEvent.CreatedAt,
+                          CreatedBy = registrationEvent.CreatedBy,
+                          LastUpdatedAt = registrationEvent.LastUpdatedAt,
+                          LastUpdatedBy = registrationEvent.LastUpdatedBy,  
+                         });
+
+                       }
+
+                    return Result<List<RegistrationEvent>>.Success(result);
                 }
             }
 
