@@ -10,17 +10,47 @@ interface Props{
     registrationEventId: string
     setFormDirty: () => void
     saveFormInBackground: () => void
+    userEmails: string[]
 }
 
 export default observer (function CreateUpdateRegistrationOwners(
-    {registrationEventOwners, setRegistrationEventOwners, registrationEventId, setFormDirty, saveFormInBackground} : Props
+    {registrationEventOwners, setRegistrationEventOwners, registrationEventId, setFormDirty, saveFormInBackground, userEmails} : Props
 ){
     const [saveForm, setSaveForm] = useState(false);
     const [newOwnerEmail, setNewOwnerEmail] = useState('');
-    const [newOwnerEmailError, setNewOwnerEmailError] = useState(false);
+    const [newOwnerEmailError, setNewOwnerEmailError] = useState(false)
+
+
 
     const handleNewOwnerEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setNewOwnerEmail(e.target.value);
+         setNewOwnerEmailError(false);
+        const emailInput = e.target.value;
+        if (userEmails.includes(emailInput)) {
+          const newRegistrationEventOwner : RegistrationEventOwner = {
+            id: uuidv4(),
+            registrationEventId,
+            email: emailInput
+        }
+        setRegistrationEventOwners([...registrationEventOwners, newRegistrationEventOwner])
+        setNewOwnerEmail('');
+        setSaveForm(true);
+        setFormDirty();
+        }else{
+          const error = validateEmail(emailInput)
+          if(error){
+            setNewOwnerEmail(emailInput)
+          }else{
+            const newRegistrationEventOwner : RegistrationEventOwner = {
+              id: uuidv4(),
+              registrationEventId,
+              email: emailInput
+          }
+          setRegistrationEventOwners([...registrationEventOwners, newRegistrationEventOwner])
+          setNewOwnerEmail('');
+          setSaveForm(true);
+          setFormDirty();
+          }
+        }
     };
 
     const validateEmail = (email: string): boolean => {
@@ -33,6 +63,7 @@ export default observer (function CreateUpdateRegistrationOwners(
       };
 
     const handleSubmit = () => {
+       if(!newOwnerEmail) return;
        const error = validateEmail(newOwnerEmail)
        setNewOwnerEmailError(error)
        if(!error){
@@ -60,6 +91,9 @@ export default observer (function CreateUpdateRegistrationOwners(
         setFormDirty();
         setSaveForm(true);
     }
+
+
+
     return(
      <SegmentGroup>
         <Segment textAlign="center" color="teal">
@@ -102,26 +136,33 @@ export default observer (function CreateUpdateRegistrationOwners(
               </Header>
               <Form onSubmit={handleSubmit}>
                 <FormGroup>
-                 <FormField required width={14} error={newOwnerEmailError}>
+                 <FormField required width={16} error={newOwnerEmailError}>
                  <Input 
+                 id="emailInput"
                  icon='envelope'
                  iconPosition='left'
                  placeholder='Edu or Mil Email Address'
                  value={newOwnerEmail}
                  name='newOwnerEmail'
                  onChange={handleNewOwnerEmailChange}
+                 onBlur={handleSubmit}
+                 list='emailOptions'
                   />
+                   <datalist id='emailOptions'>  
+                      {userEmails.map((email, index) => (
+                        <option key={index} value={email} />
+                      ))}
+                  </datalist>
                      {newOwnerEmailError && (
                         <Label basic color='red' pointing>
                         Please enter a valid .mil or armywarcollege.edu email address
                         </Label>
-      )}
+                      )}
                  </FormField>
-                 <Form.Field width={2}>
-                    <Button type='submit' color='blue'>Add</Button>
-                 </Form.Field>
+                
                  </FormGroup>
               </Form>
+           
         </Segment>
 
      </SegmentGroup>

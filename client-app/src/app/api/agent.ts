@@ -67,7 +67,11 @@ const Registrants = {
 }
 const Account = {
     login: (token: string) => requests.post<User>('/account/login', {token}),
-    current: () => requests.get<User>('/account')
+    current: () => requests.get<User>('/account'),
+    addAdmin: (email: string) => requests.post<void>('/account/addAdmin',{email}),
+    removeAdmin: (email: string) => requests.post<void>('/account/removeAdmin',{email}),
+    listAdmins: () => requests.get<User[]>('/account/listAdmins'),
+    listEmails: () => requests.get<string[]>('/account/listEmails')
 }
 
 const EmailLinks = {

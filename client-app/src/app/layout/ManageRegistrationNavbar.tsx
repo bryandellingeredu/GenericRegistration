@@ -60,8 +60,17 @@ export default observer(function ManageRegistrationNavbar() {
             </Menu.Item>
             <Menu.Item as={NavLink} to='/myregistrations'>My Registrations</Menu.Item>
             <Menu.Item position="right">
-              <Dropdown trigger={<><Icon name="user" /> {user?.displayName}</>}>
+              <Dropdown trigger={<>
+              {user?.roles && user?.roles.includes('Administrators') ?
+               <Icon name="user plus" color='olive'/> :  <Icon name="user" />
+               }
+             
+               {user?.displayName}</>}>
                 <Dropdown.Menu>
+                {user?.roles && user?.roles.includes('Administrators') &&
+                  <Dropdown.Item icon="user plus" text="Manage Admins"
+                    onClick={() => navigate('/manageAdmins')} />
+                }
                   <Dropdown.Item icon="power" text="Logout" onClick={logout} />
                 </Dropdown.Menu>
               </Dropdown>

@@ -6,6 +6,7 @@ import { observer } from 'mobx-react-lite';
 import { NavLink, useNavigate} from 'react-router-dom';
 
 export default observer(function RegistrantNavbar() {
+    const navigate = useNavigate();
     const { responsiveStore, userStore } = useStore();
     const {isMobile} = responsiveStore
     const [sidebarVisible, setSidebarVisible] = useState(false);
@@ -25,8 +26,18 @@ export default observer(function RegistrantNavbar() {
             </Menu.Item>
             {user && 
             <Menu.Item style={{ flexShrink: 0 }}>
-              <Dropdown trigger={<><Icon name="user" /> {user?.displayName}</>}>
+              <Dropdown trigger={
+              <>
+              {user?.roles && user?.roles.includes('Administrators') ?
+               <Icon name="user plus" color='olive'/> :  <Icon name="user" />
+               }
+              
+               {user?.displayName}</>}>
                 <Dropdown.Menu>
+                {user?.roles && user?.roles.includes('Administrators') &&
+                  <Dropdown.Item icon="user plus" text="Manage Admins"
+                    onClick={() => navigate('/manageAdmins')} />
+                }
                   <Dropdown.Item icon="power" text="Logout" onClick={logout} />
                 </Dropdown.Menu>
               </Dropdown>
@@ -57,8 +68,17 @@ export default observer(function RegistrantNavbar() {
             <Menu.Item as={NavLink} to='/viewallevents'>View All Events</Menu.Item>
             {user && 
             <Menu.Item position="right">
-              <Dropdown trigger={<><Icon name="user" /> {user?.displayName}</>}>
+              <Dropdown trigger={<>
+                {user?.roles && user?.roles.includes('Administrators') ?
+               <Icon name="user plus" color='olive'/> :  <Icon name="user" />
+               }
+               {user?.displayName}
+              </>}>
                 <Dropdown.Menu>
+                {user?.roles && user?.roles.includes('Administrators') &&
+                  <Dropdown.Item icon="user plus" text="Manage Admins"
+                    onClick={() => navigate('/manageAdmins')} />
+                }
                   <Dropdown.Item icon="power" text="Logout" onClick={logout} />
                 </Dropdown.Menu>
               </Dropdown>

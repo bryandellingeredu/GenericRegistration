@@ -2,20 +2,22 @@
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using System.Text;
+using System.Text;   
 
 namespace API.Services
 {
-    public class TokenService
+    public class TokenService  
     {
         private readonly SymmetricSecurityKey _key;
+         private readonly UserManager<IdentityUser> _userManager;
 
-        public TokenService(IConfiguration config)
+        public TokenService(IConfiguration config, UserManager<IdentityUser> userManager)
         {
             var keyString = config["SecuritySettings:SymmetricSecurityKey"];
             _key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(keyString));
+            _userManager = userManager; 
         }
-        public string CreateToken(IdentityUser user, string displayName)
+        public async Task<string> CreateToken(IdentityUser user, string displayName)
         {
             var claims = new List<Claim>
             {
@@ -24,6 +26,12 @@ namespace API.Services
                 new Claim(ClaimTypes.Email, user.Email),
                 new Claim(ClaimTypes.GivenName, displayName)
             };
+
+            var userRoles = await _userManager.GetRolesAsync(user);
+            foreach (var role in userRoles)
+            {
+                claims.Add(new Claim(ClaimTypes.Role, role));
+            }
 
             var creds = new SigningCredentials(_key, SecurityAlgorithms.HmacSha256Signature);
 

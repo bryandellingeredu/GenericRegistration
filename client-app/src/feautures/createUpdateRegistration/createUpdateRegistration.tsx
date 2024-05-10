@@ -79,6 +79,7 @@ export default observer(function CreateUpdateRegistration() {
     const [registrationEventOwners, setRegistrationEventOwners] = useState<RegistrationEventOwner[]>([]);
     const [loading, setLoading] = useState(false);
     const [loadTreeData, setLoadTreeData] = useState(false);
+    const [userEmails, setUserEmails] = useState<string[]>([]);
 
     const handleSetRegistrationEvent = (event: RegistrationEvent) =>{
         setRegistrationEvent(event);
@@ -109,6 +110,15 @@ export default observer(function CreateUpdateRegistration() {
           documentLibraryStore.fetchAndStoreTreeData(registrationEventId);
       }
   }, [loadTreeData, registrationEventId, documentLibraryStore]);
+
+  useEffect(() => {
+    if(userEmails.length < 1){
+      agent.Account.listEmails().then((response) => {
+       setUserEmails(response);
+      });
+    }
+  }, [userEmails]);
+
 
   useEffect(() => {
     const disposer = reaction(
@@ -445,6 +455,7 @@ export default observer(function CreateUpdateRegistration() {
                         registrationEventId={registrationEventId}
                         setFormDirty={handleSetFormDirty} 
                         saveFormInBackground={saveFormInBackground}
+                        userEmails={userEmails}
                          />
 
                       <Header as='h2' textAlign="center">

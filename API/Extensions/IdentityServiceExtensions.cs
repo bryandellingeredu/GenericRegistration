@@ -21,6 +21,7 @@ namespace API.Extensions
                 // You can configure identity options here if needed
                 // For example: opt.Password.RequireDigit = false;
             })
+            .AddRoles<IdentityRole>()
             .AddEntityFrameworkStores<DataContext>()
             .AddSignInManager<SignInManager<IdentityUser>>();
 

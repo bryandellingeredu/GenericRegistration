@@ -143,7 +143,6 @@ export default observer(function RegisterForEvent() {
             const registrationEvent : RegistrationEvent = await agent.RegistrationEvents.details(id!);
             setRegistrationEvent(registrationEvent);
             if(registrationEvent && registrationEvent.maxRegistrantInd && registrationEvent.maxRegistrantNumber){
-              debugger;
               const approvedRegistrants = await agent.Registrations.countRegisteredUsers(id!)
                   setNumberOfApprovedRegistrants(approvedRegistrants);
             }
