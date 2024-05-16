@@ -311,7 +311,8 @@ export default observer(function CreateUpdateRegistration() {
             await agent.RegistrationEventWebsites.createUpdate({registrationEventId, content});
             await agent.DocumentUploadWebsites.createUpdate({registrationEventId, content: documentLibraryContent});
             await agent.DocumentUploadWebsites.createUpdate({registrationEventId, content: documentLibraryContent});
-            if(!registeredUsersIndicator) await agent.CustomQuestions.createUpdate(registrationEventId, customQuestions);
+          //  if(!registeredUsersIndicator) await agent.CustomQuestions.createUpdate(registrationEventId, customQuestions);
+            await agent.CustomQuestions.createUpdate(registrationEventId, customQuestions);
             await agent.RegistrationEventOwners.createUpdate(registrationEventId, registrationEventOwners); 
             setFormisDirty(false);
         } catch (e: any) {
@@ -347,7 +348,7 @@ export default observer(function CreateUpdateRegistration() {
             await agent.RegistrationEvents.createUpdate(data);
             await agent.RegistrationEventWebsites.createUpdate({registrationEventId, content});
             await agent.DocumentUploadWebsites.createUpdate({registrationEventId, content: documentLibraryContent});
-            if(!registeredUsersIndicator) await agent.CustomQuestions.createUpdate(registrationEventId, customQuestions);
+            await agent.CustomQuestions.createUpdate(registrationEventId, customQuestions);
             await agent.RegistrationEventOwners.createUpdate(registrationEventId, registrationEventOwners);
             toast.success("Save was successful!"); 
             setFormisDirty(false);
@@ -479,12 +480,13 @@ export default observer(function CreateUpdateRegistration() {
                         }
                     </Grid.Column>
                     <Grid.Column width={8}>
-                    <Header as='h2' textAlign="center">
+                    <Header as='h2' >
                         <Icon name='question' />
                             <Header.Content>
                                 Event Questions
                                 <Header.Subheader>
-                                  {registeredUsersIndicator ? 'People have already registred for your event you MAY NOT change questions' : 'Use the add button to design questions for your form'}
+                                  {registeredUsersIndicator ? 'People have already registred for your event you MAY NOT change questions' : 
+                                  'Use the "Add" button to design questions for your form. For limited-availability options (e.g., class size or event attendance), select the "Choice" type and enter your limit. For example, to limit attendance at a dinner to 20 people, choose the "Choice" type, label it "Attend Dinner", and add the choices "Yes" with a limit of 20 and "No" with no limit.'}
                                   </Header.Subheader> 
                              </Header.Content>
                         </Header>

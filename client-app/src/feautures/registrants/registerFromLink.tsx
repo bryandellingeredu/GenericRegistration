@@ -33,6 +33,15 @@ function formatDate(date : Date) {
     });
   }
 
+  interface OptionWithDisabled{
+    id: string;
+    customQuestionId: string;
+    optionText: string;
+    optionQuota: string;
+    index: number
+    disabled: boolean;
+  }
+
   export default observer(function RegisterFromLink() {
 
     const { responsiveStore, attachmentStore } = useStore();
@@ -47,6 +56,7 @@ function formatDate(date : Date) {
     const [loading, setLoading] = useState(false);
     const [content, setContent] = useState('');
     const [saving, setSaving] = useState(false);
+    const [extendedOptions, setExtendedOptions] = useState<OptionWithDisabled[]>([]);
     const [registrationEvent, setRegistrationEvent] = useState<RegistrationEvent>(
         {
           id: '',
@@ -81,6 +91,48 @@ function formatDate(date : Date) {
     const [customQuestions, setCustomQuestions] = useState<CustomQuestion[]>([]);
     const [email, setEmail] = useState('');
     const [numberOfApprovedRegistrants, setNumberOfApprovedRegistrants] = useState(0);
+
+    useEffect(() => {
+      const updateOptions = async () => {
+        if (customQuestions && customQuestions.length > 0) {
+          for (const customQuestion of customQuestions) {
+            if (customQuestion.options && customQuestion.options.length > 0) {
+              const newOptions: OptionWithDisabled[] = [];
+              for (const opt of customQuestion.options) {
+                let disabled = false;
+                if (opt.optionQuota) {
+                  disabled = await fetchIsDisabled(opt.id);
+                }
+                const newOption: OptionWithDisabled = {
+                  id: opt.id,
+                  customQuestionId: opt.customQuestionId,
+                  optionText: opt.optionText,
+                  optionQuota: opt.optionQuota,
+                  index: opt.index,
+                  disabled
+                };
+                newOptions.push(newOption);
+              }
+              setExtendedOptions(prevOptions => [...prevOptions, ...newOptions]);
+            }
+          }
+        }
+      };
+  
+      updateOptions();
+    }, [customQuestions]);
+
+    const fetchIsDisabled = async (optionId : string) => {
+      try {
+        
+        const response = await fetch(`${apiUrl}/OptionDisabled/${optionId}`);
+        const isDisabled = await response.json();
+        return isDisabled;
+      } catch (error) {
+        console.error('Error fetching disabled status:', error);
+        return false;
+      }
+    };
 
     useEffect(() => {
         getData();
@@ -486,6 +538,11 @@ function formatDate(date : Date) {
                       key: option.id, 
                       value: option.optionText, 
                       text: option.optionText, 
+                      disabled: option.optionQuota ?
+                      extendedOptions && extendedOptions.length && extendedOptions.find(opt => opt.id === option.id) ?
+                      extendedOptions.find(opt => opt.id === option.id)!.disabled
+                      : false
+                    : false
                     }))
                 : []}
            />

@@ -98,6 +98,7 @@ export default observer(function CreateUpdateRegistrationQuestions({customQuesti
             id: uuidv4(), 
             customQuestionId: questionId, 
             optionText: 'Choice',
+            optionQuota: '',
             index: 0 
         };
     
@@ -163,6 +164,28 @@ export default observer(function CreateUpdateRegistrationQuestions({customQuesti
       
         setCustomQuestions(updatedQuestions);
       };
+
+      const handleOptionQuotaChange = (newQuota: string, questionId: string, choiceId: string) => {
+        setFormDirty();
+        const updatedQuestions = customQuestions.map(question => {
+          // Find the question to update
+          if (question.id === questionId) {
+            // Map through its options to find and update the specific choice
+            const updatedOptions = question.options?.map(option => {
+              if (option.id === choiceId) {
+                return { ...option, optionQuota: newQuota };
+              }
+              return option;
+            });
+            // Return the question with the updated options array
+            return { ...question, options: updatedOptions };
+          }
+          // Return the question unchanged if it's not the one to update
+          return question;
+        });
+      
+        setCustomQuestions(updatedQuestions);
+      };
     
 
       const handleRequiredChange = (newRequired: boolean, questionId: string) =>{
@@ -182,7 +205,7 @@ export default observer(function CreateUpdateRegistrationQuestions({customQuesti
        setCustomQuestions(updatedQuestions);
       }
 
-      const addChoice = (questionId: string, choiceIndex: number, choiceText: string) => {
+      const addChoice = (questionId: string, choiceIndex: number, choiceText: string, choiceQuota: string) => {
         setFormDirty(); // Mark the form as having unsaved changes
     
         const newCustomQuestions = customQuestions.map(question => {
@@ -200,6 +223,7 @@ export default observer(function CreateUpdateRegistrationQuestions({customQuesti
                     id: uuidv4(), 
                     customQuestionId: questionId,
                     optionText: choiceText,
+                    optionQuota: choiceQuota,
                     index: choiceIndex + 1, // Change here: Increment the choiceIndex for the new choice
                 };
     
@@ -401,6 +425,19 @@ export default observer(function CreateUpdateRegistrationQuestions({customQuesti
             />
             </FormField>
             <FormField width='2'>
+              <input 
+               placeholder="limit"
+              type='text'
+              onChange={(e) => {
+              //  handleOptionQuotaChange(e.target.value, question.id, option.id);
+                if (e.target.value === "" || /^\d+$/.test(e.target.value)) {
+                  handleOptionQuotaChange(e.target.value, question.id, option.id);
+                }
+              }}
+              value={option.optionQuota}
+              />
+            </FormField>
+            <FormField width='2'>
               <ButtonGroup size='tiny'>
             <Button animated='vertical' color='red' basic size='tiny'
             onClick={() => deleteChoice(question.id, option.id)}
@@ -414,7 +451,7 @@ export default observer(function CreateUpdateRegistrationQuestions({customQuesti
         
             <Button animated='vertical' color='teal' basic size='tiny'
              disabled={registeredUsersIndicator} 
-            onClick={() => addChoice(question.id, option.index, 'Choice')}
+            onClick={() => addChoice(question.id, option.index, 'Choice', '')}
             >
                 <ButtonContent hidden>+Choice</ButtonContent>
             <ButtonContent visible>
