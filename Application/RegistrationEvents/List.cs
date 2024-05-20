@@ -49,6 +49,8 @@ namespace Application.RegistrationEvents
                     .Where(x => x.CreatedBy == request.Email ||
                                 x.RegistrationEventOwners.Any(o => o.Email == request.Email) ||
                                 isAdmin)
+                    .OrderBy(x => x.StartDate)
+                    .ThenBy(x => x.Title)
                     .Select(x => new RegistrationEvent
                     {
                         Id = x.Id,

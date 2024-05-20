@@ -1,5 +1,5 @@
 import { observer } from "mobx-react-lite";
-import { Container, Header, Icon, Button, CardGroup } from "semantic-ui-react";
+import { Container, Header, Icon, Button, CardGroup, FormGroup, FormField, Form, Radio, Search, SearchProps } from "semantic-ui-react";
 import ManageRegistrationNavbar from "../../app/layout/ManageRegistrationNavbar";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
@@ -15,7 +15,10 @@ import { useStore } from "../../app/stores/store";
 export default observer (function MyRegistrations() {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
+    const [showActive, setShowActive] = useState(true);
     const [registrationEvents, setRegistrationEvents] = useState<RegistrationEvent[]>([]);
+    const [filteredResults, setFilteredResults] = useState<RegistrationEvent[]>([]);
+    const [searchQuery, setSearchQuery] = useState('');
     const { responsiveStore } = useStore();
     const {isMobile} = responsiveStore
 
@@ -44,12 +47,65 @@ export default observer (function MyRegistrations() {
       }
     }
 
+    const handleSearchChange = (e: React.SyntheticEvent, { value }: SearchProps) => {
+      setSearchQuery(value || '');
+  
+      const filtered = registrationEvents.filter(event =>
+        event.title.toLowerCase().includes((value || '').toLowerCase())
+      );
+  
+      setFilteredResults(filtered.map(event => ({
+        id: event.id,
+        title: event.title,
+        location: event.location,
+        overview: event.overview,
+        startDate: event.startDate,
+        endDate: event.endDate,
+        published: event.published,
+        public: event.public,
+        autoApprove: event.autoApprove,
+        autoEmail: event.autoEmail,
+        documentLibrary: event.documentLibrary,
+        certified: event.certified,
+        registrationIsOpen: event.registrationIsOpen,
+        maxRegistrantInd: event.maxRegistrantInd,
+        maxRegistrantNumber: event.maxRegistrantNumber,
+        registrations: event.registrations,
+        customQuestions: event.customQuestions
+      })));
+    };
+
+    const displayRegistrationEvents = () =>{
+      if(filteredResults && filteredResults.length > 0) return filteredResults;
+      return registrationEvents;
+    }
+
+    
     
     if (loading) return <LoadingComponent content="Loading events..."/>
     return (
         <>
             <ManageRegistrationNavbar />
             <Container fluid style={{ color: '#333', paddingTop: '20px' }}> {/* Light grey background, dark text */}
+            <Form style={{ paddingLeft: '40px' }}>
+              <Form.Group inline>
+                <Form.Field>
+                  <Search placeholder='Search...'
+                        input={{ className: 'rounded-input' }} 
+                        onSearchChange={handleSearchChange}
+                        results={filteredResults}
+                        />
+                </Form.Field>
+              <Form.Field>
+                <Radio
+                  toggle
+                  label={showActive ? 'Active Events' : 'All Events'}
+                  checked={showActive}
+                  onChange={() => setShowActive(!showActive)}
+                />
+             </Form.Field>
+          </Form.Group>
+        </Form>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
                     {/* Wrapper div for the Header to center it horizontally */}
                     <div style={{ textAlign: 'center', width: '100%' }}>
@@ -66,7 +122,9 @@ export default observer (function MyRegistrations() {
                     </Button>
                 </div>
                 <CardGroup itemsPerRow={isMobile ? '1' : '2'} style={{padding: isMobile ? '5px' : '40px'}}>
-                    {registrationEvents.map((event) => (
+                    {displayRegistrationEvents()
+                    .filter(event => new Date(event.endDate) >= new Date() || !showActive)
+                    .map((event) => (
                         <EventCard key={event.id} event={event} removeEvent={handleRemoveRegistrationEvent}/>
                     ))}
                 </CardGroup>
