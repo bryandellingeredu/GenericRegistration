@@ -9,4 +9,5 @@ export interface CustomQuestion{
     required: boolean
     index: number
     options?: QuestionOption[];
+    parentQuestionOption: string
 }
