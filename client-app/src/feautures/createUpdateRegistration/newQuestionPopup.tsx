@@ -1,27 +1,33 @@
 import { Button, ButtonContent, Icon, Menu, Popup } from "semantic-ui-react";
 import { CustomQuestion } from "../../app/models/customQuestion";
+import { QuestionOption } from "../../app/models/questionOption";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCodeBranch } from "@fortawesome/free-solid-svg-icons";
 
 interface Props{
     registeredUsersIndicator: boolean
     popoverVisibility: boolean
-    togglePopover: () => void;
-    addTextQuestion: (index: number) =>void;
-    addChoiceQuestion: (index: number) => void
-    addAttachmentQuestion: (index: number) => void
+    togglePopover: () => void
+    addTextQuestion: (index: number, choiceId?: string) =>void
+    addChoiceQuestion: (index: number, choiceId?: string) => void
+    addAttachmentQuestion: (index: number, choiceId?: string) => void
     index: number
+    option?: QuestionOption
+    icon: string
+    color: string
 }
 export default function NewQuestionPopup(
     {registeredUsersIndicator, popoverVisibility, togglePopover,
-         addTextQuestion, addChoiceQuestion, addAttachmentQuestion, index } : Props){
+         addTextQuestion, addChoiceQuestion, addAttachmentQuestion, index, option, icon, color } : Props){
     return(
         <Popup
         trigger={
-          <Button animated='vertical' color='green' basic size='tiny'
+          <Button animated='vertical' color={color === 'teal' ? 'teal' : 'green'} basic size='tiny'
           disabled={registeredUsersIndicator} 
           onClick={() => togglePopover()}> 
             <ButtonContent hidden>+Question</ButtonContent>
             <ButtonContent visible>
-              <Icon name='plus' />
+              {icon == 'branch' ? <FontAwesomeIcon icon={faCodeBranch} /> : <Icon name='plus' />  }
             </ButtonContent>
           </Button>
         }
@@ -34,7 +40,11 @@ export default function NewQuestionPopup(
           <Menu.Item
             name='input'
             onClick={() => {
-              addTextQuestion(index);
+              if(option){
+                addTextQuestion(index, option.id);
+              }else{
+                addTextQuestion(index);
+              }
               togglePopover();
             }}
           >
@@ -43,7 +53,11 @@ export default function NewQuestionPopup(
           <Menu.Item
             name='choice'
             onClick={() => {
-              addChoiceQuestion(index);
+              if(option){
+                addChoiceQuestion(index, option.id);
+              }else{
+                addChoiceQuestion(index)
+              }
               togglePopover();
             }}
           >
@@ -52,7 +66,11 @@ export default function NewQuestionPopup(
           <Menu.Item
             name='attachment'
             onClick={() => {
-              addAttachmentQuestion(index);
+              if(option){
+                addAttachmentQuestion(index, option.id);
+              }else{
+                addAttachmentQuestion(index);
+              }
               togglePopover();
             }}
           >

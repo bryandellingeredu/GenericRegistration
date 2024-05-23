@@ -4,20 +4,22 @@ import { QuestionType } from "../../app/models/questionType";
 import { useState } from "react";
 import OptionComponent from "./optionComponent";
 import NewQuestionPopup from "./newQuestionPopup";
+import { QuestionOption } from "../../app/models/questionOption";
 
 interface Props{
-    customQuestions: CustomQuestion[],
+    customQuestions: CustomQuestion[]
     question: CustomQuestion
     registeredUsersIndicator: boolean
-    setCustomQuestions: (newCustomQuestions: CustomQuestion[]) => void;
-    setFormDirty: () => void;
-    addTextQuestion: (index: number) =>void;
-    addChoiceQuestion: (index: number) => void
-    addAttachmentQuestion: (index: number) => void
+    setCustomQuestions: (newCustomQuestions: CustomQuestion[]) => void
+    setFormDirty: () => void
+    addTextQuestion: (index: number, choiceId?: string) =>void
+    addChoiceQuestion: (index: number, choiceId?: string) => void
+    addAttachmentQuestion: (index: number, choiceId?: string) => void
+    parentOption?: QuestionOption
 }
 export default function CustomQuestionComponent(
     {question, registeredUsersIndicator, setCustomQuestions, setFormDirty, customQuestions,
-     addTextQuestion, addChoiceQuestion, addAttachmentQuestion  } : Props){
+     addTextQuestion, addChoiceQuestion, addAttachmentQuestion, parentOption  } : Props){
     
      const [popoverVisibility, setPopoverVisibility] = useState(false);
      const togglePopover = () => setPopoverVisibility(prevVisibility => !prevVisibility);
@@ -53,7 +55,7 @@ export default function CustomQuestionComponent(
        }
 
     return(
-        <Segment  style={{backgroundColor: '#f4f4f4'}}>
+        <Segment  style={{backgroundColor: question.parentQuestionOption ? '#d1eeee' : '#f4f4f4'}} >
         <FormGroup>
            <FormField width='9'>
            {question.questionType === QuestionType.Attachment && <Icon name='paperclip' />}
@@ -100,6 +102,9 @@ export default function CustomQuestionComponent(
            addChoiceQuestion={addChoiceQuestion}
            addAttachmentQuestion={addAttachmentQuestion}
            index={question.index}
+           option={parentOption}
+           icon={'plus'}
+           color={'green'}
          />
  </ButtonGroup>
    </FormField>
@@ -114,6 +119,9 @@ export default function CustomQuestionComponent(
        setCustomQuestions={setCustomQuestions}
        customQuestions={customQuestions}
        setFormDirty={setFormDirty}
+       addTextQuestion={addTextQuestion}
+       addChoiceQuestion={addChoiceQuestion}
+       addAttachmentQuestion={addAttachmentQuestion}
      />
  ))}
    </Segment> 

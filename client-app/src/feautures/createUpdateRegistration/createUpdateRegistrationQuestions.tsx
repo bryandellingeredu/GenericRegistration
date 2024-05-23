@@ -16,13 +16,14 @@ interface Props{
 }
 
 
-export default observer(function CreateUpdateRegistrationQuestions({customQuestions, setCustomQuestions, setFormDirty, registrationEventId, registeredUsersIndicator} : Props) {
+export default observer(function CreateUpdateRegistrationQuestions(
+  {customQuestions, setCustomQuestions, setFormDirty, registrationEventId, registeredUsersIndicator} : Props) {
 
     
     const [isOpen, setIsOpen] = useState(false);
     const togglePopover = () => setIsOpen(prevIsOpen => !prevIsOpen);
 
-    const addTextQuestion = (index: number) => {
+    const addTextQuestion = (index: number, choiceId?: string) => {
         setFormDirty();
         let newIndex = index + 1;
         const updatedQuestions = customQuestions.map(question => {
@@ -39,13 +40,13 @@ export default observer(function CreateUpdateRegistrationQuestions({customQuesti
             questionText: 'Label',
             questionType: QuestionType.TextInput, 
             required: false,
-            parentQuestionOption: ''
+            parentQuestionOption: choiceId||''
         };
 
         setCustomQuestions([...updatedQuestions, customQuestion]);
     };
 
-    const addAttachmentQuestion = (index: number) => {
+    const addAttachmentQuestion = (index: number, choiceId?: string) => {
       setFormDirty();
       let newIndex = index + 1;
       const updatedQuestions = customQuestions.map(question => {
@@ -62,13 +63,13 @@ export default observer(function CreateUpdateRegistrationQuestions({customQuesti
           questionText: 'Upload your document',
           questionType: QuestionType.Attachment, 
           required: false,
-          parentQuestionOption: ''
+          parentQuestionOption: choiceId||''
       };
 
       setCustomQuestions([...updatedQuestions, customQuestion]);
   };
 
-    const addChoiceQuestion = (index: number) => {
+    const addChoiceQuestion = (index: number, choiceId?: string) => {
         setFormDirty(); 
         let newIndex = index + 1;
         const updatedQuestions = customQuestions.map(question => {
@@ -96,7 +97,7 @@ export default observer(function CreateUpdateRegistrationQuestions({customQuesti
             required: false,
             index: newIndex,
             options: [customOption],
-            parentQuestionOption: '' 
+            parentQuestionOption: choiceId||'' 
         };
     
         setCustomQuestions([...updatedQuestions, customQuestion]);
@@ -171,7 +172,9 @@ export default observer(function CreateUpdateRegistrationQuestions({customQuesti
             </FormField>
         </FormGroup>
         {
-          customQuestions.sort((a, b) => a.index - b.index).map((question) => (
+          customQuestions
+          .filter(x => !x.parentQuestionOption)
+          .sort((a, b) => a.index - b.index).map((question) => (
           <CustomQuestionComponent
           question={question}
           registeredUsersIndicator={registeredUsersIndicator}
@@ -194,6 +197,8 @@ export default observer(function CreateUpdateRegistrationQuestions({customQuesti
            addChoiceQuestion={addChoiceQuestion}
            addAttachmentQuestion={addAttachmentQuestion}
            index={customQuestions.length > 0 ? Math.max(...customQuestions.map(x => x.index)) : 0}
+           icon={'plus'}
+           color={'green'}
           />
          </Segment>
 

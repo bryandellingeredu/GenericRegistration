@@ -1,18 +1,31 @@
-import { Button, ButtonContent, ButtonGroup, FormField, FormGroup, Icon } from "semantic-ui-react";
+import { Button, ButtonContent, ButtonGroup, FormField, FormGroup, Icon, Segment, SegmentGroup } from "semantic-ui-react";
 import { QuestionOption } from "../../app/models/questionOption";
 import { CustomQuestion } from "../../app/models/customQuestion";
 import { v4 as uuidv4 } from 'uuid';
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCodeBranch } from "@fortawesome/free-solid-svg-icons";
+import NewQuestionPopup from "./newQuestionPopup";
+import { useState } from "react";
+import CustomQuestionComponent from "./customQuestionComponent";
 
 interface Props{
     registeredUsersIndicator: boolean
     option: QuestionOption
     question: CustomQuestion
-    setCustomQuestions: (newCustomQuestions: CustomQuestion[]) => void;
+    setCustomQuestions: (newCustomQuestions: CustomQuestion[]) => void
     setFormDirty: () => void;
-    customQuestions: CustomQuestion[],
+    customQuestions: CustomQuestion[]
+    addTextQuestion: (index: number, choiceId?: string) =>void
+    addChoiceQuestion: (index: number, choiceId?: string) => void
+    addAttachmentQuestion: (index: number, choiceId?: string) => void
 }
 export default function OptionComponent(
-    {registeredUsersIndicator, option, question, setCustomQuestions, setFormDirty, customQuestions} : Props){
+    {registeredUsersIndicator, option, question, setCustomQuestions, setFormDirty, customQuestions,
+      addTextQuestion, addChoiceQuestion, addAttachmentQuestion
+    } : Props){
+   
+      const [popoverVisibility, setPopoverVisibility] = useState(false);
+      const togglePopover = () => setPopoverVisibility(prevVisibility => !prevVisibility);
 
     const handleOptionTextChange = (newText: string, questionId: string, choiceId: string) => {
         setFormDirty();
@@ -115,6 +128,7 @@ export default function OptionComponent(
 
 
     return(
+      <>
         <FormGroup widths='16'>
         <FormField width={2} />
         <FormField width='8'>
@@ -167,8 +181,40 @@ export default function OptionComponent(
          <Icon name='plus' />
       </ButtonContent>
     </Button>
+
+    <NewQuestionPopup
+           registeredUsersIndicator={registeredUsersIndicator}
+           popoverVisibility={popoverVisibility}
+           togglePopover={togglePopover}
+           addTextQuestion={addTextQuestion}
+           addChoiceQuestion={addChoiceQuestion}
+           addAttachmentQuestion={addAttachmentQuestion}
+           index={question.index}
+           option={option}
+           icon={'branch'}
+           color={'teal'}
+         />
+
     </ButtonGroup>
        </FormField>
 </FormGroup>
+<SegmentGroup>
+{customQuestions.
+filter(x => x.parentQuestionOption === option.id)
+.sort((a, b) => a.index - b.index).map((question) => (
+          <CustomQuestionComponent
+          question={question}
+          registeredUsersIndicator={registeredUsersIndicator}
+          customQuestions={customQuestions}
+          setCustomQuestions={setCustomQuestions}
+          setFormDirty={setFormDirty}
+          addTextQuestion={addTextQuestion}
+          addChoiceQuestion={addChoiceQuestion}
+          addAttachmentQuestion={addAttachmentQuestion}
+          parentOption={option}
+           key={question.id} />
+      ))}
+  </SegmentGroup>
+   </>
     )
 }
