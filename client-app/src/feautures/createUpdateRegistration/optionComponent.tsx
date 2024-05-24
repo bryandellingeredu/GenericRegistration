@@ -198,7 +198,12 @@ export default function OptionComponent(
     </ButtonGroup>
        </FormField>
 </FormGroup>
-<SegmentGroup>
+<SegmentGroup
+style={customQuestions.
+  filter(x => x.parentQuestionOption === option.id).length > 0 ? {
+  border: '1px dashed #000000', 
+} : undefined}
+>
 {customQuestions.
 filter(x => x.parentQuestionOption === option.id)
 .sort((a, b) => a.index - b.index).map((question) => (

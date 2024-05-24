@@ -2,16 +2,15 @@ import { useEffect, useState } from 'react';
 import { observer } from "mobx-react-lite";
 import { RegistrationEvent } from '../../app/models/registrationEvent';
 import { CustomQuestion } from '../../app/models/customQuestion';
-import { Button, ButtonGroup, Divider, Form, FormField, Grid, Header, Icon, Input, Menu, Message, Select } from 'semantic-ui-react';
+import { Button, ButtonGroup, Form, FormField, Grid, Header, Icon, Input, Menu, Message, } from 'semantic-ui-react';
 import ArmyLogo from '../home/ArmyLogo';
 import { Editor } from "react-draft-wysiwyg";
 import { EditorState, convertFromRaw  } from "draft-js";
 import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
-import { QuestionType } from '../../app/models/questionType';
 import { toast } from 'react-toastify';
 import { useNavigate } from "react-router-dom";
 import QRCode from 'qrcode';
-import DocumentUploadWidget from '../documentUpload/documentUploadWidget';
+import PreviewCustomQuestionComponent from './previewCustomQuestionComponent';
 
 interface Props{
    registrationEvent: RegistrationEvent
@@ -95,9 +94,6 @@ export default observer(function ReviewAndPublishRegistration(
         });
       };
 
-      function handleUpload(file: any) {
-       //do nothing
-      }
 
     return (
         <>
@@ -186,50 +182,13 @@ export default observer(function ReviewAndPublishRegistration(
              <label> Email</label>
             <Input value={''}/>
        </FormField>
-       {customQuestions.sort((a, b) => a.index - b.index).map((question) => (
-          <FormField key={question.id} required={question.required}>
-            {question.questionType !== QuestionType.Attachment && <label>{question.questionText}</label> }
-            {question.questionType === QuestionType.TextInput && <Input value={''}/>}
-            {question.questionType === QuestionType.Choice &&
-             <Select
-             search
-             clearable
-             placeholder='Select an option'
-             options={ question.options
-                ? question.options
-                    .sort((a, b) => a.index - b.index)
-                    .map(option => ({
-                      key: option.id, 
-                      value: option.optionText, 
-                      text: option.optionText, 
-                    }))
-                : []}
-           />
-            }
-            {question.questionType == QuestionType.Attachment &&
-            <>
-              <Divider color="black" />
-              <Grid>
-                <Grid.Row>
-                  <Grid.Column width={4}>
-                    <strong>{question.questionText}:</strong>
-                    {question.required && <Icon name='asterisk' color='red' /> } 
-                  </Grid.Column>
-                  <Grid.Column width={12}>
-                    <DocumentUploadWidget
-                      uploadDocument={handleUpload}
-                      loading={false}
-                      color={'black'}
-                      questionId={question.id}
-                      error={false}
-                    />
-                  </Grid.Column>
-                </Grid.Row>
-              </Grid>
-              <Divider color="black" />
-              </> 
-            }
-          </FormField>
+       {customQuestions
+       .filter(x => !x.parentQuestionOption)
+       .sort((a, b) => a.index - b.index).map((question) => (
+          <PreviewCustomQuestionComponent key={question.id} 
+          question={question}
+          customQuestions={customQuestions}
+          />
             ))}
         </Form>
         </Grid.Column>

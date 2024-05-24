@@ -18,7 +18,7 @@ namespace Domain
 
         public List<QuestionOption> Options { get; set; }
 
-        public Guid? ParentQuestionOption {get; set; }
+        public string ParentQuestionOption {get; set; }
 
         public CustomQuestion()
         {

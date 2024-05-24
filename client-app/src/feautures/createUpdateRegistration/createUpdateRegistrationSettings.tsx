@@ -88,10 +88,6 @@ export default observer (function CreateUpdateRegistrationSettings(
         }
     };
 
-   
-
-      
-
     return (
       <Form style={{paddingBottom: '20px'}}>
       <Grid>

@@ -345,6 +345,7 @@ export default observer(function CreateUpdateRegistration() {
           const data = {...registrationEvent, id: registrationEventId}
 
           try {
+            debugger
             await agent.RegistrationEvents.createUpdate(data);
             await agent.RegistrationEventWebsites.createUpdate({registrationEventId, content});
             await agent.DocumentUploadWebsites.createUpdate({registrationEventId, content: documentLibraryContent});
