@@ -9,7 +9,7 @@ import { EditorState, convertFromRaw  } from "draft-js";
 import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
 import { QuestionType } from "../../app/models/questionType";
 import { useStore } from '../../app/stores/store';
-import { Button, ButtonContent, ButtonGroup, Divider, DropdownProps, Form, FormField, Grid, Header, Icon, Input, Loader, Menu, Message, Select } from "semantic-ui-react";
+import { Button, DropdownProps, Form, FormField, Grid, Header, Icon, Input, Menu, Message,  } from "semantic-ui-react";
 import { RegistrationEvent } from "../../app/models/registrationEvent";
 import { RegistrationLink } from "../../app/models/registrationLink";
 import { RegistrationEventWebsite } from "../../app/models/registrationEventWebsite";
@@ -20,7 +20,7 @@ import { stateToHTML } from "draft-js-export-html";
 import { useNavigate } from "react-router-dom";
 import { AnswerAttachment } from "../../app/models/answerAttachment";
 import { v4 as uuid } from "uuid";
-import DocumentUploadWidget from "../documentUpload/documentUploadWidget";
+import CustomQuestionComponentForRegistrant from "./customQuestionComponentForRegistrant";
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
@@ -44,9 +44,8 @@ function formatDate(date : Date) {
 
   export default observer(function RegisterFromLink() {
 
-    const { responsiveStore, attachmentStore } = useStore();
+    const { responsiveStore} = useStore();
     const {isMobile} = responsiveStore
-    const {uploadAnswerDocument, uploading}  = attachmentStore
     const navigate = useNavigate();
     const [formisDirty, setFormisDirty] = useState(false);
     const [editorState, setEditorState] = useState(() => EditorState.createEmpty());
@@ -91,6 +90,9 @@ function formatDate(date : Date) {
     const [customQuestions, setCustomQuestions] = useState<CustomQuestion[]>([]);
     const [email, setEmail] = useState('');
     const [numberOfApprovedRegistrants, setNumberOfApprovedRegistrants] = useState(0);
+    
+    const handleSetAnswerAttachments = (newAnswerAttachments :AnswerAttachment[] ) => setAnswerAttachments(newAnswerAttachments)
+    const handleSetRegistration = (newRegistration : Registration) => setRegistration(newRegistration)
 
     useEffect(() => {
       const updateOptions = async () => {
@@ -264,53 +266,6 @@ function formatDate(date : Date) {
       setRegistration({ ...registration, [name]: value });
   };
 
-    const handleCustomInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      const { name, value } = e.target;
-      const updatedRegistration = { ...registration };
-      if (updatedRegistration.answers) {
-        const answerIndex = updatedRegistration.answers.findIndex(answer => answer.customQuestionId === name);
-        if (answerIndex !== -1) {
-          updatedRegistration.answers[answerIndex] = { ...updatedRegistration.answers[answerIndex], answerText: value };
-          setRegistration(updatedRegistration);
-        }
-      }
-    }
-
-    const handleCustomSelectChange = (e: React.SyntheticEvent<HTMLElement>, data: DropdownProps ) =>{
-      const name = data.name as string;
-      const value = data.value ?? '';
-      const updatedRegistration = { ...registration };
-      if (updatedRegistration.answers) {
-        const answerIndex = updatedRegistration.answers.findIndex(answer => answer.customQuestionId === name);
-        if (answerIndex !== -1) {
-          updatedRegistration.answers[answerIndex] = { ...updatedRegistration.answers[answerIndex], answerText: value as string };
-          setRegistration(updatedRegistration);
-        }
-      }
-    }
-
-    const handleDocumentUpload = async (file: any, customQuestionId : string) => {
-      const answerAttachmentId = uuid();
-      const fileName = file.name;
-      const fileType = file.type;
-      try{
-      await uploadAnswerDocument(file, answerAttachmentId, customQuestionId, registration.id )
-  
-          const answerAttachment: AnswerAttachment = {
-            id: answerAttachmentId,
-            customQuestionLookup: customQuestionId,
-            registrationLookup: registration.id,
-            fileName: fileName,
-            fileType: fileType
-          };
-  
-          setAnswerAttachments([...answerAttachments, answerAttachment]);
-        }
-        catch(error :any) {
-          console.log(error);
-          toast.error(`Error uploading ${fileName}: ${error.message}`);
-        }
-      }
 
       const deleteAttachment = async (questionId: string) => {
         const answerAttachment = answerAttachments.find(x => x.customQuestionLookup === questionId);
@@ -459,95 +414,21 @@ function formatDate(date : Date) {
             <Input value={registration.email}/>
        </FormField>
         {customQuestions.sort((a, b) => a.index - b.index).map((question) => (
-          <FormField key={question.id} required={question.required}
-          disabled={!registrationIsOpen() && !registration.registered }
-          error={
-            formisDirty &&
-            question.required &&
-            (
-              (question.questionType !== QuestionType.Attachment &&
-                (!registration.answers?.find(x => x.customQuestionId === question.id)?.answerText ||
-                 !registration.answers?.find(x => x.customQuestionId === question.id)?.answerText.trim()
-                )
-              ) 
-              ||
-              (
-                question.questionType === QuestionType.Attachment &&
-                !findAnswerAttachmentByQuestionId(question.id) 
-              )
-           )
-        }
-          >
-            <label>{question.questionText}</label>
-            {question.questionType === QuestionType.Attachment && uploading &&
-             <Loader active inline />
-            }
-
-             {question.questionType === QuestionType.Attachment &&  !findAnswerAttachmentByQuestionId(question.id) && !uploading &&
-                   <>
-                   <Divider color="black" />
-                   {(registrationIsOpen() || registration.registered ) && 
-                       <DocumentUploadWidget
-                        uploadDocument={handleDocumentUpload}
-                        loading={uploading}
-                        color={'black'}
-                        questionId={question.id}
-                        error={formisDirty && question.required && !findAnswerAttachmentByQuestionId(question.id)}
-                        />
-                    }
-                   <Divider color="black" />
-                 </>
-              }
-
-             {question.questionType === QuestionType.Attachment  && !uploading  && findAnswerAttachmentByQuestionId(question.id)?.fileName &&
-              <ButtonGroup >
-                <Button animated='vertical' basic color='blue' onClick={() => downloadAttachment(question.id)} type="button">
-                <ButtonContent hidden>Download</ButtonContent>
-                <ButtonContent visible>
-                  <Icon name='paperclip' />{findAnswerAttachmentByQuestionId(question.id)?.fileName} 
-                </ButtonContent>
-              </Button>
-              <Button animated='vertical' basic color='red' onClick={() => deleteAttachment(question.id)} type="button">
-                <ButtonContent hidden>Delete</ButtonContent>
-                <ButtonContent visible>
-                  <Icon name='x' />
-                </ButtonContent>
-              </Button>
-              </ButtonGroup>
-              }
-
-            {question.questionType === QuestionType.TextInput &&
-             <Input value={registration.answers?.find(x => x.customQuestionId === question.id)?.answerText} 
-             disabled={!registrationIsOpen() && !registration.registered }
-              name={question.id}
-              onChange={handleCustomInputChange }/>
-             }
-            {question.questionType === QuestionType.Choice &&
-             <Select
-             disabled={!registrationIsOpen() && !registration.registered }
-             name={question.id}
-             value={registration.answers?.find(x => x.customQuestionId === question.id)?.answerText || ''}
-             search
-             clearable
-             placeholder='Select an option'
-             onChange={(e, data) => handleCustomSelectChange(e, data)}
-             options={ question.options
-                ? question.options
-                    .sort((a, b) => a.index - b.index)
-                    .map(option => ({
-                      key: option.id, 
-                      value: option.optionText, 
-                      text: option.optionText, 
-                      disabled: option.optionQuota ?
-                      extendedOptions && extendedOptions.length && extendedOptions.find(opt => opt.id === option.id) ?
-                      extendedOptions.find(opt => opt.id === option.id)!.disabled
-                      : false
-                    : false
-                    }))
-                : []}
-           />
-            }
-          </FormField>
+                 <CustomQuestionComponentForRegistrant
+                 key={question.id}
+                 question={question}
+                 customQuestions={customQuestions}
+                 registration={registration}
+                 registrationIsOpen={registrationIsOpen}
+                 formisDirty={formisDirty}
+                 findAnswerAttachmentByQuestionId={findAnswerAttachmentByQuestionId}
+                 setAnswerAttachments={handleSetAnswerAttachments}
+                 answerAttachments={answerAttachments}
+                 downloadAttachment={downloadAttachment}
+                 deleteAttachment={deleteAttachment}
+                 setRegistration={handleSetRegistration}
+                 extendedOptions={extendedOptions}
+                  />
             ))}
             {registration.registered && 
             <Button type='button' size={isMobile ? 'tiny' : 'huge'} color='red' floated="right" content='Cancel Registration' onClick={() => navigate(`/deregisterforeventfromlink/${encodeURIComponent(encryptedKey!)}`)}  />
