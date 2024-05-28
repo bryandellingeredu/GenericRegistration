@@ -75,7 +75,8 @@ export default function CustomQuestionComponentForRegistrant(
               }
 
     return(
-        <FormField key={question.id} required={question.required}
+       <div id={question.id}>
+        <FormField key={question.id} required={question.required} 
           disabled={!registrationIsOpen() && !registration.registered }
           error={
                   formisDirty &&
@@ -134,7 +135,8 @@ export default function CustomQuestionComponentForRegistrant(
                <Input value={registration.answers?.find(x => x.customQuestionId === question.id)?.answerText} 
                disabled={!registrationIsOpen() && !registration.registered }
                 name={question.id}
-                onChange={handleCustomInputChange }/>}
+                onChange={handleCustomInputChange }
+                />}
             {question.questionType === QuestionType.Choice &&
              <SelectComponentForRegistrant
              question={question}
@@ -152,5 +154,6 @@ export default function CustomQuestionComponentForRegistrant(
              />
             }
           </FormField>
+          </div>
     )
 }

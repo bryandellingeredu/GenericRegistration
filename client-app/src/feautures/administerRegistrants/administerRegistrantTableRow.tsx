@@ -7,6 +7,7 @@ import { format } from "date-fns";
 import { AnswerAttachment } from "../../app/models/answerAttachment";
 import { useStore } from "../../app/stores/store";
 import { QuestionType } from "../../app/models/questionType";
+import { QuestionOption } from "../../app/models/questionOption";
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
@@ -37,11 +38,27 @@ export default function AdministerRegistrantTableRow(
     }, 600); 
   };
 
-    const orderedQuestions = questions.sort((a, b) => a.index - b.index);
+
+    const orderedQuestions = questions
+    .filter(x => !x.parentQuestionOption || registration.answers?.find(y => y.answerText === x.parentQuestionOption))
+   .sort((a, b) => a.index - b.index);
+
+    const isGuid = (str : string) => {
+      const guidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+      return guidPattern.test(str);
+  };
 
     const getAnswer = (questionId : string) => {
-        return  registration.answers!.find(x => x.customQuestionId === questionId)?.answerText || '';
-    }
+      const answerText =   registration.answers!.find(x => x.customQuestionId === questionId)?.answerText || '';
+      if(isGuid(answerText)){
+        const allOptions: QuestionOption[] = questions.reduce<QuestionOption[]>((acc, question) => {
+          return acc.concat(question.options ?? []);
+        }, []);
+        const option = allOptions.find(x => x.id === answerText)
+        return option?.optionText
+      }
+      return answerText;
+  }
 
     const getAttachment = (questionId : string) => {
       if (!answerAttachments || answerAttachments.length < 1) return null;

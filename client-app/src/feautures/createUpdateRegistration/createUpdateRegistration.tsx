@@ -485,10 +485,27 @@ export default observer(function CreateUpdateRegistration() {
                         <Icon name='question' />
                             <Header.Content>
                                 Event Questions
-                                <Header.Subheader>
-                                  {registeredUsersIndicator ? 'People have already registred for your event you MAY NOT change questions' : 
-                                  'Use the "Add" button to design questions for your form. For limited-availability options (e.g., class size or event attendance), select the "Choice" type and enter your limit. For example, to limit attendance at a dinner to 20 people, choose the "Choice" type, label it "Attend Dinner", and add the choices "Yes" with a limit of 20 and "No" with no limit.'}
-                                  </Header.Subheader> 
+                               
+                                  {registeredUsersIndicator  &&
+                                    <Header.Subheader>
+                                  People have already registred for your event you MAY NOT change questions' : 
+                                  </Header.Subheader>
+                                  }
+                               
+                                  {!registeredUsersIndicator &&
+                                  <>
+                                   <Header.Subheader>
+                                    <p>'Use the "Add" button to design questions for your form.</p>
+                                     <p>For limited-availability options (e.g., class size or event attendance), select the "Choice" type and enter your limit. For example,
+                                       to limit attendance at a dinner to 20 people, choose the "Choice" type, label it "Attend Dinner",
+                                        and add the choices "Yes" with a limit of 20 and "No" with no limit.'</p>
+                                        <p>
+                                     To conditionally hide or show questions, select a "Choice" type question.
+                                      To display additional questions based on a specific choice, use the "branch" button to add conditional questions.
+                                      </p>
+                                   </Header.Subheader>
+                                   </>
+                                  }
                              </Header.Content>
                         </Header>
                         <CreateUpdateRegistrationQuestions 

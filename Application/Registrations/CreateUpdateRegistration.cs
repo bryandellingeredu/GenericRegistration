@@ -95,6 +95,11 @@ namespace Application.Registrations
                 }
             }
 
+            static bool IsGuid(string input)
+            {
+                return Guid.TryParse(input, out _);
+            }
+
             private async Task SendEmailToEventOwner(RegistrationWithHTMLContent registration, string status)
             {
                 bool hasAttachments = false;
@@ -126,25 +131,35 @@ namespace Application.Registrations
                     body = body + $"<p><strong>First Name: </strong> {registration.FirstName}</p>";
                     body = body + $"<p><strong>Last Name: </strong> {registration.LastName}</p>";
                     body += $"<p><strong>Email: </strong> <a href='mailto:{registration.Email}'>{registration.Email}</a></p>";
-                    foreach (var question in customQuestions)
+                    foreach (var question in customQuestions.OrderBy(x => x.Index))
                     {
-                        if (question.QuestionType != QuestionType.Attachment)
+                        if (string.IsNullOrEmpty(question.ParentQuestionOption) || registration.Answers.Any(x => x.AnswerText == question.ParentQuestionOption))
                         {
-                            body = body + $"<p><strong>{question.QuestionText}: </strong> {registration.Answers.Where(x => x.CustomQuestionId == question.Id).FirstOrDefault().AnswerText ?? string.Empty}</p>";
-                        }
-                        if (question.QuestionType == QuestionType.Attachment)
-                        {
-                            if (answerAttachments.Any() && answerAttachments.FirstOrDefault(x => x.CustomQuestionLookup == question.Id) != null)
+                            if (question.QuestionType != QuestionType.Attachment)
                             {
-                                hasAttachments = true;
-                                body = body + $"<p><strong>{question.QuestionText}: </strong> {answerAttachments.First(x => x.CustomQuestionLookup == question.Id).FileName}</p>";
-                            }
-                            else
-                            {
-                                body = body + $"<p><strong>{question.QuestionText}: </strong></p>";
-                            }
-                        }
+                                string answer = registration.Answers.Where(x => x.CustomQuestionId == question.Id).FirstOrDefault().AnswerText ?? string.Empty;
+                                if (IsGuid(answer))
+                                {
+                                    Guid questionOptionId = Guid.Parse(answer);
+                                    QuestionOption questionOption = await _context.QuestionOptions.FindAsync(questionOptionId);
+                                    answer = questionOption.OptionText;
+                                }
 
+                                body = body + $"<p><strong>{question.QuestionText}: </strong> {answer}</p>";
+                            }
+                            if (question.QuestionType == QuestionType.Attachment)
+                            {
+                                if (answerAttachments.Any() && answerAttachments.FirstOrDefault(x => x.CustomQuestionLookup == question.Id) != null)
+                                {
+                                    hasAttachments = true;
+                                    body = body + $"<p><strong>{question.QuestionText}: </strong> {answerAttachments.First(x => x.CustomQuestionLookup == question.Id).FileName}</p>";
+                                }
+                                else
+                                {
+                                    body = body + $"<p><strong>{question.QuestionText}: </strong></p>";
+                                }
+                            }
+                        }
                     }
                     try
                     {
@@ -178,6 +193,7 @@ namespace Application.Registrations
                     }
                 }
             }
+
 
             private async Task SendEmail(RegistrationWithHTMLContent registration, string status, string email    )
             {

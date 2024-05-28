@@ -23,9 +23,20 @@ namespace API.Controllers
 
             var registrationEvent =  _context.RegistrationEvents
                 .Include(x => x.CustomQuestions)
+                .ThenInclude(x =>x.Options)
                 .Include(x => x.Registrations)
                     .ThenInclude(x => x.Answers)
                 .FirstOrDefault(x => x.Id == id);
+
+            List<QuestionOption> options = new List<QuestionOption>();
+
+            foreach (var question in registrationEvent.CustomQuestions)
+            {
+                foreach (var option in question.Options)
+                {
+                    options.Add(option);
+                }
+            }
 
 
 
@@ -53,7 +64,7 @@ namespace API.Controllers
                 var line = $"\"{registration.FirstName}\",\"{registration.LastName}\",\"{registration.Email}\"";
                 foreach (var question in registrationEvent.CustomQuestions.OrderBy(x => x.Index))
                 {
-                    var answer = GetAnswer(question.Id, registration.Answers, question.QuestionType, answerAttachments, registration.Id);
+                    var answer = GetAnswer(question.Id, registration.Answers, question.QuestionType, answerAttachments, registration.Id, options);
                     line += $",\"{answer.Replace("\"", "\"\"")}\""; 
                 }
                 builder.AppendLine(line);
@@ -62,7 +73,7 @@ namespace API.Controllers
             return File(Encoding.UTF8.GetBytes(builder.ToString()), "text/csv", "registrations.csv");
         }
 
-        private string GetAnswer(Guid questionId, IEnumerable<Answer> answers, QuestionType questionType, List<AnswerAttachment> answerAttachments, Guid id)
+        private string GetAnswer(Guid questionId, IEnumerable<Answer> answers, QuestionType questionType, List<AnswerAttachment> answerAttachments, Guid id, List<QuestionOption> options)
         {
             if(questionType == QuestionType.Attachment)
             {
@@ -80,9 +91,21 @@ namespace API.Controllers
             else
             {
                 var answer = answers.FirstOrDefault(x => x.CustomQuestionId == questionId);
-                return answer?.AnswerText.Replace("\r\n", " ").Replace("\n", " ").Replace("\r", " ") ?? string.Empty;
+                string answerText =  answer?.AnswerText ?? string.Empty;
+                if (IsGuid(answerText))
+                {
+                    Guid questionOptionId = Guid.Parse(answerText);
+                    QuestionOption questionOption = options.Find(x => x.Id == questionOptionId);
+                    answerText = questionOption.OptionText;
+                }
+                return answerText?.Replace("\r\n", " ").Replace("\n", " ").Replace("\r", " ") ?? string.Empty;
             }
  
+        }
+
+        static bool IsGuid(string input)
+        {
+            return Guid.TryParse(input, out _);
         }
     }
 }

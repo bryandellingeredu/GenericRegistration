@@ -42,12 +42,15 @@ namespace Application.EmailLink
                     .AsNoTracking()
                     .FirstAsync();
 
+
                 if (registrationLink != null)
                 {
                     var existingRegistration =await _context.Registrations
                         .Include(x => x.Answers)
                         .Where(x => x.Id == request.RegistrationDTO.Id)
                         .FirstOrDefaultAsync();
+
+               
 
                     if (existingRegistration != null) {
                         existingRegistration.FirstName = request.RegistrationDTO.FirstName; 
@@ -81,6 +84,7 @@ namespace Application.EmailLink
                     }
                     else
                     {
+            
                         Registration newRegistration = new Registration();
                         newRegistration.Id = request.RegistrationDTO.Id;
                         newRegistration.RegistrationEventId = request.RegistrationDTO.RegistrationEventId;
@@ -103,6 +107,11 @@ namespace Application.EmailLink
                 return Result<Unit>.Failure($"invalid registration link");
             
                
+            }
+
+            static bool IsGuid(string input)
+            {
+                return Guid.TryParse(input, out _);
             }
 
             private async Task SendEmailToEventOwner(RegistrationDTO registration, string status)
@@ -138,25 +147,33 @@ namespace Application.EmailLink
                     body = body + $"<p><strong>First Name: </strong> {registration.FirstName}</p>";
                     body = body + $"<p><strong>Last Name: </strong> {registration.LastName}</p>";
                     body += $"<p><strong>Email: </strong> <a href='mailto:{registration.Email}'>{registration.Email}</a></p>";
-                    foreach (var question in customQuestions)
+                    foreach (var question in customQuestions.OrderBy(x => x.Index))
                     {
-                        if (question.QuestionType != QuestionType.Attachment)
-                        {
-                            body = body + $"<p><strong>{question.QuestionText}: </strong> {registration.Answers.Where(x => x.CustomQuestionId == question.Id).FirstOrDefault().AnswerText ?? string.Empty}</p>";
-                        }
-                        if (question.QuestionType == QuestionType.Attachment)
-                        {
-                            if (answerAttachments.Any() && answerAttachments.FirstOrDefault(x => x.CustomQuestionLookup == question.Id) != null)
+                        if (string.IsNullOrEmpty(question.ParentQuestionOption) || registration.Answers.Any(x => x.AnswerText == question.ParentQuestionOption)) { 
+                            if (question.QuestionType != QuestionType.Attachment)
                             {
+                                string answer = registration.Answers.Where(x => x.CustomQuestionId == question.Id).FirstOrDefault().AnswerText ?? string.Empty;
+                                if (IsGuid(answer))
+                                {
+                                    Guid questionOptionId = Guid.Parse(answer);
+                                    QuestionOption questionOption = await _context.QuestionOptions.FindAsync(questionOptionId);
+                                    answer = questionOption.OptionText;
+                                }
+                                body = body + $"<p><strong>{question.QuestionText}: </strong> {answer}</p>";
+                            }
+                            if (question.QuestionType == QuestionType.Attachment)
+                            {
+                              if (answerAttachments.Any() && answerAttachments.FirstOrDefault(x => x.CustomQuestionLookup == question.Id) != null)
+                              {
                                 hasAttachments = true;
                                 body = body + $"<p><strong>{question.QuestionText}: </strong> {answerAttachments.First(x => x.CustomQuestionLookup == question.Id).FileName}</p>";
-                            }
-                            else
-                            {
-                                body = body + $"<p><strong>{question.QuestionText}: </strong></p>";
-                            }
-                        }
-
+                              }
+                              else
+                              {
+                                 body = body + $"<p><strong>{question.QuestionText}: </strong></p>";
+                             }
+                         }
+                      }
                     }
                     try
                     {

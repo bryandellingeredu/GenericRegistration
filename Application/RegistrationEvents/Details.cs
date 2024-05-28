@@ -31,6 +31,7 @@ namespace Application.RegistrationEvents
                 var registrationEvent = await _context.RegistrationEvents
                     .Include(x => x.Registrations).ThenInclude(x => x.Answers)
                     .Include(x => x.CustomQuestions)
+                     .ThenInclude(x => x.Options)
                     .Where(x => x.Id == request.Id)   
                     .AsNoTracking()
                     .FirstAsync();
@@ -40,8 +41,11 @@ namespace Application.RegistrationEvents
                 }
                 foreach (var question in registrationEvent.CustomQuestions)
                 {
-                    question.Options = null;
                     question.RegistrationEvent = null;
+                    foreach (var option in question.Options)
+                    {
+                        option.CustomQuestion = null;
+                    }
                 }
 
                 return Result<RegistrationEvent>.Success(registrationEvent);

@@ -220,20 +220,32 @@ function formatDate(date : Date) {
        !registration.firstName || !registration.firstName.trim() ||
        !registration.lastName || !registration.lastName.trim() 
 
-       const customQuestionsErrors = customQuestions.some(question => 
-        question.required && question.questionType !== QuestionType.Attachment &&
+       const customQuestionsErrors = customQuestions.some(question => {
+
+        const questionDiv = document.getElementById(question.id);
+        if (!questionDiv) {
+          return false; // Skip the question if its corresponding div is not present
+        }
+
+       return question.required && question.questionType !== QuestionType.Attachment &&
         (!registration.answers?.find(x => x.customQuestionId === question.id)?.answerText ||
          !registration.answers?.find(x => x.customQuestionId === question.id)?.answerText.trim())
-      );
+      });
 
       const findAnswerAttachmentByQuestionId = (questionId: string): AnswerAttachment | null => {
         return answerAttachments.find(x => x.customQuestionLookup === questionId) || null;
       };
 
-      const attachmentErrors = customQuestions.some(question =>
-        question.required && question.questionType === QuestionType.Attachment &&
+      const attachmentErrors = customQuestions.some(question => {
+
+        const questionDiv = document.getElementById(question.id);
+        if (!questionDiv) {
+          return false; // Skip the question if its corresponding div is not present
+        }
+        
+       return  question.required && question.questionType === QuestionType.Attachment &&
         !findAnswerAttachmentByQuestionId(question.id) 
-        );
+      });
 
       formHasError = formHasError || customQuestionsErrors || attachmentErrors;
 
@@ -413,7 +425,9 @@ function formatDate(date : Date) {
              <label> Email</label>
             <Input value={registration.email}/>
        </FormField>
-        {customQuestions.sort((a, b) => a.index - b.index).map((question) => (
+        {customQuestions
+        .filter(x => !x.parentQuestionOption)
+        .sort((a, b) => a.index - b.index).map((question) => (
                  <CustomQuestionComponentForRegistrant
                  key={question.id}
                  question={question}
