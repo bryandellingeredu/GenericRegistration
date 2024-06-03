@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Persistence;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace API.Controllers
 {
@@ -21,12 +20,31 @@ namespace API.Controllers
             var builder = new StringBuilder();
             builder.Append(Encoding.UTF8.GetString(Encoding.UTF8.GetPreamble()));
 
-            var registrationEvent =  _context.RegistrationEvents
-                .Include(x => x.CustomQuestions)
-                .ThenInclude(x =>x.Options)
-                .Include(x => x.Registrations)
-                    .ThenInclude(x => x.Answers)
-                .FirstOrDefault(x => x.Id == id);
+
+            RegistrationEvent registrationEvent =  _context.RegistrationEvents
+            .Where(x => x.Id == id)
+            .AsNoTracking()
+            .FirstOrDefault();
+
+            if (registrationEvent == null)
+            {
+                throw new Exception("registration event not found");
+            }
+
+            var customQuestions = _context.CustomQuestions
+                .Where(c => c.RegistrationEventId == registrationEvent.Id)
+                .Include(c => c.Options)
+                .AsNoTracking()
+                .ToList();
+
+            var registrations = _context.Registrations
+            .Where(r => r.RegistrationEventId == registrationEvent.Id)
+            .Include(r => r.Answers)
+            .AsNoTracking()
+            .ToList();
+
+            registrationEvent.CustomQuestions = customQuestions;
+            registrationEvent.Registrations = registrations;
 
             List<QuestionOption> options = new List<QuestionOption>();
 

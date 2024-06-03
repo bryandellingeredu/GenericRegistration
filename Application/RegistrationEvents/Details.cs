@@ -28,13 +28,32 @@ namespace Application.RegistrationEvents
             }
             public async Task<Result<RegistrationEvent>> Handle(Query request, CancellationToken cancellationToken)
             {
+
                 var registrationEvent = await _context.RegistrationEvents
-                    .Include(x => x.Registrations).ThenInclude(x => x.Answers)
-                    .Include(x => x.CustomQuestions)
-                     .ThenInclude(x => x.Options)
-                    .Where(x => x.Id == request.Id)   
+                    .Where(x => x.Id == request.Id)
                     .AsNoTracking()
-                    .FirstAsync();
+                    .FirstOrDefaultAsync();
+
+                if (registrationEvent == null)
+                {
+                    return Result<RegistrationEvent>.Failure("registration event not found");
+                }
+
+                var registrations = await _context.Registrations
+                .Where(r => r.RegistrationEventId == registrationEvent.Id)
+                .Include(r => r.Answers)
+                .AsNoTracking()
+                .ToListAsync();
+
+                var customQuestions = await _context.CustomQuestions
+                    .Where(c => c.RegistrationEventId == registrationEvent.Id)
+                    .Include(c => c.Options)
+                    .AsNoTracking()
+                    .ToListAsync();
+
+                registrationEvent.Registrations = registrations;
+                registrationEvent.CustomQuestions = customQuestions;
+
                 foreach (var registration in registrationEvent.Registrations)
                 {
                     registration.RegistrationEvent = null;
