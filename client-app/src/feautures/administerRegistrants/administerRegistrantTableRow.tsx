@@ -162,7 +162,7 @@ export default function AdministerRegistrantTableRow(
               </a></TableCell>
           <TableCell rowSpan={maxRowSpan}>{`Registered on ${formattedDate}`}</TableCell>
     
-          {showQuestions && (
+          {showQuestions && orderedQuestions && orderedQuestions.length > 1 && (
             <>
               <TableCell>{orderedQuestions[0].questionText}</TableCell>
               <TableCell>
