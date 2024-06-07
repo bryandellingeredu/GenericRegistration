@@ -1,8 +1,8 @@
 import { observer } from "mobx-react-lite";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from 'react-router-dom';
-import { RegistrationEvent } from "../../app/models/registrationEvent";
-import { Registration } from "../../app/models/registration";
+import { RegistrationEvent, RegistrationEventFormValues } from "../../app/models/registrationEvent";
+import { Registration, RegistrationFormValues } from "../../app/models/registration";
 import { toast } from "react-toastify";
 import agent from "../../app/api/agent";
 import { useStore } from "../../app/stores/store";
@@ -18,36 +18,9 @@ export default observer(function DeRegisterForEvent() {
     const [loading, setLoading] = useState(true);
     const [cancellingRegistration, setCancellingRegistration] = useState(false);
     const [confirmed, setConfirmed] = useState(false);
-    const [registrationEvent, setRegistrationEvent] = useState<RegistrationEvent>(
-        {
-          id: '',
-          title: '',
-          location: '',
-          startDate: new Date(),
-          endDate: new Date(),
-          overview: '',
-          published: true,
-          public: true,
-          autoApprove: true,
-          autoEmail: true,
-          registrationIsOpen: true,
-          maxRegistrantInd: false,
-          maxRegistrantNumber: '',
-          certified: true,
-          documentLibrary: false
-        }  
-    );
-    const [registration, setRegistration] = useState<Registration>({
-        id: '',
-        registrationEventId: '',
-        firstName: '',
-        lastName: '',
-        email: '',
-        phone: '',
-        registrationDate: new Date(),
-        registered: false,
-        }
-      )
+    const [registrationEvent, setRegistrationEvent] = useState<RegistrationEvent>(new RegistrationEventFormValues());
+    const [registration, setRegistration] = useState<Registration>(new RegistrationFormValues());
+
 
       useEffect(() => {
         if(id && user) getData();     

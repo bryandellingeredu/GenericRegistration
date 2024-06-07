@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { observer } from "mobx-react-lite";
-import { RegistrationEvent } from '../../app/models/registrationEvent';
+import { RegistrationEvent, RegistrationEventFormValues } from '../../app/models/registrationEvent';
 import agent from '../../app/api/agent';
 import { toast } from 'react-toastify';
 import LoadingComponent from '../../app/layout/LoadingComponent';
@@ -51,26 +51,7 @@ export default observer(function AdministerRegistrants() {
   const handleSetShowTable = (newShowTable : boolean) => setShowTable(newShowTable);
   const handleSetQueryOrder = (newQueryOrder : string) => setQueryOrder(newQueryOrder);
   const handleSetSearchFilter = (newSearchFilter : string) => setSearchFilter(newSearchFilter);
-  const [registrationEvent, setRegistrationEvent] = useState<RegistrationEvent>(
-    {
-      id: '',
-      title: '',
-      location: '',
-      startDate: new Date(),
-      endDate: new Date(),
-      overview: '',
-      published: false,
-      autoApprove: true,
-      public: true,
-      registrations: [],
-      certified: true,
-      autoEmail: true,
-      registrationIsOpen: true,
-      documentLibrary: false,
-      maxRegistrantInd: false,
-      maxRegistrantNumber: ''
-    }  
-);
+  const [registrationEvent, setRegistrationEvent] = useState<RegistrationEvent>(new RegistrationEventFormValues());
 
 const [answerAttachments, setAnswerAttachments] = useState<AnswerAttachment[]>([]);
 

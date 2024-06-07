@@ -2,7 +2,7 @@ import { observer } from "mobx-react-lite";
 import { useEffect, useState } from "react";
 import { useStore } from "../../app/stores/store";
 import { useNavigate } from "react-router-dom";
-import { RegistrationEvent } from "../../app/models/registrationEvent";
+import { RegistrationEvent, RegistrationEventFormValues } from "../../app/models/registrationEvent";
 import { toast } from "react-toastify";
 import LoadingComponent from "../../app/layout/LoadingComponent";
 import { Grid, Header, Icon, Menu, Message } from "semantic-ui-react";
@@ -44,26 +44,8 @@ export default observer(function RegisterForDocumentLibraryFromLink() {
     const [editorState, setEditorState] = useState(() => EditorState.createEmpty());
     const [loadTreeData, setLoadTreeData] = useState(false);
     const [treeData, setTreeData] = useState<Node[]>([]);
-
-    const [registrationEvent, setRegistrationEvent] = useState<RegistrationEvent>(
-        {
-          id: '',
-          title: '',
-          location: '',
-          startDate: new Date(),
-          endDate: new Date(),
-          overview: '',
-          published: true,
-          public: true,
-          autoApprove: true,
-          autoEmail: true,
-          registrationIsOpen: true,
-          maxRegistrantInd: false,
-          maxRegistrantNumber: '',
-          certified: true,
-          documentLibrary: false
-        }  
-    );
+    const [registrationEvent, setRegistrationEvent] = useState<RegistrationEvent>(new RegistrationEventFormValues());
+   
 
     function displayDateRange(startDate : Date, endDate : Date) {
         const formattedStartDate = formatDate(startDate);

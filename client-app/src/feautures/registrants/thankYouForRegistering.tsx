@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import { useStore } from "../../app/stores/store";
 import { useEffect, useState } from "react";
-import { RegistrationEvent } from "../../app/models/registrationEvent";
+import { RegistrationEvent, RegistrationEventFormValues } from "../../app/models/registrationEvent";
 import { toast } from "react-toastify";
 import agent from "../../app/api/agent";
 import { Button, ButtonGroup, Dropdown, Header, HeaderSubheader, Icon, Menu, Segment, SegmentGroup } from "semantic-ui-react";
@@ -18,25 +18,7 @@ export default observer(function ThankYouForRegistering() {
     const {isMobile} = responsiveStore
     const { user, logout } = userStore;
     const [loading, setLoading] = useState(true);
-    const [registrationEvent, setRegistrationEvent] = useState<RegistrationEvent>(
-      {
-        id: '',
-        title: '',
-        location: '',
-        startDate: new Date(),
-        endDate: new Date(),
-        overview: '',
-        published: true,
-        public: true,
-        autoApprove: true,
-        autoEmail: true,
-        registrationIsOpen: true,
-        maxRegistrantInd: false,
-        maxRegistrantNumber: '',
-        certified: true,
-        documentLibrary: false
-      }  
-  );
+    const [registrationEvent, setRegistrationEvent] = useState<RegistrationEvent>(new RegistrationEventFormValues());
 
   useEffect(() => {
     if(id && user) getRegistrationEvent();     

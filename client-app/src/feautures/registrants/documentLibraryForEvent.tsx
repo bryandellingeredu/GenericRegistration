@@ -4,7 +4,7 @@ import { useParams } from 'react-router-dom';
 import { Button, Container, Divider, Dropdown, Grid, Header, Icon, Menu, Message, MessageItem, MessageList } from "semantic-ui-react";
 import ArmyLogo from "../home/ArmyLogo";
 import { useStore } from "../../app/stores/store";
-import { RegistrationEvent } from "../../app/models/registrationEvent";
+import { RegistrationEvent, RegistrationEventFormValues } from "../../app/models/registrationEvent";
 import { toast } from "react-toastify";
 import agent from "../../app/api/agent";
 import LoadingComponent from "../../app/layout/LoadingComponent";
@@ -14,8 +14,6 @@ import { RegistrationEventWebsite } from "../../app/models/registrationEventWebs
 import Tree from "../documentLibrary/tree";
 import { Node } from "../../app/models/Node";
 import { reaction } from "mobx";
-
-const apiUrl = import.meta.env.VITE_API_URL;
 
 function formatDate(date : Date) {
   return new Date(date).toLocaleDateString('en-US', {
@@ -39,26 +37,7 @@ export default observer (function DocumentLibraryForEvent() {
     const [content, setContent] = useState('');
     const [editorState, setEditorState] = useState(() => EditorState.createEmpty());
     const [treeData, setTreeData] = useState<Node[]>([]);
-
-    const [registrationEvent, setRegistrationEvent] = useState<RegistrationEvent>(
-        {
-          id: '',
-          title: '',
-          location: '',
-          startDate: new Date(),
-          endDate: new Date(),
-          overview: '',
-          published: true,
-          public: true,
-          autoApprove: true,
-          autoEmail: true,
-          registrationIsOpen: true,
-          maxRegistrantInd: false,
-          maxRegistrantNumber: '',
-          certified: true,
-          documentLibrary: false
-        }  
-    );
+    const [registrationEvent, setRegistrationEvent] = useState<RegistrationEvent>(new RegistrationEventFormValues());
 
     function displayDateRange(startDate : Date, endDate : Date) {
         const formattedStartDate = formatDate(startDate);

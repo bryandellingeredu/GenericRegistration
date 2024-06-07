@@ -9,38 +9,25 @@ import { EditorState, convertFromRaw  } from "draft-js";
 import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
 import { QuestionType } from "../../app/models/questionType";
 import { useStore } from '../../app/stores/store';
-import { Button, DropdownProps, Form, FormField, Grid, Header, Icon, Input, Menu, Message,  } from "semantic-ui-react";
-import { RegistrationEvent } from "../../app/models/registrationEvent";
+import { Button,  Form,  Grid, Header, Icon, Input, Menu, Message,  } from "semantic-ui-react";
+import { RegistrationEvent, RegistrationEventFormValues } from "../../app/models/registrationEvent";
 import { RegistrationLink } from "../../app/models/registrationLink";
 import { RegistrationEventWebsite } from "../../app/models/registrationEventWebsite";
 import { CustomQuestion } from "../../app/models/customQuestion";
-import { Registration } from "../../app/models/registration";
+import { Registration, RegistrationFormValues } from "../../app/models/registration";
 import { registrationDTO } from "../../app/models/registrationDTO";
 import { stateToHTML } from "draft-js-export-html";
 import { useNavigate } from "react-router-dom";
 import { AnswerAttachment } from "../../app/models/answerAttachment";
 import { v4 as uuid } from "uuid";
 import CustomQuestionComponentForRegistrant from "./customQuestionComponentForRegistrant";
+import CommonFormQuestions from "./commonFormQuestions";
+import TitleLocationDate from "./titleLocationDate";
+import { OptionWithDisabled } from "../../app/models/optionsWithDisabled";
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
 const query = new URLSearchParams(location.search);
-function formatDate(date : Date) {
-    return new Date(date).toLocaleDateString('en-US', {
-      month: '2-digit',
-      day: '2-digit',
-      year: 'numeric',
-    });
-  }
-
-  interface OptionWithDisabled{
-    id: string;
-    customQuestionId: string;
-    optionText: string;
-    optionQuota: string;
-    index: number
-    disabled: boolean;
-  }
 
   export default observer(function RegisterFromLink() {
 
@@ -56,36 +43,8 @@ function formatDate(date : Date) {
     const [content, setContent] = useState('');
     const [saving, setSaving] = useState(false);
     const [extendedOptions, setExtendedOptions] = useState<OptionWithDisabled[]>([]);
-    const [registrationEvent, setRegistrationEvent] = useState<RegistrationEvent>(
-        {
-          id: '',
-          title: '',
-          location: '',
-          startDate: new Date(),
-          endDate: new Date(),
-          overview: '',
-          published: true,
-          public: true,
-          autoApprove: true,
-          autoEmail: true,
-          registrationIsOpen: true,
-          maxRegistrantInd: false,
-          maxRegistrantNumber: '',
-          certified: true,
-          documentLibrary: false
-        }  
-    );
-    const [registration, setRegistration] = useState<Registration>({
-      id: uuid(),
-      registrationEventId: '',
-      firstName: '',
-      lastName: '',
-      email: '',
-      phone: '',
-      registrationDate: new Date(),
-      registered: false
-      }
-    )
+    const [registrationEvent, setRegistrationEvent] = useState<RegistrationEvent>(new RegistrationEventFormValues());
+    const [registration, setRegistration] = useState<Registration>(new RegistrationFormValues({ id: uuid() }));
     const [answerAttachments, setAnswerAttachments] = useState<AnswerAttachment[]>([]);
     const [customQuestions, setCustomQuestions] = useState<CustomQuestion[]>([]);
     const [email, setEmail] = useState('');
@@ -151,18 +110,6 @@ function formatDate(date : Date) {
             );
           }
         }, [content]);
-
-        function displayDateRange(startDate : Date, endDate : Date) {
-          const formattedStartDate = formatDate(startDate);
-          const formattedEndDate = formatDate(endDate);
-        
-          // Check if start and end dates are the same
-          if (formattedStartDate === formattedEndDate) {
-            return formattedStartDate;
-          } else {
-            return `${formattedStartDate} - ${formattedEndDate}`;
-          }
-        }
 
     const getData = async() => {
         if (!encryptedKey) return;
@@ -378,24 +325,7 @@ function formatDate(date : Date) {
            <Grid stackable style={{padding: '40px' }}>
               <Grid.Row>
               <Grid.Column width={8}>
-              <Header as='h3'>
-        <Icon name='pencil' />
-         <Header.Content>
-         {registrationEvent.title}
-         </Header.Content>
-        </Header> 
-        <Header as='h3'>
-        <Icon name='map marker alternate' />
-         <Header.Content>
-         {registrationEvent.location}
-         </Header.Content>
-        </Header> 
-        <Header as='h3'>
-        <Icon name='calendar' />
-         <Header.Content>
-         {displayDateRange(registrationEvent.startDate, registrationEvent.endDate)}
-         </Header.Content>
-        </Header> 
+              <TitleLocationDate registrationEvent={registrationEvent} />
               <Editor
                   editorState={editorState}
                   readOnly={true}
@@ -407,24 +337,13 @@ function formatDate(date : Date) {
               </Grid.Column>
               <Grid.Column width={8}>
                 <Form onSubmit={handleSubmit}>
-        <FormField required error={formisDirty && (!registration.firstName || !registration.firstName.trim()) } 
-         disabled={!registrationEvent.registrationIsOpen && !registration.registered }>
-             <label>First Name</label>
-            <Input value={registration.firstName}
-            name="firstName"
-            onChange={handleInputChange}/>
-        </FormField>
-        <FormField required error={formisDirty && (!registration.lastName || !registration.lastName.trim()) }
-         disabled={!registrationIsOpen() && !registration.registered } >
-             <label>Last Name</label>
-            <Input value={registration.lastName}
-            name="lastName"
-            onChange={handleInputChange}/>
-        </FormField>
-        <FormField required   disabled={!registrationIsOpen() && !registration.registered }>
-             <label> Email</label>
-            <Input value={registration.email}/>
-       </FormField>
+                <CommonFormQuestions
+                  formisDirty={formisDirty}
+                  registrationIsOpen={registrationIsOpen}
+                  registration={registration}
+                  handleInputChange={handleInputChange}
+                  emailUpdateAllowed={false}
+                  />
         {customQuestions
         .filter(x => !x.parentQuestionOption)
         .sort((a, b) => a.index - b.index).map((question) => (

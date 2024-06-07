@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import { useStore } from "../../app/stores/store";
 import { useEffect, useState } from "react";
-import { RegistrationEvent } from "../../app/models/registrationEvent";
+import { RegistrationEvent, RegistrationEventFormValues } from "../../app/models/registrationEvent";
 import LoadingComponent from "../../app/layout/LoadingComponent";
 import { toast } from "react-toastify";
 import agent from "../../app/api/agent";
@@ -20,28 +20,7 @@ export default observer(function DeRegisterForEventFromLink() {
     const [validated, setValidated] = useState(false);
     const [confirmed, setConfirmed] = useState(false);
     const [cancellingRegistration, setCancellingRegistration] = useState(false);
-
-    const [registrationEvent, setRegistrationEvent] = useState<RegistrationEvent>(
-        {
-          id: '',
-          title: '',
-          location: '',
-          startDate: new Date(),
-          endDate: new Date(),
-          overview: '',
-          published: true,
-          public: true,
-          autoApprove: true,
-          autoEmail: true,
-          registrationIsOpen: true,
-          maxRegistrantInd: false,
-          maxRegistrantNumber: '',
-          certified: true,
-          documentLibrary: false
-        }
-    );
-
-
+    const [registrationEvent, setRegistrationEvent] = useState<RegistrationEvent>(new RegistrationEventFormValues());
 
     useEffect(() => {
         if(encryptedKey) getData();     

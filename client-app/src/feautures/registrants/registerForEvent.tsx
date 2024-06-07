@@ -2,44 +2,32 @@ import { observer } from "mobx-react-lite";
 import { useEffect, useState } from "react";
 import { useParams } from 'react-router-dom';
 import { CustomQuestion } from "../../app/models/customQuestion";
-import { RegistrationEvent } from "../../app/models/registrationEvent";
+import { RegistrationEvent, RegistrationEventFormValues } from "../../app/models/registrationEvent";
 import { RegistrationEventWebsite } from "../../app/models/registrationEventWebsite";
 import agent from "../../app/api/agent";
 import { toast } from "react-toastify";
 import LoadingComponent from "../../app/layout/LoadingComponent";
-import { FormField, Grid, Header, Icon, Input, Menu, Form, Select, Button, Message, Divider, MessageList, MessageItem, Dropdown, DropdownProps, ButtonContent, ButtonGroup, Loader } from "semantic-ui-react";
+import {  Grid, Header, Icon,  Menu, Form,  Button,  Dropdown} from "semantic-ui-react";
 import ArmyLogo from "../home/ArmyLogo";
 import { Editor } from "react-draft-wysiwyg";
 import { EditorState, convertFromRaw  } from "draft-js";
 import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
 import { QuestionType } from "../../app/models/questionType";
 import { useStore } from '../../app/stores/store';
-import { Registration } from "../../app/models/registration";
+import { Registration, RegistrationFormValues } from "../../app/models/registration";
 import { stateToHTML } from 'draft-js-export-html';
 import { RegistrationWithHTMLContent } from "../../app/models/registrationWithHTMLContent";
 import { useNavigate } from "react-router-dom";
 import { AnswerAttachment } from "../../app/models/answerAttachment";
 import { v4 as uuid } from "uuid";
 import CustomQuestionComponentForRegistrant from "./customQuestionComponentForRegistrant";
+import SignInMessage from "./signInMessage";
+import CommonFormQuestions from "./commonFormQuestions";
+import TitleLocationDate from "./titleLocationDate";
+import { OptionWithDisabled } from "../../app/models/optionsWithDisabled";
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
-function formatDate(date : Date) {
-  return new Date(date).toLocaleDateString('en-US', {
-    month: '2-digit',
-    day: '2-digit',
-    year: 'numeric',
-  });
-}
-
-interface OptionWithDisabled{
-  id: string;
-  customQuestionId: string;
-  optionText: string;
-  optionQuota: string;
-  index: number
-  disabled: boolean;
-}
 
 export default observer(function RegisterForEvent() {
   const navigate = useNavigate();
@@ -47,62 +35,21 @@ export default observer(function RegisterForEvent() {
   const {token} = commonStore;
   const {isMobile} = responsiveStore
   const { user, logout } = userStore;
-    const { id } = useParams();
-    const [content, setContent] = useState('');
-    const [numberOfApprovedRegistrants, setNumberOfApprovedRegistrants] = useState(0);
-    const [extendedOptions, setExtendedOptions] = useState<OptionWithDisabled[]>([]);
-    const [registrationEvent, setRegistrationEvent] = useState<RegistrationEvent>(
-        {
-          id: '',
-          title: '',
-          location: '',
-          startDate: new Date(),
-          endDate: new Date(),
-          overview: '',
-          published: true,
-          public: true,
-          autoApprove: true,
-          autoEmail: true,
-          registrationIsOpen: true,
-          maxRegistrantInd: false,
-          maxRegistrantNumber: '',
-          certified: true,
-          documentLibrary: false
-        }  
-    );
-    const [registration, setRegistration] = useState<Registration>({
-      id: uuid(),
-      registrationEventId: '',
-      firstName: '',
-      lastName: '',
-      email: '',
-      phone: '',
-      registrationDate: new Date(),
-      registered: false,
-      }
-    )
-    const handleSetRegistration = (newRegistration : Registration) => setRegistration(newRegistration)
-    const [answerAttachments, setAnswerAttachments] = useState<AnswerAttachment[]>([]);
-    const [formisDirty, setFormisDirty] = useState(false);
-    const [saving, setSaving] = useState(false);
-    const [customQuestions, setCustomQuestions] = useState<CustomQuestion[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [loading2, setLoading2] = useState(false);
-    const [editorState, setEditorState] = useState(() => EditorState.createEmpty());
-
-    const handleSetAnswerAttachments = (newAnswerAttachments :AnswerAttachment[] ) => setAnswerAttachments(newAnswerAttachments)
-
-    function displayDateRange(startDate : Date, endDate : Date) {
-      const formattedStartDate = formatDate(startDate);
-      const formattedEndDate = formatDate(endDate);
-    
-      // Check if start and end dates are the same
-      if (formattedStartDate === formattedEndDate) {
-        return formattedStartDate;
-      } else {
-        return `${formattedStartDate} - ${formattedEndDate}`;
-      }
-    }
+  const { id } = useParams();
+  const [content, setContent] = useState('');
+  const [numberOfApprovedRegistrants, setNumberOfApprovedRegistrants] = useState(0);
+  const [extendedOptions, setExtendedOptions] = useState<OptionWithDisabled[]>([]);
+  const [registrationEvent, setRegistrationEvent] = useState<RegistrationEvent>(new RegistrationEventFormValues());
+  const [registration, setRegistration] = useState<Registration>(new RegistrationFormValues({ id: uuid() }));
+  const handleSetRegistration = (newRegistration : Registration) => setRegistration(newRegistration)
+  const [answerAttachments, setAnswerAttachments] = useState<AnswerAttachment[]>([]);
+  const [formisDirty, setFormisDirty] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [customQuestions, setCustomQuestions] = useState<CustomQuestion[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [loading2, setLoading2] = useState(false);
+  const [editorState, setEditorState] = useState(() => EditorState.createEmpty());
+  const handleSetAnswerAttachments = (newAnswerAttachments :AnswerAttachment[] ) => setAnswerAttachments(newAnswerAttachments)
 
     useEffect(() => {
       const updateOptions = async () => {
@@ -216,17 +163,10 @@ export default observer(function RegisterForEvent() {
       }
     }
 
-    const handleSignIn = () =>{
-      const baseUrl = import.meta.env.VITE_BASE_URL;
-      const url = `${baseUrl}?redirecttopage=registerforevent/${id}`
-      window.location.href = url;
-    }
-
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       const { name, value } = e.target;
       setRegistration({ ...registration, [name]: value });
   };
-
 
   const handleSubmit = async () => {
     if(!saving){
@@ -240,7 +180,7 @@ export default observer(function RegisterForEvent() {
      .some(question => {
        const questionDiv = document.getElementById(question.id);
        if (!questionDiv) {
-         return false; // Skip the question if its corresponding div is not present
+         return false; 
        }
    
        return question.required && question.questionType !== QuestionType.Attachment &&
@@ -248,12 +188,10 @@ export default observer(function RegisterForEvent() {
            !registration.answers?.find(x => x.customQuestionId === question.id)?.answerText.trim());
      });
 
-
-
     const attachmentErrors = customQuestions.some(question => {
       const questionDiv = document.getElementById(question.id);
       if (!questionDiv) {
-        return false; // Skip the question if its corresponding div is not present
+        return false; 
       }
      return  question.required && question.questionType === QuestionType.Attachment &&
       !findAnswerAttachmentByQuestionId(question.id) 
@@ -301,8 +239,6 @@ export default observer(function RegisterForEvent() {
     const findAnswerAttachmentByQuestionId = (questionId: string): AnswerAttachment | null => {
       return answerAttachments.find(x => x.customQuestionLookup === questionId) || null;
     };
-
-  
 
     const deleteAttachment = async (questionId: string) => {
       const answerAttachment = answerAttachments.find(x => x.customQuestionLookup === questionId);
@@ -354,9 +290,6 @@ export default observer(function RegisterForEvent() {
       }
     };
     
-
-  
-
     if (loading || loading2) return <LoadingComponent content="Loading Data..."/>
     return (
       <>
@@ -387,24 +320,7 @@ export default observer(function RegisterForEvent() {
     <Grid  stackable style={{padding: '40px' }}>
       <Grid.Row>
         <Grid.Column width={8}>
-        <Header as='h3'>
-        <Icon name='pencil' />
-         <Header.Content>
-         {registrationEvent.title}
-         </Header.Content>
-        </Header> 
-        <Header as='h3'>
-        <Icon name='map marker alternate' />
-         <Header.Content>
-         {registrationEvent.location}
-         </Header.Content>
-        </Header> 
-        <Header as='h3'>
-        <Icon name='calendar' />
-         <Header.Content>
-         {displayDateRange(registrationEvent.startDate, registrationEvent.endDate)}
-         </Header.Content>
-        </Header> 
+         <TitleLocationDate registrationEvent={registrationEvent} />
         <Editor
             editorState={editorState}
             readOnly={true}
@@ -417,28 +333,13 @@ export default observer(function RegisterForEvent() {
         </Grid.Column>
        {user && <Grid.Column width={8}>
           <Form onSubmit={handleSubmit}>
-          <FormField required error={formisDirty && (!registration.firstName || !registration.firstName.trim()) } 
-               disabled={!registrationIsOpen() && !registration.registered }>
-             <label>First Name</label>
-            <Input value={registration.firstName}
-            name="firstName"
-            onChange={handleInputChange}/>
-        </FormField>
-        <FormField required error={formisDirty && (!registration.lastName || !registration.lastName.trim()) }
-             disabled={!registrationIsOpen() && !registration.registered } >
-             <label>Last Name</label>
-            <Input value={registration.lastName}
-            name="lastName"
-            onChange={handleInputChange}/>
-        </FormField>
-        <FormField required error={formisDirty && (!registration.email || !registration.email.trim() || !isValidEmail(registration.email) ) }
-             disabled={!registrationIsOpen() && !registration.registered }
-         >
-             <label>Email</label>
-            <Input value={registration.email}
-            name="email"
-            onChange={handleInputChange}/>
-        </FormField>
+          <CommonFormQuestions
+             formisDirty={formisDirty}
+             registrationIsOpen={registrationIsOpen}
+             registration={registration}
+             handleInputChange={handleInputChange}
+             emailUpdateAllowed={true}
+           />
         {customQuestions
         .filter(x => !x.parentQuestionOption)
         .sort((a, b) => a.index - b.index).map((question) => (
@@ -467,34 +368,7 @@ export default observer(function RegisterForEvent() {
         </Form>
         </Grid.Column> }
         {!user && <Grid.Column width={8}>
-            <Message info>
-              {!isMobile && 
-              <Message.Header>
-              <Divider horizontal>
-      <Header as='h4'>
-        <Icon name='tag' />
-        Register For {registrationEvent.title}
-      </Header>
-    </Divider>
-              </Message.Header>}
-              <Message.Content>
-                <h4>
-                {registrationIsOpen() ? 'In order to register for this event you will need to sign in' : 'Registration is Closed for this Event' }
-                </h4>
-              </Message.Content>
-              {registrationIsOpen() && 
-              <MessageList>
-                <MessageItem>You can sign in with an Edu Account</MessageItem>
-                <MessageItem>You can sign in with a CAC</MessageItem>
-                <MessageItem>You can sign in by having a confirmation link emailed to you</MessageItem>
-            </MessageList>
-             }
-                 {registrationIsOpen() && 
-            <Message.Content>
-              <Button size="huge" primary content='Sign In' style={{marginTop: '40px'}} onClick={handleSignIn}/>
-            </Message.Content>
-           }
-            </Message>
+           <SignInMessage  registrationIsOpen={registrationIsOpen} isMobile={isMobile} title={registrationEvent.title} id={id}/>
         </Grid.Column>}
       </Grid.Row>
     </Grid>

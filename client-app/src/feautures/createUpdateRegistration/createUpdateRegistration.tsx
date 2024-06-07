@@ -2,34 +2,27 @@ import { useEffect, useState } from 'react';
 import { observer } from "mobx-react-lite";
 import ManageRegistrationNavbar from "../../app/layout/ManageRegistrationNavbar";
 import { useParams } from 'react-router-dom';
-import { Button, ButtonGroup, Grid, Header, Icon, Loader, Step, StepContent, StepDescription, StepGroup, StepTitle } from 'semantic-ui-react';
-import { RegistrationEvent } from '../../app/models/registrationEvent';
+import { Icon, Loader, Step, StepContent, StepDescription, StepGroup, StepTitle } from 'semantic-ui-react';
+import { RegistrationEvent, RegistrationEventFormValues } from '../../app/models/registrationEvent';
 import { v4 as uuidv4 } from 'uuid';
 import agent from '../../app/api/agent';
 import { toast } from 'react-toastify';
 import LoadingComponent from '../../app/layout/LoadingComponent';
-import CreateUpdateReqistrationDetails from './createUpdateReqistrationDetails';
-import CreateUpdateRegistrationInfo from './createUpdateRegistrationInfo';
 import { RegistrationEventWebsite } from '../../app/models/registrationEventWebsite';
 import { useNavigate } from "react-router-dom";
-import CreateUpdateRegistrationQuestions from './createUpdateRegistrationQuestions';
 import { CustomQuestion } from '../../app/models/customQuestion';
 import ReviewAndPublishRegistration from './reviewAndPublishRegistration';
 import { RegistrationEventOwner } from '../../app/models/registrationEventOwner';
-import CreateUpdateRegistrationOwners from './createUpdateRegistrationOwners';
-import CreateUpdateRegistrationSettings from './createUpdateRegistrationSettings';
 import { Registration } from '../../app/models/registration';
-import HeaderSubHeader from 'semantic-ui-react/dist/commonjs/elements/Header/HeaderSubheader';
-import Tree from '../documentLibrary/tree';
 import { Node } from '../../app/models/Node';
 import { useStore } from "../../app/stores/store";
 import { reaction } from 'mobx';
+import DesignStep from './designStep';
+import DocumentStep from './documentStep';
 
-const baseUrl = import.meta.env.VITE_BASE_URL;
 
 export default observer(function CreateUpdateRegistration() {
     const { documentLibraryStore } = useStore();
-    const {getTreeData, TreeDataRegistry} = documentLibraryStore;
     const navigate = useNavigate();
     const { id } = useParams();
     const { step } = useParams();
@@ -41,7 +34,6 @@ export default observer(function CreateUpdateRegistration() {
     const [savingFromStepClick, setSavingFromStepClick] = useState(false);
     const [formisDirty, setFormisDirty] = useState(false);
     const handleSetFormDirty = () => setFormisDirty(true);
-    const handleSetFormClean = () => setFormisDirty(false);
     const [formSubmitted, setFormSubmitted] = useState(false);
     const [activeStep, setActiveStep] = useState('Design');
     const [registeredUsersIndicator, setRegisteredUsersIndicator] = useState(false);
@@ -54,26 +46,7 @@ export default observer(function CreateUpdateRegistration() {
       setLoadTreeData(true);
     }
     
-    const [registrationEvent, setRegistrationEvent] = useState<RegistrationEvent>(
-        {
-          id: '',
-          title: '',
-          location: '',
-          startDate: new Date(),
-          endDate: new Date(),
-          overview: '',
-          published: false,
-          autoApprove: true,
-          autoEmail: true,
-          documentLibrary: false,
-          registrationIsOpen: true,
-          maxRegistrantInd: false,
-          maxRegistrantNumber: '',
-          public: true,
-          registrations: [],
-          certified: false
-        }  
-    );
+    const [registrationEvent, setRegistrationEvent] = useState<RegistrationEvent>( new RegistrationEventFormValues());
     const [registrationEventId, setRegistrationEventId] = useState(uuidv4());
     const [customQuestions, setCustomQuestions] = useState<CustomQuestion[]>([]);
     const [registrationEventOwners, setRegistrationEventOwners] = useState<RegistrationEventOwner[]>([]);
@@ -311,7 +284,6 @@ export default observer(function CreateUpdateRegistration() {
             await agent.RegistrationEventWebsites.createUpdate({registrationEventId, content});
             await agent.DocumentUploadWebsites.createUpdate({registrationEventId, content: documentLibraryContent});
             await agent.DocumentUploadWebsites.createUpdate({registrationEventId, content: documentLibraryContent});
-          //  if(!registeredUsersIndicator) await agent.CustomQuestions.createUpdate(registrationEventId, customQuestions);
             await agent.CustomQuestions.createUpdate(registrationEventId, customQuestions);
             await agent.RegistrationEventOwners.createUpdate(registrationEventId, registrationEventOwners); 
             setFormisDirty(false);
@@ -345,7 +317,6 @@ export default observer(function CreateUpdateRegistration() {
           const data = {...registrationEvent, id: registrationEventId}
 
           try {
-            debugger
             await agent.RegistrationEvents.createUpdate(data);
             await agent.RegistrationEventWebsites.createUpdate({registrationEventId, content});
             await agent.DocumentUploadWebsites.createUpdate({registrationEventId, content: documentLibraryContent});
@@ -367,15 +338,6 @@ export default observer(function CreateUpdateRegistration() {
         }
       }
 
-      const copyLink = () => {
-        const websiteUrl = `${baseUrl}/documentlibraryforevent/${registrationEventId}`;
-        navigator.clipboard.writeText(websiteUrl).then(() => {
-          // Optionally, show a notification or message indicating the link was copied
-          toast.success("Link copied to clipboard!");
-        }).catch(err => {
-          toast.error('Could not copy link: ', err);
-        });
-      };
 
 
       if (loading) return <LoadingComponent content="Loading Data..."/>
@@ -412,128 +374,33 @@ export default observer(function CreateUpdateRegistration() {
                 </StepContent>
               </Step>
              }
-
-
           </StepGroup>
 
          {activeStep === 'Design' && 
-            <Grid  stackable style={{ marginTop: '20px', padding: '40px' }}>
-                <Grid.Row>
-                    <Grid.Column width={8}>
-                    <Header as='h2' textAlign="center">
-                        <Icon name='pencil' />
-                            <Header.Content>
-                                Event Details
-                                <Header.Subheader>The Basic details of your event</Header.Subheader> {/* Add your subheader text here */}
-                             </Header.Content>
-                        </Header>
-                        <CreateUpdateReqistrationDetails
-                          registrationEvent={registrationEvent}
-                          setRegistrationEvent={handleSetRegistrationEvent}
-                          formSubmitted={formSubmitted}
-                          setFormDirty={handleSetFormDirty}
-                         />
-                          
-                          <Header as='h2' textAlign="center">
-                        <Icon name='info' />
-                            <Header.Content>
-                                Event Info
-                                <Header.Subheader>Enter information about your event, Overview, Agenda, Speakers etc.</Header.Subheader> 
-                             </Header.Content>
-                        </Header>
-                        <CreateUpdateRegistrationInfo content={content} setContent={handleSetContent} setFormDirty={handleSetFormDirty}/>
+          <DesignStep
+          registrationEvent={registrationEvent}
+          setRegistrationEvent={handleSetRegistrationEvent}
+          formSubmitted={formSubmitted}
+          setFormDirty={handleSetFormDirty}
+          content={content}
+          setContent={handleSetContent}
+          registrationEventOwners={registrationEventOwners}
+          setRegistrationEventOwners={handleSetRegistrationEventOwners}
+          registrationEventId={registrationEventId}
+          saveFormInBackground={saveFormInBackground}
+          userEmails={userEmails}
+          formisDirty={formisDirty}
+          savingFromStepClick={savingFromStepClick}
+          saving={saving}
+          saveForm={saveForm}
+          registeredUsersIndicator={registeredUsersIndicator}
+          customQuestions={customQuestions}
+          setCustomQuestions={handleSetCustomQuestions}
+          handleReviewClick={handleReviewClick}
+           />
+          }
 
-                        <Header as='h2' textAlign="center">
-                        <Icon name='user plus' />
-                            <Header.Content>
-                                Additional Event Administrators
-                                <Header.Subheader>Enter additional administrators for this event</Header.Subheader> 
-                                <Header.Subheader>Pro Tip! If you logged in with your Edu account add your .Mil account here</Header.Subheader> 
-                             </Header.Content>
-                        </Header>
-                        <CreateUpdateRegistrationOwners
-                        registrationEventOwners={registrationEventOwners}
-                        setRegistrationEventOwners={handleSetRegistrationEventOwners}
-                        registrationEventId={registrationEventId}
-                        setFormDirty={handleSetFormDirty} 
-                        saveFormInBackground={saveFormInBackground}
-                        userEmails={userEmails}
-                         />
-
-                      <Header as='h2' textAlign="center">
-                      <Icon name='settings' />
-                      <Header.Content>
-                          Settings
-                           <Header.Subheader>
-                              Configure your event
-                            </Header.Subheader> 
-                          </Header.Content>
-                      </Header>
-                      <CreateUpdateRegistrationSettings
-                        registrationEvent={registrationEvent}
-                        setRegistrationEvent={handleSetRegistrationEvent}
-                        setFormDirty={handleSetFormDirty}
-                        saveFormInBackground={saveFormInBackground}
-                       />
-
-                        {formisDirty && !savingFromStepClick && 
-                        <Button floated='right' color='blue' basic size='huge' loading={saving} onClick={saveForm}> Save Pending Changes</Button>
-                        }
-                    </Grid.Column>
-                    <Grid.Column width={8}>
-                    <Header as='h2' >
-                        <Icon name='question' />
-                            <Header.Content>
-                                Event Questions
-                               
-                                  {registeredUsersIndicator  &&
-                                    <Header.Subheader>
-                                  People have already registred for your event you MAY NOT change questions' : 
-                                  </Header.Subheader>
-                                  }
-                               
-                                  {!registeredUsersIndicator &&
-                                  <>
-                                   <Header.Subheader>
-                                    <p>'Use the "Add" button to design questions for your form.</p>
-                                     <p>For limited-availability options (e.g., class size or event attendance), select the "Choice" type and enter your limit. For example,
-                                       to limit attendance at a dinner to 20 people, choose the "Choice" type, label it "Attend Dinner",
-                                        and add the choices "Yes" with a limit of 20 and "No" with no limit.'</p>
-                                        <p>
-                                     To conditionally hide or show questions, select a "Choice" type question.
-                                      To display additional questions based on a specific choice, use the "branch" button to add conditional questions.
-                                      </p>
-                                   </Header.Subheader>
-                                   </>
-                                  }
-                             </Header.Content>
-                        </Header>
-                        <CreateUpdateRegistrationQuestions 
-                        customQuestions={customQuestions}
-                        setCustomQuestions={handleSetCustomQuestions}
-                        setFormDirty={handleSetFormDirty}
-                        registrationEventId={registrationEventId}
-                        registeredUsersIndicator={registeredUsersIndicator}
-                        />
-                         <Button icon labelPosition='right' floated='right' color='blue' basic size='huge'
-                          disabled = {savingFromStepClick || !registrationEvent.title || !registrationEvent.title.trim() || !registrationEvent.location || !registrationEvent.location.trim() || !registrationEvent.startDate || !registrationEvent.endDate || !registrationEvent.certified  }
-                          loading={savingFromStepClick}
-                          onClick={handleReviewClick}
-                         >
-                            Review and Publish
-                          <Icon name='arrow alternate circle right' />
-                        </Button>
-                         {formisDirty && !savingFromStepClick && 
-                        <Button floated='right'
-                         color='blue'
-                         basic size='huge'
-                         loading={saving} onClick={saveForm}> Save Pending Changes</Button>
-                        }
-                    </Grid.Column>
-                </Grid.Row>
-            </Grid>
-            }
-            {activeStep === 'Review' &&
+          {activeStep === 'Review' &&
              <ReviewAndPublishRegistration 
              registrationEvent={registrationEvent}
              content={content}
@@ -542,49 +409,21 @@ export default observer(function CreateUpdateRegistration() {
              unPublish={handleUnpublish}
              publishing={publishing}
              setActiveStep={handeSetActiveStepToDesign}
-             registrationEventId={registrationEventId}/>}
+             registrationEventId={registrationEventId}/>
+          }
 
-            {activeStep === 'Document' && 
-                <>
-                <Header as={'h2'} textAlign='center'>
-                Optional Document Library Creation
-                   <HeaderSubHeader>
-                   Create content and upload documents for registered participants to use during the event
-                   </HeaderSubHeader>
-                </Header>
-                <Grid  stackable style={{ marginTop: '20px', padding: '40px' }}>
-                    <Grid.Row>
-                      <Grid.Column width={8}>
-                      <Header as='h2' textAlign="center">
-                        <Icon name='info' />
-                            <Header.Content>
-                                Document Library Instructions
-                                <Header.Subheader>Create a description and instructions for your document library.
-                                </Header.Subheader> 
-                             </Header.Content>
-                        </Header>
-                        <CreateUpdateRegistrationInfo content={documentLibraryContent} setContent={handleSetDocumentLibraryContent} setFormDirty={handleSetFormDirty}/>
-                        {formisDirty && !savingFromStepClick && 
-                        <Button floated='right' color='blue' basic size='huge' loading={saving} onClick={saveForm} style={{marginTop: '10px'}}> Save Pending Changes</Button>
-                        }
-                        </Grid.Column>
-                        <Grid.Column width={8}>
-                        <Header as='h2' textAlign="center">
-                        <Icon name='book' />
-                            <Header.Content>
-                                Document Library
-                                <Header.Subheader>Upload documents into folders and subfolders
-                                </Header.Subheader> 
-                             </Header.Content>
-                        </Header>
-                        <Tree treeData = {treeData} registrationEventId = {registrationEventId} isAdmin = {true} />
-                        <ButtonGroup size='huge' floated='right' style={{marginRight: '40px'}} >
-                          <Button  primary content='Copy Docment Library Link to Clipboard' floated='right' onClick={copyLink} />
-                        </ButtonGroup>
-                       </Grid.Column>
-                    </Grid.Row>
-                </Grid>
-                </>
+          {activeStep === 'Document' && 
+               <DocumentStep
+                 documentLibraryContent={documentLibraryContent}
+                 formisDirty={formisDirty}
+                 setContent={handleSetDocumentLibraryContent}
+                 setFormDirty={handleSetFormDirty}
+                 savingFromStepClick={savingFromStepClick}
+                 registrationEventId={registrationEventId}
+                 treeData={treeData}
+                 saving={saving}
+                 saveForm={saveForm}
+                />
             }
         </>
     );
