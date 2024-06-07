@@ -1,50 +1,49 @@
 body {
-    background-color: #f4f4f4;
-  }
-  
+  background-color: #f4f4f4;
+}
+
 .homepage-background {
-    position: relative;
-    background: url('/assets/bldg651.jpg') no-repeat center center; 
-    background-size: cover;
-    width: 100%;
-    height: 100vh; /* Adjust the height as needed */
-    display: flex;
-    align-items: center; /* This will center the content vertically */
-    justify-content: center; /* This will center the content horizontally */
+  position: relative;
+  background: url('/assets/bldg651.jpg') no-repeat center center;
+  background-size: cover;
+  width: 100%;
+  height: 100vh; /* Adjust the height as needed */
+  display: flex;
+  align-items: center; /* This will center the content vertically */
+  justify-content: center; /* This will center the content horizontally */
 }
 
 /* Create the overlay using a pseudo-element */
 .homepage-background::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(0, 0, 0, 0.6); /* This adds the dark overlay */
-    z-index: 1; /* Overlay needs to be under the text and buttons */
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6); /* This adds the dark overlay */
+  z-index: 1; /* Overlay needs to be under the text and buttons */
 }
 
 /* Container for the text and buttons */
 .homepage-background > .container {
-    position: relative;
-    z-index: 2; /* This ensures that text and buttons are above the overlay */
-    display: flex; /* Use flexbox for alignment */
-    flex-direction: column; /* Stack children vertically */
-    align-items: center; /* Center children horizontally */
-    justify-content: center; /* Center children vertically */
-    text-align: center; /* Center text */
-    height: 100%; /* Take full height of parent to allow centering */
+  position: relative;
+  z-index: 2; /* This ensures that text and buttons are above the overlay */
+  display: flex; /* Use flexbox for alignment */
+  flex-direction: column; /* Stack children vertically */
+  align-items: center; /* Center children horizontally */
+  justify-content: center; /* Center children vertically */
+  text-align: center; /* Center text */
+  height: 100%; /* Take full height of parent to allow centering */
 }
 
 /* Button margin-top for spacing */
 .homepage-background .button.m-top {
-    margin-top: 20px; /* Adjust as needed */
+  margin-top: 20px; /* Adjust as needed */
 }
 
-
 .army-logo-container {
-    z-index: 2;
+  z-index: 2;
   position: absolute; /* Position relative to the nearest positioned ancestor */
   bottom: 0; /* At the bottom of the container */
   left: 0; /* At the left of the container */
@@ -54,28 +53,26 @@ body {
 }
 
 .right {
-    display: flex;
-    flex-direction: row;
-    justify-content: flex-end;
-  }
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+}
 
-  .react-datepicker__input-container {
-    width: inherit;
-  }
-  
-  .react-datepicker-wrapper {
-    width: 100%;
-  }
+.react-datepicker__input-container {
+  width: inherit;
+}
 
-
+.react-datepicker-wrapper {
+  width: 100%;
+}
 
 .editor-class-preview {
-    border: none; /* Remove borders */
-    background-color: transparent; /* Adjust as needed */
+  border: none; /* Remove borders */
+  background-color: transparent; /* Adjust as needed */
 }
 
 .toolbar-class-hidden {
-    display: none; /* Ensures the toolbar is not displayed */
+  display: none; /* Ensures the toolbar is not displayed */
 }
 
 .unique-editor-class {
@@ -88,20 +85,17 @@ body {
 }
 
 @keyframes fadeOutAnimation {
-  from { opacity: 1; }
-  to { opacity: 0; height: 0; padding: 0; margin: 0; } /* Adjust other properties as needed */
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+    height: 0;
+    padding: 0;
+    margin: 0;
+  } /* Adjust other properties as needed */
 }
 
 .rounded-input input {
   border-radius: 20px !important; /* Adjust the radius as needed */
 }
-
-
-
-
-
-
-
-  
-  
-

@@ -1,4 +1,4 @@
-export interface RegistrationEventWebsite{
-    registrationEventId : string,
-    content: string
+export interface RegistrationEventWebsite {
+  registrationEventId: string;
+  content: string;
 }

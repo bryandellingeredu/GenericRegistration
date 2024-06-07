@@ -1,4 +1,4 @@
-export interface EmailLinkDTO{
-    registrationEventId: string
-    email: string
+export interface EmailLinkDTO {
+  registrationEventId: string;
+  email: string;
 }

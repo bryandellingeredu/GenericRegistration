@@ -1,4 +1,4 @@
-export interface RegistrationEventDocumentLibrary{
-    registrationEventId : string,
-    treeData: string
+export interface RegistrationEventDocumentLibrary {
+  registrationEventId: string;
+  treeData: string;
 }
