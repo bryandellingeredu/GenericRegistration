@@ -68,6 +68,7 @@ export default function CustomQuestionComponent({
   };
 
   const deleteQuestion = (id: string) => {
+    setFormDirty();
     const updatedQuestions = customQuestions.filter(
       (question) => question.id !== id,
     );

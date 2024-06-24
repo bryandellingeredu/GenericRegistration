@@ -74,7 +74,14 @@ export default observer(function ManageRegistrationNavbar() {
             <Menu.Item as={NavLink} to="/myregistrations">
               My Registrations
             </Menu.Item>
-            {/* Add other menu items here */}
+            <Menu.Item
+        as="a"
+        href="https://usarmywarcollege-my.sharepoint.com/:v:/g/personal/bryan_dellinger_civ_armywarcollege_edu/EWm1XZABqQ5KmVIwb_j_K_UBjZHjwc5lyMNirPPtgPeJ0w?nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJPbmVEcml2ZUZvckJ1c2luZXNzIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXciLCJyZWZlcnJhbFZpZXciOiJNeUZpbGVzTGlua0NvcHkifX0&e=hAa6ou"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        Watch the Tutorial
+      </Menu.Item>
           </Sidebar>
         </div>
       ) : (
@@ -92,6 +99,14 @@ export default observer(function ManageRegistrationNavbar() {
             <Menu.Item as={NavLink} to="/myregistrations">
               My Registrations
             </Menu.Item>
+            <Menu.Item
+        as="a"
+        href="https://usarmywarcollege-my.sharepoint.com/:v:/g/personal/bryan_dellinger_civ_armywarcollege_edu/EWm1XZABqQ5KmVIwb_j_K_UBjZHjwc5lyMNirPPtgPeJ0w?nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJPbmVEcml2ZUZvckJ1c2luZXNzIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXciLCJyZWZlcnJhbFZpZXciOiJNeUZpbGVzTGlua0NvcHkifX0&e=hAa6ou"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        Watch the Tutorial
+      </Menu.Item>
             <Menu.Item position="right">
               <Dropdown
                 trigger={
