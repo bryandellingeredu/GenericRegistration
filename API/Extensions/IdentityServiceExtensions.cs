@@ -18,8 +18,7 @@ namespace API.Extensions
         {
             services.AddIdentityCore<IdentityUser>(opt =>
             {
-                // You can configure identity options here if needed
-                // For example: opt.Password.RequireDigit = false;
+               opt.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+'";
             })
             .AddRoles<IdentityRole>()
             .AddEntityFrameworkStores<DataContext>()
