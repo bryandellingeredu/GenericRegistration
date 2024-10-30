@@ -12,6 +12,7 @@ interface Props {
   isMobile: boolean;
   title: string;
   id: string | undefined;
+  getRegistrationIsClosedMessage: () => string;
 }
 
 export default function SignInMessage({
@@ -19,6 +20,7 @@ export default function SignInMessage({
   isMobile,
   title,
   id,
+  getRegistrationIsClosedMessage
 }: Props) {
   const handleSignIn = () => {
     const baseUrl = import.meta.env.VITE_BASE_URL;
@@ -42,7 +44,7 @@ export default function SignInMessage({
         <h4>
           {registrationIsOpen()
             ? 'In order to register for this event you will need to sign in'
-            : 'Registration is Closed for this Event'}
+            : getRegistrationIsClosedMessage()}
         </h4>
       </Message.Content>
       {registrationIsOpen() && (

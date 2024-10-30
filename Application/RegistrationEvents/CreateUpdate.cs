@@ -46,6 +46,8 @@ namespace Application.RegistrationEvents
                     existingRegistrationEvent.Certified = request.RegistrationEvent.Certified;
                     existingRegistrationEvent.StartDate = request.RegistrationEvent.StartDate;
                     existingRegistrationEvent.EndDate = request.RegistrationEvent.EndDate;
+                    existingRegistrationEvent.RegistrationOpenDate = request.RegistrationEvent.RegistrationOpenDate;
+                    existingRegistrationEvent.RegistrationClosedDate = request.RegistrationEvent.RegistrationClosedDate;
                     existingRegistrationEvent.LastUpdatedBy = request.Email;
                     request.RegistrationEvent.LastUpdatedAt = DateTime.UtcNow;
                     try

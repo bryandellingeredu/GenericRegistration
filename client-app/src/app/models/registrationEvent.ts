@@ -8,6 +8,8 @@ export interface RegistrationEvent {
   overview: string;
   startDate: Date;
   endDate: Date;
+  registrationOpenDate: Date | null
+  registrationClosedDate: Date | null
   published: boolean;
   public: boolean;
   autoApprove: boolean;
@@ -28,6 +30,8 @@ export class RegistrationEvent implements RegistrationEvent {
   overview: string;
   startDate: Date;
   endDate: Date;
+  registrationOpenDate: Date | null;
+  registrationClosedDate: Date | null;
   published: boolean;
   public: boolean;
   autoApprove: boolean;
@@ -47,6 +51,8 @@ export class RegistrationEvent implements RegistrationEvent {
     this.overview = '';
     this.startDate = new Date();
     this.endDate = new Date();
+    this.registrationOpenDate = null;
+    this.registrationClosedDate = null;
     this.published = false;
     this.public = true;
     this.autoApprove = true;

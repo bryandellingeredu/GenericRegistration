@@ -20,6 +20,10 @@ namespace Domain
 
         public DateTime EndDate { get; set; }
 
+        public DateTime? RegistrationOpenDate {get; set;}
+
+        public DateTime? RegistrationClosedDate {get; set;}
+
         public bool Published {get; set;}
         public bool Certified {get; set;}
 

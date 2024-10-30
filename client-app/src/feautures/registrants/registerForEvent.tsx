@@ -39,6 +39,7 @@ import SignInMessage from './signInMessage';
 import CommonFormQuestions from './commonFormQuestions';
 import TitleLocationDate from './titleLocationDate';
 import { OptionWithDisabled } from '../../app/models/optionsWithDisabled';
+import { format } from 'date-fns';
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
@@ -283,8 +284,35 @@ export default observer(function RegisterForEvent() {
     return emailRegex.test(email);
   };
 
+  const getRegistrationIsClosedMessage  = () =>{
+    let message="Registration is closed for this event";
+    if(registrationEvent.registrationOpenDate){
+    const today = new Date().toISOString().split('T')[0]; // Format as "YYYY-MM-DD"
+    const registrationOpenDate = new Date(registrationEvent.registrationOpenDate).toISOString().split('T')[0];
+    if (registrationOpenDate > today) { 
+       message = `Registration for this event does not open until 
+       ${ format( new Date(registrationEvent.registrationOpenDate),'MMM do',)}`
+      }
+    }
+    return message;
+  }
+
   const registrationIsOpen = () => {
     if (!registrationEvent.registrationIsOpen) return false;
+    if (registrationEvent.registrationClosedDate) {
+      const today = new Date().toISOString().split('T')[0]; // Format as "YYYY-MM-DD"
+      const registrationClosedDate = new Date(registrationEvent.registrationClosedDate).toISOString().split('T')[0];
+      if (registrationClosedDate < today) { // Change to `<` to check if closed date is before today
+          return false;
+      }
+  }
+  if (registrationEvent.registrationOpenDate) {
+      const today = new Date().toISOString().split('T')[0]; // Format as "YYYY-MM-DD"
+      const registrationOpenDate = new Date(registrationEvent.registrationOpenDate).toISOString().split('T')[0];
+      if (registrationOpenDate > today) { // Change to `>` to check if open date is after today
+          return false;
+      }
+  }
     if (
       registrationEvent.maxRegistrantInd &&
       registrationEvent.maxRegistrantNumber
@@ -294,6 +322,7 @@ export default observer(function RegisterForEvent() {
       );
       if (numberOfApprovedRegistrants >= maxRegistrantNumberAsNumber)
         return false;
+
     }
     return true;
   };
@@ -401,7 +430,7 @@ export default observer(function RegisterForEvent() {
       {!registrationIsOpen() && !registration.registered && (
         <Header
           as={'h1'}
-          content="Registration is Closed For This Event"
+          content={getRegistrationIsClosedMessage()}
           textAlign="center"
         />
       )}
@@ -483,6 +512,7 @@ export default observer(function RegisterForEvent() {
                 isMobile={isMobile}
                 title={registrationEvent.title}
                 id={id}
+                getRegistrationIsClosedMessage = {getRegistrationIsClosedMessage}
               />
             </Grid.Column>
           )}

@@ -29,6 +29,29 @@ namespace Application.Registrant
                          .OrderBy(x => x.Title)
                          .ToListAsync(cancellationToken);
 
+
+                    for (int i = registrationEvents.Count - 1; i >= 0; i--)
+                    {
+                        var registrationEvent = registrationEvents[i];
+                        if (registrationEvent.RegistrationOpenDate.HasValue
+                            && DateTime.Today < registrationEvent.RegistrationOpenDate.Value.Date)
+                        {
+                            registrationEvents.RemoveAt(i);
+                        }
+                    }
+
+                    for (int i = registrationEvents.Count - 1; i >= 0; i--)
+                    {
+                        var registrationEvent = registrationEvents[i];
+                        if (registrationEvent.RegistrationClosedDate.HasValue
+                            && DateTime.Today > registrationEvent.RegistrationClosedDate.Value.Date)
+                        {
+                            registrationEvents.RemoveAt(i);
+                        }
+                    }
+
+
+
                     List<RegistrationEvent> result = new List<RegistrationEvent>();
                     foreach ( var registrationEvent in registrationEvents ) {
                         bool derivedRegistrationIsOpen = registrationEvent.RegistrationIsOpen;
@@ -52,6 +75,8 @@ namespace Application.Registrant
                           Overview = registrationEvent.Overview,
                           StartDate = registrationEvent.StartDate,
                           EndDate = registrationEvent.EndDate,
+                          RegistrationOpenDate = registrationEvent.RegistrationOpenDate,
+                          RegistrationClosedDate = registrationEvent.RegistrationClosedDate,
                           Published = registrationEvent.Published,
                           Certified = registrationEvent.Certified,
                           Public = registrationEvent.Public,

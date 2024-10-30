@@ -12,6 +12,7 @@ import {
   Radio,
 } from 'semantic-ui-react';
 import { useEffect, useState } from 'react';
+import ReactDatePicker from 'react-datepicker';
 
 interface Props {
   registrationEvent: RegistrationEvent;
@@ -34,6 +35,20 @@ export default observer(function CreateUpdateRegistrationSettings({
       setSaveForm(false);
     }
   }, [saveForm]);
+
+  const handleRegistrationOpenDateChange = (date: Date | null) => {
+    if (date) {
+      setRegistrationEvent({ ...registrationEvent, ['registrationOpenDate']: date });
+      setFormDirty();
+    }
+  };
+
+  const handleRegistrationClosedDateChange = (date: Date | null) => {
+    if (date) {
+      setRegistrationEvent({ ...registrationEvent, ['registrationClosedDate']: date });
+      setFormDirty();
+    }
+  };
 
   const handleAutoApproveChange = () => {
     setRegistrationEvent({
@@ -309,6 +324,56 @@ export default observer(function CreateUpdateRegistrationSettings({
             />
           </Grid.Column>
         </Grid.Row>
+        <Divider />
+        <Grid.Row columns={3}>
+        <Grid.Column width={8}>
+            <Form.Field>
+              <label>Registration Opens On</label>
+            </Form.Field>
+          </Grid.Column>
+        <Grid.Column width={5}>
+
+          <ReactDatePicker
+          selected={registrationEvent.registrationOpenDate}
+          onChange={handleRegistrationOpenDateChange}
+          dateFormat="MM/dd/yyyy"
+          placeholderText="Date Registration Opens"
+        />
+       </Grid.Column>
+        <Grid.Column width={3}>
+            <Popup
+              content="Set a date for the registration to open. If blank registration will open immediately"
+              trigger={<Button color="teal" basic icon="question" />}
+              on="click"
+              position="top right"
+            />
+          </Grid.Column>   
+         </Grid.Row>
+         <Divider />
+        <Grid.Row columns={3}>
+        <Grid.Column width={8}>
+            <Form.Field>
+              <label>Registration Closes On</label>
+            </Form.Field>
+          </Grid.Column>
+        <Grid.Column width={5}>
+
+          <ReactDatePicker
+          selected={registrationEvent.registrationClosedDate}
+          onChange={handleRegistrationClosedDateChange}
+          dateFormat="MM/dd/yyyy"
+          placeholderText="Date Registration Closes"
+        />
+       </Grid.Column>
+        <Grid.Column width={3}>
+            <Popup
+              content="Set a date for the registration to close. If blank registration will close at the end of the event"
+              trigger={<Button color="teal" basic icon="question" />}
+              on="click"
+              position="top right"
+            />
+          </Grid.Column>   
+         </Grid.Row>
       </Grid>
     </Form>
   );

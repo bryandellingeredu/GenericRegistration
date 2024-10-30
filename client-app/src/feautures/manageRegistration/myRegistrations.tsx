@@ -92,6 +92,8 @@ export default observer(function MyRegistrations() {
         maxRegistrantNumber: event.maxRegistrantNumber,
         registrations: event.registrations,
         customQuestions: event.customQuestions,
+        registrationOpenDate: event.registrationOpenDate,
+        registrationClosedDate: event.registrationClosedDate
       })),
     );
   };

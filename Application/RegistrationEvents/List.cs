@@ -62,6 +62,8 @@ namespace Application.RegistrationEvents
                         Published = x.Published,
                         Registrations = x.Registrations,
                         RegistrationIsOpen = x.RegistrationIsOpen,
+                        RegistrationOpenDate = x.RegistrationOpenDate,
+                        RegistrationClosedDate = x.RegistrationClosedDate,
                         MaxRegistrantInd = x.MaxRegistrantInd,
                         MaxRegistrantNumber = x.MaxRegistrantNumber
                     })
