@@ -76,7 +76,7 @@ export default observer(function ManageRegistrationNavbar() {
             </Menu.Item>
             <Menu.Item
         as="a"
-        href="https://youtu.be/55Bb4Vuj57s"
+        href="https://www.youtube.com/watch?v=oRdTJLGtnrE"
         target="_blank"
         rel="noopener noreferrer"
       >
@@ -101,7 +101,7 @@ export default observer(function ManageRegistrationNavbar() {
             </Menu.Item>
             <Menu.Item
         as="a"
-        href="https://youtu.be/55Bb4Vuj57s"
+        href="https://www.youtube.com/watch?v=oRdTJLGtnrE"
         target="_blank"
         rel="noopener noreferrer"
       >
