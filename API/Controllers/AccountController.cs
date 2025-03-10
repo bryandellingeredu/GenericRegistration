@@ -24,11 +24,14 @@ namespace API.Controllers
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly TokenService _tokenService;
 
-        public AccountController(UserManager<IdentityUser> userManager, TokenService tokenService, RoleManager<IdentityRole> roleManager)
+          readonly IConfiguration _config;
+
+        public AccountController(UserManager<IdentityUser> userManager, TokenService tokenService, RoleManager<IdentityRole> roleManager, IConfiguration config)
         {
             _userManager = userManager;
             _tokenService = tokenService;
             _roleManager = roleManager; 
+            _config = config;
         }
 
         [HttpGet]
@@ -181,7 +184,10 @@ namespace API.Controllers
                         }
                     }
 
-                    if (user.Email.Equals("bryan.dellinger.civ@armywarcollege.edu"))
+                    Application.Settings s = new Application.Settings();
+                    var settings = s.LoadSettings(_config);
+
+                    if (user.Email.Equals(settings.DefaultAdmin))
                     {
                         if (!await _userManager.IsInRoleAsync(user, "Administrators"))
                         {
@@ -229,7 +235,11 @@ namespace API.Controllers
                         }
                     }
 
-                    if (user.Email.Equals("bryan.dellinger.civ@armywarcollege.edu"))
+                      Application.Settings s = new Application.Settings();
+                      var settings = s.LoadSettings(_config);
+
+
+                    if (user.Email.Equals(settings.DefaultAdmin))
                     {
                         if (!await _userManager.IsInRoleAsync(user, "Administrators"))
                         {

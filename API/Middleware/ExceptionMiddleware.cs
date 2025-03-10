@@ -59,7 +59,7 @@ namespace API.Middleware
                                 $"\nInner Exception Stack Trace:\n{ex.InnerException.StackTrace}";
                     }
 
-                    await GraphHelper.SendEmail(new[] { "bryan.d.dellinger.civ@army.mil", "bryan.dellinger.civ@armywarcollege.edu" }, "A Registration Error Occurred", body);
+                    await GraphHelper.SendEmail(settings.ErrorRecipients, "A Registration Error Occurred", body);
                 }
                 catch (Exception emailEx)
                 {

@@ -13,6 +13,8 @@ namespace Application
         public string[] GraphUserScopes { get; set; }
         public string ServiceAccount { get; set; }
         public string BaseUrl { get; set; }
+        public string[] ErrorRecipients { get; set; } 
+        public string DefaultAdmin { get; set; }
 
 
         public Settings LoadSettings(IConfiguration config)
